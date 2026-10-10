@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 
 const productSchema = z.object({
     title: z.string().min(1, 'Title is required').max(150),
-    description: z.string().optional(),
+    description: z.string().max(2000, 'Description is too long').optional(),
     price: z.number().min(0, 'Price must be non-negative'),
     categoryId: z.number().min(1, 'Category is required'),
     imageUrl: z.string().url('Must be a valid URL').or(z.literal('')).optional(),
@@ -86,8 +86,21 @@ export const ProductForm = () => {
             <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 
                 {mutation.isError && (
-                    <div className="p-4 bg-red-50 text-red-700 rounded">
-                        Failed to save product. Please try again.
+                    <div className="p-4 bg-red-50 text-red-700 rounded border border-red-200 flex flex-col gap-2">
+                        <span className="font-medium">
+                            {(mutation.error as any).response?.status === 409 
+                                ? 'The product has been modified by another update. Please reload the latest data before continuing your edit.' 
+                                : 'Failed to save product. Please try again.'}
+                        </span>
+                        {(mutation.error as any).response?.status === 409 && isEditing && (
+                            <button
+                                type="button"
+                                onClick={() => queryClient.invalidateQueries({ queryKey: ['product', id] })}
+                                className="self-start text-xs font-semibold underline text-red-800 hover:text-red-900 cursor-pointer"
+                            >
+                                Click here to reload latest data
+                            </button>
+                        )}
                     </div>
                 )}
 
@@ -133,6 +146,7 @@ export const ProductForm = () => {
                         {...register('description')}
                         className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                     />
+                    {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
                 </div>
 
                 <div>

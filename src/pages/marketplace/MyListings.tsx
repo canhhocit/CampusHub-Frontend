@@ -19,6 +19,12 @@ export const MyListings = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['my-products'] });
             queryClient.invalidateQueries({ queryKey: ['products'] });
+        },
+        onError: (err: any) => {
+            if (err.response?.status === 409) {
+                alert('This listing was modified by another session. Reloading latest listings...');
+                queryClient.invalidateQueries({ queryKey: ['my-products'] });
+            }
         }
     });
 
@@ -60,7 +66,9 @@ export const MyListings = () => {
                                                 <div className="h-10 w-10 rounded bg-gray-200"></div>
                                             )}
                                             <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">{p.title}</div>
+                                                <Link to={`/marketplace/${p.id}`} className="text-sm font-medium text-gray-900 hover:text-blue-600 hover:underline">
+                                                    {p.title}
+                                                </Link>
                                                 <div className="text-sm text-gray-500">{p.category.name}</div>
                                             </div>
                                         </div>
@@ -80,6 +88,7 @@ export const MyListings = () => {
                                         {new Date(p.updatedAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                                        <Link to={`/marketplace/${p.id}`} className="text-gray-600 hover:text-gray-900">View</Link>
                                         <Link to={`/marketplace/edit/${p.id}`} className="text-blue-600 hover:text-blue-900">Edit</Link>
                                         
                                         {p.status === 'ACTIVE' && (

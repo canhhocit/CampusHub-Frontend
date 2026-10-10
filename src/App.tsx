@@ -14,6 +14,14 @@ import { ProductDetail } from './pages/marketplace/ProductDetail';
 import { ProductForm } from './pages/marketplace/ProductForm';
 import { MyListings } from './pages/marketplace/MyListings';
 
+import { LockerList } from './pages/admin/lockers/LockerList';
+import { LockerDetail } from './pages/admin/lockers/LockerDetail';
+import { LockerForm } from './pages/admin/lockers/LockerForm';
+
+import { BuyingOrders } from './pages/orders/BuyingOrders';
+import { SellingOrders } from './pages/orders/SellingOrders';
+import { OrderDetail } from './pages/orders/OrderDetail';
+
 function App() {
   return (
     <BrowserRouter>
@@ -34,6 +42,17 @@ function App() {
             <Route path="/marketplace/new" element={<ProductForm />} />
             <Route path="/marketplace/edit/:id" element={<ProductForm />} />
             <Route path="/marketplace/my-listings" element={<MyListings />} />
+            <Route path="/orders/buying" element={<BuyingOrders />} />
+            <Route path="/orders/selling" element={<SellingOrders />} />
+            <Route path="/orders/:id" element={<OrderDetail />} />
+          </Route>
+
+          {/* Admin Protected Routes */}
+          <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
+            <Route path="/admin/lockers" element={<LockerList />} />
+            <Route path="/admin/lockers/new" element={<LockerForm />} />
+            <Route path="/admin/lockers/edit/:id" element={<LockerForm />} />
+            <Route path="/admin/lockers/:id" element={<LockerDetail />} />
           </Route>
 
           {/* Catch all */}

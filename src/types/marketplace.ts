@@ -16,6 +16,7 @@ export interface Product {
     category: Category;
     owner: {
         id: number;
+        username?: string;
         fullName: string;
     };
     createdAt: string;
