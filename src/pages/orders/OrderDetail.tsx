@@ -88,7 +88,7 @@ export const OrderDetail = () => {
 
   const getStepStatus = (stepKey: OrderStatus) => {
     if (!order) return 'upcoming';
-    if (order.status === 'CANCELLED' || order.status === 'REJECTED') return 'cancelled';
+    if (order.status === 'CANCELLED' || order.status === 'REJECTED' || order.status === 'EXPIRED') return 'cancelled';
 
     const orderSteps: OrderStatus[] = ['PENDING_SELLER', 'AWAITING_DEPOSIT', 'READY_FOR_PICKUP', 'COMPLETED'];
     const currentIndex = orderSteps.indexOf(order.status);
@@ -179,6 +179,11 @@ export const OrderDetail = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {order.status === 'EXPIRED' && (
+              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-300">
+                ⚠️ Quá hạn nhận
+              </span>
+            )}
             {order.status === 'CANCELLED' && (
               <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">
                 ✕ Đã hủy
@@ -213,7 +218,7 @@ export const OrderDetail = () => {
         </div>
 
         {/* Stepper / Timeline */}
-        {order.status !== 'CANCELLED' && order.status !== 'REJECTED' ? (
+        {order.status !== 'CANCELLED' && order.status !== 'REJECTED' && order.status !== 'EXPIRED' ? (
           <div className="mt-8 pt-6 border-t border-gray-100">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {stepConfig.map((s, idx) => {
@@ -247,6 +252,11 @@ export const OrderDetail = () => {
                 );
               })}
             </div>
+          </div>
+        ) : order.status === 'EXPIRED' ? (
+          <div className="mt-6 p-4 rounded-xl bg-orange-50 border border-orange-200 text-orange-800 text-sm">
+            <span className="font-semibold">Đơn hàng đã hết hạn nhận hàng: </span>
+            Mã PIN đã hết hiệu lực. Hàng hóa vẫn được lưu giữ an toàn bên trong ngăn tủ và chờ quản trị viên xử lý thu hồi/hoàn trả trước khi mở tủ.
           </div>
         ) : (
           <div className="mt-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm">
@@ -508,6 +518,17 @@ export const OrderDetail = () => {
               <h3 className="text-base font-bold text-emerald-900">Giao dịch đã hoàn tất!</h3>
               <p className="text-xs text-emerald-700 mt-1">
                 Hàng đã được lấy thành công vào lúc {formatDate(order.pickedUpAt)}. Ngăn tủ đã được giải phóng trở lại trạng thái sẵn sàng.
+              </p>
+            </div>
+          )}
+
+          {/* Expired State Warning Card */}
+          {order.status === 'EXPIRED' && (
+            <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 text-center">
+              <div className="text-4xl mb-2">⏱️</div>
+              <h3 className="text-base font-bold text-orange-900">Mã nhận đồ đã quá hạn</h3>
+              <p className="text-xs text-orange-700 mt-1">
+                Thời hạn nhận đồ tại tủ locker đã kết thúc. Vui lòng liên hệ ban quản trị để được hỗ trợ kiểm tra và thu hồi.
               </p>
             </div>
           )}

@@ -4,7 +4,8 @@ export type OrderStatus =
   | 'READY_FOR_PICKUP'
   | 'COMPLETED'
   | 'CANCELLED'
-  | 'REJECTED';
+  | 'REJECTED'
+  | 'EXPIRED';
 
 export interface Order {
   id: number;
@@ -36,6 +37,7 @@ export interface OrderDetail extends Order {
   depositAt?: string | null;
   pickedUpAt?: string | null;
   cancelledAt?: string | null;
+  clearedAt?: string | null;
   rejectionReason?: string | null;
   version?: number;
   pickupCode?: string | null;

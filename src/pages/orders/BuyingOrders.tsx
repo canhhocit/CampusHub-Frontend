@@ -12,6 +12,7 @@ const statusLabels: Record<OrderStatus, { label: string; color: string }> = {
   COMPLETED: { label: 'Đã hoàn tất', color: 'bg-gray-100 text-gray-800 border-gray-200' },
   CANCELLED: { label: 'Đã hủy', color: 'bg-zinc-100 text-zinc-600 border-zinc-200' },
   REJECTED: { label: 'Người bán từ chối', color: 'bg-rose-100 text-rose-800 border-rose-200' },
+  EXPIRED: { label: 'Quá hạn nhận hàng', color: 'bg-orange-100 text-orange-800 border-orange-300' },
 };
 
 export const BuyingOrders = () => {
