@@ -95,7 +95,7 @@ export const ProductForm = () => {
                         {isEditing ? 'Chỉnh sửa tin đăng' : 'Đăng bán sản phẩm mới'}
                     </h1>
                     <p className="text-sm text-gray-500 mt-0.5">
-                        {isEditing ? 'Cập nhật lại giá, mô tả hoặc hình ảnh món đồ.' : 'Chia sẻ đồ dùng, sách học tập đến các sinh viên khác.'}
+                        {isEditing ? 'Cập nhật lại giá, mô tả hoặc hình ảnh món đồ.' : 'Chia sẻ đồ dùng, sách, thiết bị đến các thành viên trong cộng đồng.'}
                     </p>
                 </div>
             </div>
@@ -129,7 +129,7 @@ export const ProductForm = () => {
                     <input
                         type="text"
                         {...register('title')}
-                        placeholder="VD: Giáo trình Giải tích 1 còn mới 95%"
+                        placeholder="VD: Tai nghe bluetooth, sách tham khảo, máy tính cầm tay..."
                         className="mt-1 block w-full border border-gray-300 rounded-xl shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
                     />
                     {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}

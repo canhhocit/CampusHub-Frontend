@@ -46,7 +46,7 @@ export const LockerList = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Quản lý Tủ đồ Thông minh</h1>
-                    <p className="mt-1 text-sm text-gray-500">Quản lý hệ thống tủ đồ và các ngăn chứa tại các điểm trường.</p>
+                    <p className="mt-1 text-sm text-gray-500">Quản lý hệ thống tủ đồ và các ngăn chứa tại các điểm giao nhận trên toàn thành phố.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button

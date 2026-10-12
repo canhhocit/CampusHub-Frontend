@@ -41,7 +41,7 @@ export const AdminNav = () => {
               className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 transition"
             >
               <ArrowLeft size={16} className="mr-1.5" />
-              Trang sinh viên
+              Về trang chủ
             </Link>
             <div className="h-5 w-px bg-gray-300" />
             <span className="font-bold text-gray-900 text-lg flex items-center gap-2">

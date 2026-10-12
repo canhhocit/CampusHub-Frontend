@@ -342,7 +342,7 @@ export const AdminDashboard = () => {
                     </div>
                     <h4 className="text-lg font-bold text-gray-900 mt-4">Quản lý Người dùng</h4>
                     <p className="text-sm text-gray-500 mt-1">
-                      Tra cứu tài khoản sinh viên, xem số đơn hàng/sản phẩm và thực hiện khóa hoặc kích hoạt tài khoản.
+                      Tra cứu tài khoản thành viên, xem số đơn hàng/sản phẩm và thực hiện khóa hoặc kích hoạt tài khoản.
                     </p>
                   </div>
                   <div className="mt-4 flex items-center text-sm font-semibold text-blue-600 group-hover:text-blue-700">

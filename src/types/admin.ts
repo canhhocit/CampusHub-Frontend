@@ -65,6 +65,7 @@ export interface UserManagementItem {
   fullName: string;
   role: AdminUserRole;
   status: AdminUserStatus;
+  dateOfBirth?: string | null;
   createdAt: string;
   lastLogin?: string | null;
   totalProducts: number;

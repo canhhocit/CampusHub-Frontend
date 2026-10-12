@@ -1,27 +1,57 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { AlertCircle, CheckCircle, User, Mail, Lock, UserCheck, ArrowRight } from 'lucide-react';
+import { AlertCircle, CheckCircle, User, Mail, Lock, UserCheck, Calendar, ArrowRight } from 'lucide-react';
 
 export const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     fullName: '',
-    password: ''
+    password: '',
+    dateOfBirth: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
 
+  // Max birthdate for 13 years old
+  const maxBirthDate = new Date(Date.now() - 13 * 365.25 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const calculateAge = (birthDateString: string): number => {
+    if (!birthDateString) return 0;
+    const birthDate = new Date(birthDateString);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!formData.dateOfBirth) {
+      setError('Vui lòng chọn ngày sinh.');
+      return;
+    }
+
+    const age = calculateAge(formData.dateOfBirth);
+    if (age < 13) {
+      setError('Bạn phải từ đủ 13 tuổi trở lên để tham gia sử dụng hệ thống.');
+      return;
+    }
+
     setLoading(true);
     try {
       await register(formData);
@@ -50,10 +80,10 @@ export const Register = () => {
             CH
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
-            Tạo tài khoản sinh viên
+            Đăng ký thành viên
           </h2>
           <p className="text-sm text-gray-500 mt-1">
-            Đăng ký để trao đổi đồ cũ và sử dụng Tủ Locker Thông Minh
+            Mạng lưới tủ locker thông minh & trao đổi đồ dùng toàn thành phố (Dành cho công dân từ 13 tuổi trở lên)
           </p>
         </div>
 
@@ -97,14 +127,14 @@ export const Register = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">Email sinh viên / cá nhân</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Email cá nhân</label>
               <div className="relative">
                 <input
                   name="email"
                   type="email"
                   required
                   className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
-                  placeholder="VD: an.nv@school.edu.vn"
+                  placeholder="VD: an.nguyen@example.com"
                   value={formData.email}
                   onChange={handleChange}
                 />
@@ -126,6 +156,27 @@ export const Register = () => {
                 />
                 <UserCheck size={18} className="absolute left-3 top-3 text-gray-400" />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Ngày sinh <span className="text-purple-600 font-normal">(Yêu cầu từ đủ 13 tuổi trở lên)</span>
+              </label>
+              <div className="relative">
+                <input
+                  name="dateOfBirth"
+                  type="date"
+                  max={maxBirthDate}
+                  required
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                />
+                <Calendar size={18} className="absolute left-3 top-3 text-gray-400" />
+              </div>
+              <p className="text-[11px] text-gray-400 mt-1">
+                Hệ thống mở rộng toàn thành phố và bắt buộc người dùng từ đủ 13 tuổi trở lên.
+              </p>
             </div>
 
             <div>
@@ -156,7 +207,7 @@ export const Register = () => {
         )}
 
         <div className="text-center text-sm text-gray-600 pt-2 border-t border-gray-100">
-          Đã có tài khoản sinh viên?{' '}
+          Đã có tài khoản?{' '}
           <Link to="/login" className="font-semibold text-purple-600 hover:text-purple-700">
             Đăng nhập ngay
           </Link>

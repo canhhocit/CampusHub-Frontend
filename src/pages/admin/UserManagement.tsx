@@ -96,7 +96,7 @@ export const UserManagement = () => {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Quản lý Người dùng</h1>
               <p className="mt-0.5 text-sm text-gray-500">
-                Tra cứu thông tin tài khoản, phân quyền và kiểm soát trạng thái hoạt động của sinh viên.
+                Tra cứu thông tin tài khoản, phân quyền và kiểm soát trạng thái hoạt động của thành viên trong toàn thành phố.
               </p>
             </div>
           </div>
@@ -168,7 +168,7 @@ export const UserManagement = () => {
                     <th className="px-6 py-4">Vai trò</th>
                     <th className="px-6 py-4">Hoạt động</th>
                     <th className="px-6 py-4">Trạng thái</th>
-                    <th className="px-6 py-4">Ngày đăng ký</th>
+                    <th className="px-6 py-4">Ngày tham gia</th>
                     <th className="px-6 py-4 text-right">Thao tác</th>
                   </tr>
                 </thead>
@@ -179,8 +179,15 @@ export const UserManagement = () => {
                         <div className="font-semibold text-gray-900">{u.username}</div>
                         <div className="text-xs text-gray-500">{u.email}</div>
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-800">
-                        {u.fullName || <span className="text-gray-400 italic">Chưa cập nhật</span>}
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-800">
+                          {u.fullName || <span className="text-gray-400 italic">Chưa cập nhật</span>}
+                        </div>
+                        {u.dateOfBirth && (
+                          <div className="text-xs text-gray-500 mt-0.5">
+                            Sinh ngày: {new Date(u.dateOfBirth).toLocaleDateString('vi-VN')}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         {u.role === 'ADMIN' || u.role === 'ROLE_ADMIN' ? (
@@ -189,7 +196,7 @@ export const UserManagement = () => {
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
-                            Sinh viên
+                            Thành viên
                           </span>
                         )}
                       </td>

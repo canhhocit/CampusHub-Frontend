@@ -55,7 +55,7 @@ export const ProductDetail = () => {
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <Link to="/marketplace" className="text-purple-600 hover:underline mb-6 inline-flex items-center gap-1 font-medium text-sm">
-                <ArrowLeft size={16} /> Quay lại Chợ sinh viên
+                <ArrowLeft size={16} /> Quay lại Chợ trao đổi
             </Link>
             
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -118,7 +118,7 @@ export const ProductDetail = () => {
                                     )}
                                 </button>
                                 <p className="text-xs text-gray-500 text-center mt-2.5">
-                                    Giao dịch an toàn: Người bán sẽ gửi đồ vào tủ locker trường học để bạn đến nhận thuận tiện
+                                    Giao dịch an toàn: Người bán sẽ gửi đồ vào tủ locker thông minh để bạn đến nhận thuận tiện và bảo mật
                                 </p>
                             </div>
                         )}

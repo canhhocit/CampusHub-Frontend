@@ -153,7 +153,7 @@ export const SellingOrders = () => {
           </div>
           <h2 className="text-lg font-semibold text-gray-900 mb-1">Chưa có người mua đặt đơn</h2>
           <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
-            Khi có sinh viên đặt mua sản phẩm bạn đăng bán, đơn hàng sẽ hiển thị tại đây để bạn xác nhận.
+            Khi có người mua đặt sản phẩm bạn đăng bán, đơn hàng sẽ hiển thị tại đây để bạn xác nhận.
           </p>
           <Link
             to="/marketplace/new"

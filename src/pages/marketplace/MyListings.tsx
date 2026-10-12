@@ -53,7 +53,7 @@ export const MyListings = () => {
                     </div>
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Tin Đăng Của Tôi</h1>
-                        <p className="text-sm text-gray-500 mt-0.5">Quản lý các sản phẩm bạn đang rao bán trong trường</p>
+                        <p className="text-sm text-gray-500 mt-0.5">Quản lý các sản phẩm bạn đang rao bán trên toàn thành phố</p>
                     </div>
                 </div>
 
@@ -71,7 +71,7 @@ export const MyListings = () => {
                 <div className="text-center py-20 bg-white rounded-2xl border border-gray-200">
                     <Tag size={40} className="mx-auto text-gray-300 mb-2" />
                     <h3 className="text-base font-semibold text-gray-800">Bạn chưa đăng món đồ nào</h3>
-                    <p className="text-sm text-gray-500 mt-1 mb-6">Hãy đăng sách, giáo trình hoặc đồ dùng không dùng đến để sinh viên khác mua lại nhé.</p>
+                    <p className="text-sm text-gray-500 mt-1 mb-6">Hãy đăng sách, đồ dùng hoặc thiết bị không dùng đến để các thành viên khác mua lại nhé.</p>
                     <Link
                         to="/marketplace/new"
                         className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition shadow-xs"

@@ -49,7 +49,7 @@ export const Dashboard = () => {
               <p className="text-sm text-purple-800">
                 Vai trò của bạn:{' '}
                 <span className="font-semibold">
-                  {isAdmin ? 'Quản trị viên (Admin)' : 'Sinh viên (Student)'}
+                  {isAdmin ? 'Quản trị viên (Admin)' : 'Thành viên (Member)'}
                 </span>
               </p>
             </div>
@@ -70,8 +70,8 @@ export const Dashboard = () => {
                   <ShoppingBag size={20} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">Chợ Sinh viên</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Khám phá và mua sắm đồ dùng sinh viên</p>
+                  <h3 className="font-bold text-gray-900">Chợ Trao Đổi Đồ Cũ</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Khám phá và mua sắm đồ dùng trên toàn thành phố</p>
                 </div>
               </div>
             </button>

@@ -51,9 +51,9 @@ export const MarketplaceList = () => {
                         <ShoppingBag size={24} />
                     </div>
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Chợ Đồ Cũ Sinh Viên</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Chợ Trao Đổi Đồ Toàn Thành Phố</h1>
                         <p className="text-sm text-gray-500 mt-0.5">
-                            Tìm kiếm giáo trình, đồ dùng học tập và trao đổi qua Tủ Locker Thông Minh
+                            Tìm kiếm sản phẩm, đồ dùng và giao nhận tiện lợi qua Mạng lưới Tủ Locker Thông Minh
                         </p>
                     </div>
                 </div>

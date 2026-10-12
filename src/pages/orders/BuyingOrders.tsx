@@ -108,7 +108,7 @@ export const BuyingOrders = () => {
           </div>
           <h2 className="text-lg font-semibold text-gray-900 mb-1">Chưa có đơn hàng nào</h2>
           <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
-            Bạn chưa đặt mua món đồ nào từ sinh viên khác trên CampusHub.
+            Bạn chưa đặt mua món đồ nào từ các thành viên khác trên CampusHub.
           </p>
           <Link
             to="/marketplace"
