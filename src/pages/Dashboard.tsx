@@ -1,5 +1,5 @@
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import {
   ShoppingBag,
   Package,
@@ -26,6 +26,10 @@ export const Dashboard = () => {
   };
 
   const isAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN';
+
+  if (isAdmin) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">

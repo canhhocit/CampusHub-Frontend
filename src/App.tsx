@@ -26,31 +26,36 @@ import { AdminLayout } from './components/AdminLayout';
 import { BuyingOrders } from './pages/orders/BuyingOrders';
 import { SellingOrders } from './pages/orders/SellingOrders';
 import { OrderDetail } from './pages/orders/OrderDetail';
+import { UserLayout } from './components/UserLayout';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/marketplace" element={<MarketplaceList />} />
-          <Route path="/marketplace/:id" element={<ProductDetail />} />
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/marketplace/new" element={<ProductForm />} />
-            <Route path="/marketplace/edit/:id" element={<ProductForm />} />
-            <Route path="/marketplace/my-listings" element={<MyListings />} />
-            <Route path="/orders/buying" element={<BuyingOrders />} />
-            <Route path="/orders/selling" element={<SellingOrders />} />
-            <Route path="/orders/:id" element={<OrderDetail />} />
-            <Route path="/verify-identity" element={<VerifyIdentity />} />
+          {/* Member & Marketplace Routes with Navbar */}
+          <Route element={<UserLayout />}>
+            <Route path="/marketplace" element={<MarketplaceList />} />
+            <Route path="/marketplace/:id" element={<ProductDetail />} />
+
+            {/* Member Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/marketplace/new" element={<ProductForm />} />
+              <Route path="/marketplace/edit/:id" element={<ProductForm />} />
+              <Route path="/marketplace/my-listings" element={<MyListings />} />
+              <Route path="/orders/buying" element={<BuyingOrders />} />
+              <Route path="/orders/selling" element={<SellingOrders />} />
+              <Route path="/orders/:id" element={<OrderDetail />} />
+              <Route path="/verify-identity" element={<VerifyIdentity />} />
+            </Route>
           </Route>
 
           {/* Admin Protected Routes */}

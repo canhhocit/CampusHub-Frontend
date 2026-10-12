@@ -140,24 +140,24 @@ export const AdminLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans">
       {/* Mobile Drawer Backdrop */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 md:hidden transition-opacity"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
       {/* Admin Sidebar Navigation Menu Bar */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-slate-900 text-slate-200 flex flex-col justify-between transition-transform duration-300 ease-in-out border-r border-slate-800 print:hidden ${
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-900 text-slate-200 flex flex-col justify-between transition-transform duration-300 ease-in-out border-r border-slate-800 print:hidden ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         {/* Top Brand & Portal Header */}
         <div>
-          <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800 bg-slate-950/60">
+          <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800 bg-slate-950/60">
             <Link to="/admin/dashboard" className="flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-purple-600/20 ring-1 ring-purple-400/30">
                 <ShieldCheck size={22} className="group-hover:scale-110 transition-transform" />
@@ -175,7 +175,7 @@ export const AdminLayout = () => {
 
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="lg:hidden text-slate-400 hover:text-white p-1 rounded-md"
+              className="md:hidden text-slate-400 hover:text-white p-1 rounded-md"
               aria-label="Đóng thanh điều hướng"
             >
               <X size={20} />
@@ -269,13 +269,13 @@ export const AdminLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-72 transition-all">
+      <div className="flex-1 flex flex-col min-w-0 md:pl-64 transition-all">
         {/* Top Header Bar */}
         <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs px-4 sm:px-6 lg:px-8 flex items-center justify-between print:hidden">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
+              className="md:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
               aria-label="Mở thanh điều hướng"
             >
               <Menu size={22} />
