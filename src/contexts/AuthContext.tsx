@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { axiosInstance, setAccessToken } from '../api/axios';
+import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
+import { axiosInstance, setAccessToken, getAccessToken } from '../api/axios';
 
 interface User {
   username: string;
@@ -30,7 +30,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const fetchUser = async () => {
+  const hasInitializedRef = useRef(false);
+
+  const fetchUser = async (): Promise<boolean> => {
     try {
       const response = await axiosInstance.get('/api/v1/auth/me');
       const authorities = response.data.authorities;
@@ -45,19 +47,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         citizenId: response.data.citizenId,
       });
       setIsAuthenticated(true);
+      return true;
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
+      return false;
     }
   };
 
   const initializeAuth = async () => {
     try {
-      // Attempt to refresh token on initial load
+      const token = getAccessToken();
+      if (token) {
+        const ok = await fetchUser();
+        if (ok) {
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Attempt to refresh token if no token or token expired
       const response = await axiosInstance.post('/api/v1/auth/refresh');
       setAccessToken(response.data.accessToken);
       await fetchUser();
     } catch (error) {
+      setAccessToken(null);
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -66,6 +80,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
     initializeAuth();
   }, []);
 
@@ -113,7 +129,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         verifyEmail,
         forgotPassword,
         resetPassword,
-        refreshUser: fetchUser,
+        refreshUser: async () => {
+          await fetchUser();
+        },
       }}
     >
       {children}

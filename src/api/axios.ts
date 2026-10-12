@@ -10,14 +10,28 @@ export const axiosInstance = axios.create({
   },
 });
 
-// Memory storage for access token
-let accessToken: string | null = null;
+const TOKEN_STORAGE_KEY = 'campushub_access_token';
+
+let accessToken: string | null =
+  typeof window !== 'undefined' ? localStorage.getItem(TOKEN_STORAGE_KEY) : null;
 
 export const setAccessToken = (token: string | null) => {
   accessToken = token;
+  if (typeof window !== 'undefined') {
+    if (token) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    } else {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+  }
 };
 
-export const getAccessToken = () => accessToken;
+export const getAccessToken = () => {
+  if (!accessToken && typeof window !== 'undefined') {
+    accessToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+  }
+  return accessToken;
+};
 
 // Single-flight refresh token pattern
 let isRefreshing = false;
