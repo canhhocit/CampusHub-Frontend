@@ -4,6 +4,7 @@ import type { Order, OrderStatus } from '../../types/order';
 import type { PageResponse } from '../../types/marketplace';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
+import { ShoppingBag, Package, MapPin, Zap } from 'lucide-react';
 
 const statusLabels: Record<OrderStatus, { label: string; color: string }> = {
   PENDING_SELLER: { label: 'Chờ người bán xác nhận', color: 'bg-amber-100 text-amber-800 border-amber-200' },
@@ -102,8 +103,8 @@ export const BuyingOrders = () => {
         </div>
       ) : pageData?.content.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-2xl font-bold">
-            🛍️
+          <div className="w-16 h-16 mx-auto mb-4 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center font-bold">
+            <ShoppingBag size={28} />
           </div>
           <h2 className="text-lg font-semibold text-gray-900 mb-1">Chưa có đơn hàng nào</h2>
           <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
@@ -111,7 +112,7 @@ export const BuyingOrders = () => {
           </p>
           <Link
             to="/marketplace"
-            className="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
+            className="px-5 py-2.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 shadow-sm"
           >
             Xem danh sách sản phẩm
           </Link>
@@ -156,21 +157,21 @@ export const BuyingOrders = () => {
                         className="w-16 h-16 object-cover rounded-lg border border-gray-200 shrink-0"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 text-xl shrink-0">
-                        📦
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 shrink-0">
+                        <Package size={24} />
                       </div>
                     )}
                     <div>
                       <Link
                         to={`/marketplace/${order.productId}`}
-                        className="font-medium text-gray-900 hover:text-blue-600 line-clamp-1"
+                        className="font-medium text-gray-900 hover:text-purple-600 line-clamp-1"
                       >
                         {order.productTitle}
                       </Link>
                       <p className="text-sm text-gray-500 mt-0.5">
                         Người bán: <span className="text-gray-700 font-medium">{order.sellerFullName}</span> (@{order.sellerUsername})
                       </p>
-                      <p className="text-base font-bold text-blue-600 mt-1">
+                      <p className="text-base font-bold text-purple-600 mt-1">
                         {formatPrice(order.priceSnapshot)}
                       </p>
                     </div>
@@ -181,11 +182,12 @@ export const BuyingOrders = () => {
                     {order.lockerName ? (
                       <div>
                         <div className="font-medium text-gray-800 flex items-center gap-1.5">
-                          <span>📍</span> {order.lockerName}
+                          <MapPin size={15} className="text-purple-600" />
+                          <span>{order.lockerName}</span>
                         </div>
                         <div className="text-xs text-gray-500 mt-0.5">{order.lockerLocation}</div>
                         {order.compartmentCode && (
-                          <div className="text-xs font-semibold text-blue-700 mt-1">
+                          <div className="text-xs font-semibold text-purple-700 mt-1">
                             Ngăn tủ: {order.compartmentCode}
                           </div>
                         )}
@@ -200,9 +202,9 @@ export const BuyingOrders = () => {
                     {order.status === 'READY_FOR_PICKUP' && (
                       <Link
                         to={`/orders/${order.id}`}
-                        className="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 shadow-sm"
+                        className="inline-flex items-center gap-1 px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 shadow-sm transition"
                       >
-                        ⚡ Nhận hàng ngay
+                        <Zap size={15} /> Nhận hàng ngay
                       </Link>
                     )}
 

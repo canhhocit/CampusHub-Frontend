@@ -55,7 +55,7 @@ export interface DashboardStatsResponse {
   securityStats: SecurityStats;
 }
 
-export type AdminUserRole = 'ROLE_USER' | 'ROLE_ADMIN';
+export type AdminUserRole = 'ROLE_USER' | 'ROLE_STUDENT' | 'ROLE_ADMIN' | 'STUDENT' | 'ADMIN' | string;
 export type AdminUserStatus = 'ACTIVE' | 'PENDING' | 'LOCKED';
 
 export interface UserManagementItem {

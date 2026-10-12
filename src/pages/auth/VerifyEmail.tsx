@@ -13,7 +13,7 @@ export const VerifyEmail = () => {
   useEffect(() => {
     if (!token) {
       setStatus('error');
-      setErrorMsg('No token provided.');
+      setErrorMsg('Không tìm thấy mã xác thực email.');
       return;
     }
 
@@ -23,7 +23,7 @@ export const VerifyEmail = () => {
         setStatus('success');
       } catch (err: any) {
         setStatus('error');
-        setErrorMsg(err.response?.data?.message || 'Invalid or expired token.');
+        setErrorMsg(err.response?.data?.message || 'Liên kết xác thực không hợp lệ hoặc đã hết hạn.');
       }
     };
 
@@ -32,21 +32,21 @@ export const VerifyEmail = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md text-center">
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center">
         {status === 'loading' && (
           <div>
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Verifying your email...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-purple-600 border-t-transparent mx-auto"></div>
+            <p className="mt-4 text-gray-600 text-sm">Đang xác thực địa chỉ email của bạn...</p>
           </div>
         )}
         
         {status === 'success' && (
           <div className="flex flex-col items-center">
-            <CheckCircle size={48} className="text-green-500" />
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">Email Verified!</h2>
-            <p className="mt-2 text-gray-600">Your account is now active.</p>
-            <Link to="/login" className="mt-6 inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700">
-              Go to Login
+            <CheckCircle size={48} className="text-emerald-500" />
+            <h2 className="mt-4 text-2xl font-bold text-gray-900">Xác thực thành công!</h2>
+            <p className="mt-2 text-gray-600 text-sm">Tài khoản của bạn đã được kích hoạt và sẵn sàng sử dụng.</p>
+            <Link to="/login" className="mt-6 inline-flex justify-center rounded-xl bg-purple-600 py-2.5 px-5 text-sm font-semibold text-white hover:bg-purple-700 transition">
+              Đăng nhập ngay
             </Link>
           </div>
         )}
@@ -54,10 +54,10 @@ export const VerifyEmail = () => {
         {status === 'error' && (
           <div className="flex flex-col items-center">
             <AlertCircle size={48} className="text-red-500" />
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">Verification Failed</h2>
-            <p className="mt-2 text-red-600">{errorMsg}</p>
-            <Link to="/login" className="mt-6 inline-flex justify-center rounded-md border border-transparent bg-gray-600 py-2 px-4 text-sm font-medium text-white hover:bg-gray-700">
-              Back to Login
+            <h2 className="mt-4 text-2xl font-bold text-gray-900">Xác thực thất bại</h2>
+            <p className="mt-2 text-red-600 text-sm">{errorMsg}</p>
+            <Link to="/login" className="mt-6 inline-flex justify-center rounded-xl bg-gray-700 py-2.5 px-5 text-sm font-semibold text-white hover:bg-gray-800 transition">
+              Quay lại Đăng nhập
             </Link>
           </div>
         )}

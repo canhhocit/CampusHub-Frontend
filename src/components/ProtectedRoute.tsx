@@ -10,8 +10,8 @@ export const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps = {}) => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <div className="text-xl font-semibold text-gray-700">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-sm font-medium text-gray-500">Đang kiểm tra phiên đăng nhập...</div>
       </div>
     );
   }
@@ -20,8 +20,14 @@ export const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps = {}) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/" replace />;
+  if (requiredRole) {
+    const isAdminRequired = requiredRole === 'ROLE_ADMIN' || requiredRole === 'ADMIN';
+    const isUserAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN';
+    if (isAdminRequired && !isUserAdmin) {
+      return <Navigate to="/" replace />;
+    } else if (!isAdminRequired && user?.role !== requiredRole) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <Outlet />;

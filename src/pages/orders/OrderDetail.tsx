@@ -4,6 +4,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import type { OrderDetail as OrderDetailType, OrderStatus } from '../../types/order';
+import {
+  AlertTriangle,
+  Check,
+  X,
+  Zap,
+  Package,
+  Clock,
+  MapPin,
+  Lock,
+  Unlock,
+  Cpu,
+  Copy,
+  CheckCircle2,
+  ClockAlert,
+} from 'lucide-react';
 
 const stepConfig: { key: OrderStatus; label: string; desc: string }[] = [
   { key: 'PENDING_SELLER', label: '1. Đặt hàng', desc: 'Chờ người bán xác nhận' },
@@ -131,7 +146,7 @@ export const OrderDetail = () => {
     const errorStatus = (error as any)?.response?.status;
     return (
       <div className="max-w-md mx-auto my-16 p-8 bg-white rounded-2xl shadow-sm border border-gray-200 text-center">
-        <div className="text-4xl mb-3">⚠️</div>
+        <AlertTriangle size={36} className="mx-auto text-amber-500 mb-3" />
         <h2 className="text-xl font-bold text-gray-900 mb-2">
           {errorStatus === 403 ? 'Không có quyền truy cập' : 'Không tìm thấy đơn hàng'}
         </h2>
@@ -142,7 +157,7 @@ export const OrderDetail = () => {
         </p>
         <button
           onClick={() => navigate(-1)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+          className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition"
         >
           Quay lại
         </button>
@@ -154,9 +169,9 @@ export const OrderDetail = () => {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-        <Link to="/" className="hover:text-blue-600">Trang chủ</Link>
+        <Link to="/" className="hover:text-purple-600">Trang chủ</Link>
         <span>/</span>
-        <Link to={isSeller ? '/orders/selling' : '/orders/buying'} className="hover:text-blue-600">
+        <Link to={isSeller ? '/orders/selling' : '/orders/buying'} className="hover:text-purple-600">
           {isSeller ? 'Đơn bán' : 'Đơn mua'}
         </Link>
         <span>/</span>
@@ -180,38 +195,38 @@ export const OrderDetail = () => {
 
           <div className="flex items-center gap-2">
             {order.status === 'EXPIRED' && (
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-300">
-                ⚠️ Quá hạn nhận
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-300">
+                <AlertTriangle size={13} /> Quá hạn nhận
               </span>
             )}
             {order.status === 'CANCELLED' && (
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">
-                ✕ Đã hủy
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-700 border border-zinc-200">
+                <X size={13} /> Đã hủy
               </span>
             )}
             {order.status === 'REJECTED' && (
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-200">
-                ✕ Đã từ chối
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-200">
+                <X size={13} /> Đã từ chối
               </span>
             )}
             {order.status === 'COMPLETED' && (
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                ✓ Hoàn tất nhận đồ
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <Check size={13} /> Hoàn tất nhận đồ
               </span>
             )}
             {order.status === 'READY_FOR_PICKUP' && (
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-300 animate-pulse">
-                ⚡ Đang ở tủ đồ chờ nhận
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-300 animate-pulse">
+                <Zap size={13} /> Đang ở tủ đồ chờ nhận
               </span>
             )}
             {order.status === 'AWAITING_DEPOSIT' && (
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                📦 Chờ người bán gửi tủ
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                <Package size={13} /> Chờ người bán gửi tủ
               </span>
             )}
             {order.status === 'PENDING_SELLER' && (
-              <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                ⏳ Chờ xác nhận
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                <Clock size={13} /> Chờ xác nhận
               </span>
             )}
           </div>
@@ -230,11 +245,11 @@ export const OrderDetail = () => {
                         status === 'completed'
                           ? 'bg-emerald-600 text-white ring-4 ring-emerald-50'
                           : status === 'current'
-                          ? 'bg-blue-600 text-white ring-4 ring-blue-100 animate-bounce'
+                          ? 'bg-purple-600 text-white ring-4 ring-purple-100 animate-pulse'
                           : 'bg-gray-100 text-gray-400'
                       }`}
                     >
-                      {status === 'completed' ? '✓' : idx + 1}
+                      {status === 'completed' ? <Check size={18} /> : idx + 1}
                     </div>
                     <span
                       className={`text-sm font-semibold ${
@@ -280,18 +295,18 @@ export const OrderDetail = () => {
                   className="w-24 h-24 object-cover rounded-xl border border-gray-200 shrink-0"
                 />
               ) : (
-                <div className="w-24 h-24 bg-gray-100 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 text-2xl shrink-0">
-                  📦
+                <div className="w-24 h-24 bg-gray-100 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 shrink-0">
+                  <Package size={28} />
                 </div>
               )}
               <div className="flex-1">
                 <Link
                   to={`/marketplace/${order.productId}`}
-                  className="text-base font-semibold text-gray-900 hover:text-blue-600 line-clamp-2"
+                  className="text-base font-semibold text-gray-900 hover:text-purple-600 line-clamp-2"
                 >
                   {order.productTitle}
                 </Link>
-                <div className="text-xl font-black text-blue-600 mt-2">
+                <div className="text-xl font-black text-purple-600 mt-2">
                   {formatPrice(order.priceSnapshot)}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
@@ -317,7 +332,8 @@ export const OrderDetail = () => {
           {/* Locker & Compartment Information */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
             <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <span>📍</span> Địa điểm giao dịch tại Tủ Locker
+              <MapPin size={18} className="text-purple-600" />
+              <span>Địa điểm giao dịch tại Tủ Locker</span>
             </h2>
 
             {order.lockerName ? (
@@ -328,14 +344,14 @@ export const OrderDetail = () => {
                   <div className="text-xs font-mono text-gray-400 mt-1">Mã trạm: {order.lockerCode}</div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-purple-50 border border-purple-200 rounded-xl">
                   <div>
-                    <span className="text-xs text-blue-600 font-medium block">Ngăn tủ phân bổ</span>
-                    <span className="text-lg font-bold text-blue-900">
+                    <span className="text-xs text-purple-600 font-medium block">Ngăn tủ phân bổ</span>
+                    <span className="text-lg font-bold text-purple-900">
                       Ngăn {order.compartmentCode || 'Đang cấp'}
                     </span>
                   </div>
-                  <span className="text-2xl">🔐</span>
+                  <Lock size={22} className="text-purple-600" />
                 </div>
               </div>
             ) : (
@@ -353,7 +369,7 @@ export const OrderDetail = () => {
             <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-indigo-700">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">🤖</span>
+                  <Cpu size={18} className="text-indigo-300" />
                   <span className="text-xs uppercase font-bold tracking-wider text-indigo-300">
                     Smart Locker Terminal
                   </span>
@@ -378,7 +394,11 @@ export const OrderDetail = () => {
                       className="p-1.5 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors"
                       title="Sao chép"
                     >
-                      {isCopied ? '✓ Đã chép' : '📋'}
+                      {isCopied ? (
+                        <span className="flex items-center gap-1"><Check size={12} /> Đã chép</span>
+                      ) : (
+                        <Copy size={14} />
+                      )}
                     </button>
                   </div>
                   {order.pickupDeadline && (
@@ -401,8 +421,8 @@ export const OrderDetail = () => {
                     </span>
                   </div>
                   {pickupErrorMessage && (
-                    <div className="text-xs text-rose-400 mt-2 font-medium">
-                      ⚠️ {pickupErrorMessage}
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-rose-400 mt-2 font-medium">
+                      <AlertTriangle size={13} /> {pickupErrorMessage}
                     </div>
                   )}
                 </div>
@@ -448,7 +468,7 @@ export const OrderDetail = () => {
                     <span>Đang kích hoạt khóa mở ngăn...</span>
                   ) : (
                     <>
-                      <span>🔓</span> Xác nhận nhận hàng
+                      <Unlock size={16} /> Xác nhận nhận hàng
                     </>
                   )}
                 </button>
@@ -460,8 +480,8 @@ export const OrderDetail = () => {
           {order.status === 'AWAITING_DEPOSIT' && isSeller && (
             <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl">
-                  📦
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                  <Package size={20} />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-gray-900">Gửi hàng vào tủ</h3>
@@ -483,7 +503,7 @@ export const OrderDetail = () => {
                   <span>Đang mở tủ và xác nhận cảm biến...</span>
                 ) : (
                   <>
-                    <span>🤖</span> Mô phỏng gửi hàng vào ngăn {order.compartmentCode}
+                    <Cpu size={16} /> Mô phỏng gửi hàng vào ngăn {order.compartmentCode}
                   </>
                 )}
               </button>
@@ -514,7 +534,7 @@ export const OrderDetail = () => {
           {/* Completed State Celebration Card */}
           {order.status === 'COMPLETED' && (
             <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center">
-              <div className="text-4xl mb-2">🎉</div>
+              <CheckCircle2 size={36} className="mx-auto text-emerald-600 mb-2" />
               <h3 className="text-base font-bold text-emerald-900">Giao dịch đã hoàn tất!</h3>
               <p className="text-xs text-emerald-700 mt-1">
                 Hàng đã được lấy thành công vào lúc {formatDate(order.pickedUpAt)}. Ngăn tủ đã được giải phóng trở lại trạng thái sẵn sàng.
@@ -525,7 +545,7 @@ export const OrderDetail = () => {
           {/* Expired State Warning Card */}
           {order.status === 'EXPIRED' && (
             <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 text-center">
-              <div className="text-4xl mb-2">⏱️</div>
+              <ClockAlert size={36} className="mx-auto text-orange-600 mb-2" />
               <h3 className="text-base font-bold text-orange-900">Mã nhận đồ đã quá hạn</h3>
               <p className="text-xs text-orange-700 mt-1">
                 Thời hạn nhận đồ tại tủ locker đã kết thúc. Vui lòng liên hệ ban quản trị để được hỗ trợ kiểm tra và thu hồi.

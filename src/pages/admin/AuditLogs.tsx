@@ -81,11 +81,16 @@ export const AuditLogs = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">📝 Nhật ký Hệ thống (Audit Logs)</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Ghi nhận và truy vết mọi hoạt động đăng nhập, giao dịch, thao tác dữ liệu và sự kiện bảo mật.
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+              <FileText size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Nhật ký Hệ thống (Audit Logs)</h1>
+              <p className="mt-0.5 text-sm text-gray-500">
+                Ghi nhận và truy vết mọi hoạt động đăng nhập, giao dịch, thao tác dữ liệu và sự kiện bảo mật.
+              </p>
+            </div>
           </div>
           <button
             onClick={() => refetch()}

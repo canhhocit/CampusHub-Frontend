@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, User, Mail, Lock, UserCheck, ArrowRight } from 'lucide-react';
 
 export const Register = () => {
   const [formData, setFormData] = useState({
@@ -31,12 +31,11 @@ export const Register = () => {
         const d = err.response.data;
         if (d.message) setError(d.message);
         else if (typeof d === 'object') {
-          // validation errors
           const msgs = Object.values(d).join(', ');
-          setError(msgs || 'Registration failed.');
+          setError(msgs || 'Đăng ký không thành công.');
         }
       } else {
-        setError('Registration failed. Please try again.');
+        setError('Đăng ký không thành công. Vui lòng thử lại sau.');
       }
     } finally {
       setLoading(false);
@@ -45,81 +44,121 @@ export const Register = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-md">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-            Create an account
+      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-purple-100 text-purple-700 rounded-xl mx-auto flex items-center justify-center font-bold text-xl mb-3">
+            CH
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+            Tạo tài khoản sinh viên
           </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Đăng ký để trao đổi đồ cũ và sử dụng Tủ Locker Thông Minh
+          </p>
         </div>
+
         {success ? (
-          <div className="bg-green-50 text-green-700 p-4 rounded-md flex flex-col items-center gap-2 text-center">
-            <CheckCircle size={32} />
-            <p>Registration successful! Please check your email for the verification link.</p>
-            <Link to="/login" className="mt-4 font-medium text-blue-600 hover:text-blue-500">
-              Go to Login
+          <div className="bg-emerald-50 text-emerald-800 p-6 rounded-2xl border border-emerald-200 flex flex-col items-center gap-3 text-center">
+            <CheckCircle size={40} className="text-emerald-600" />
+            <h3 className="text-base font-bold text-emerald-900">Đăng ký thành công!</h3>
+            <p className="text-sm text-emerald-700">
+              Vui lòng kiểm tra hòm thư email của bạn để nhấn vào liên kết xác thực tài khoản.
+            </p>
+            <Link
+              to="/login"
+              className="mt-3 px-5 py-2.5 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition"
+            >
+              Đến trang Đăng nhập
             </Link>
           </div>
         ) : (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-md flex items-center gap-2 text-sm">
-                <AlertCircle size={16} />
-                {error}
+              <div className="bg-red-50 text-red-700 p-3.5 rounded-xl border border-red-200 flex items-center gap-2 text-sm">
+                <AlertCircle size={18} className="shrink-0" />
+                <span>{error}</span>
               </div>
             )}
-            <div className="space-y-4 rounded-md shadow-sm">
-              <input
-                name="username"
-                type="text"
-                required
-                className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="Username"
-                value={formData.username}
-                onChange={handleChange}
-              />
-              <input
-                name="email"
-                type="email"
-                required
-                className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-              />
-              <input
-                name="fullName"
-                type="text"
-                required
-                className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="Full Name"
-                value={formData.fullName}
-                onChange={handleChange}
-              />
-              <input
-                name="password"
-                type="password"
-                required
-                className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
+
             <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70"
-              >
-                {loading ? 'Signing up...' : 'Sign up'}
-              </button>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Tên đăng nhập</label>
+              <div className="relative">
+                <input
+                  name="username"
+                  type="text"
+                  required
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  placeholder="VD: nguyenvanan"
+                  value={formData.username}
+                  onChange={handleChange}
+                />
+                <User size={18} className="absolute left-3 top-3 text-gray-400" />
+              </div>
             </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Email sinh viên / cá nhân</label>
+              <div className="relative">
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  placeholder="VD: an.nv@school.edu.vn"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+                <Mail size={18} className="absolute left-3 top-3 text-gray-400" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Họ và tên đầy đủ</label>
+              <div className="relative">
+                <input
+                  name="fullName"
+                  type="text"
+                  required
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  placeholder="VD: Nguyễn Văn An"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                />
+                <UserCheck size={18} className="absolute left-3 top-3 text-gray-400" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Mật khẩu</label>
+              <div className="relative">
+                <input
+                  name="password"
+                  type="password"
+                  required
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  placeholder="Tối thiểu 6 ký tự..."
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+                <Lock size={18} className="absolute left-3 top-3 text-gray-400" />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center items-center gap-2 rounded-xl bg-purple-600 py-3 px-4 text-sm font-semibold text-white hover:bg-purple-700 focus:outline-hidden focus:ring-2 focus:ring-purple-500 disabled:opacity-70 transition shadow-sm mt-2"
+            >
+              {loading ? 'Đang đăng ký...' : 'Đăng ký tài khoản'}
+              <ArrowRight size={16} />
+            </button>
           </form>
         )}
-        <div className="text-center text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-            Sign in
+
+        <div className="text-center text-sm text-gray-600 pt-2 border-t border-gray-100">
+          Đã có tài khoản sinh viên?{' '}
+          <Link to="/login" className="font-semibold text-purple-600 hover:text-purple-700">
+            Đăng nhập ngay
           </Link>
         </div>
       </div>

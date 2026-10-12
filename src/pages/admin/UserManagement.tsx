@@ -9,6 +9,7 @@ import {
   RefreshCw,
   UserCheck,
   UserX,
+  Users,
   Shield,
   ShoppingBag,
   Package,
@@ -88,11 +89,16 @@ export const UserManagement = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">👥 Quản lý Người dùng</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Tra cứu thông tin tài khoản, phân quyền và kiểm soát trạng thái hoạt động của sinh viên.
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+              <Users size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Quản lý Người dùng</h1>
+              <p className="mt-0.5 text-sm text-gray-500">
+                Tra cứu thông tin tài khoản, phân quyền và kiểm soát trạng thái hoạt động của sinh viên.
+              </p>
+            </div>
           </div>
           <button
             onClick={() => refetch()}
@@ -111,7 +117,7 @@ export const UserManagement = () => {
               type="text"
               name="search"
               defaultValue={searchTerm}
-              placeholder="Tìm theo username, họ tên, email..."
+              placeholder="Tìm theo tên đăng nhập, họ tên, email..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
             <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
@@ -119,7 +125,7 @@ export const UserManagement = () => {
               type="submit"
               className="ml-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition"
             >
-              Tìm
+              Tìm kiếm
             </button>
           </form>
 
@@ -134,9 +140,9 @@ export const UserManagement = () => {
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Tất cả trạng thái</option>
-              <option value="ACTIVE">Hoạt động (ACTIVE)</option>
-              <option value="PENDING">Chờ xác thực (PENDING)</option>
-              <option value="LOCKED">Bị khóa (LOCKED)</option>
+              <option value="ACTIVE">Đang hoạt động</option>
+              <option value="PENDING">Chờ kích hoạt email</option>
+              <option value="LOCKED">Đang bị khóa</option>
             </select>
           </div>
         </div>
@@ -177,23 +183,23 @@ export const UserManagement = () => {
                         {u.fullName || <span className="text-gray-400 italic">Chưa cập nhật</span>}
                       </td>
                       <td className="px-6 py-4">
-                        {u.role === 'ROLE_ADMIN' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
-                            <Shield size={12} /> ADMIN
+                        {u.role === 'ADMIN' || u.role === 'ROLE_ADMIN' ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+                            <Shield size={13} className="text-purple-600" /> Quản trị viên
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                             Sinh viên
                           </span>
                         )}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4 text-xs text-gray-600">
-                          <span className="flex items-center gap-1" title="Sản phẩm đăng bán">
+                          <span className="flex items-center gap-1.5" title="Sản phẩm đăng bán">
                             <ShoppingBag size={14} className="text-amber-500" />
                             <strong>{u.totalProducts}</strong> tin
                           </span>
-                          <span className="flex items-center gap-1" title="Đơn hàng tham gia">
+                          <span className="flex items-center gap-1.5" title="Đơn hàng tham gia">
                             <Package size={14} className="text-blue-500" />
                             <strong>{u.totalOrders}</strong> đơn
                           </span>
@@ -233,13 +239,13 @@ export const UserManagement = () => {
                         ) : (
                           <button
                             onClick={() => openStatusModal(u, 'LOCKED')}
-                            disabled={u.role === 'ROLE_ADMIN'}
+                            disabled={u.role === 'ADMIN' || u.role === 'ROLE_ADMIN'}
                             className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-md transition border ${
-                              u.role === 'ROLE_ADMIN'
+                              u.role === 'ADMIN' || u.role === 'ROLE_ADMIN'
                                 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                                 : 'bg-red-50 text-red-700 hover:bg-red-100 border-red-200'
                             }`}
-                            title={u.role === 'ROLE_ADMIN' ? 'Không thể khóa tài khoản Admin' : 'Khóa tài khoản'}
+                            title={u.role === 'ADMIN' || u.role === 'ROLE_ADMIN' ? 'Không thể khóa tài khoản Quản trị viên' : 'Khóa tài khoản'}
                           >
                             <UserX size={14} /> Khóa tài khoản
                           </button>
@@ -290,15 +296,22 @@ export const UserManagement = () => {
               <X size={20} />
             </button>
 
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              {actionStatus === 'LOCKED' ? '🔒 Xác nhận khóa tài khoản' : '🔓 Xác nhận mở khóa tài khoản'}
-            </h3>
+            <div className="flex items-center gap-2 mb-2">
+              {actionStatus === 'LOCKED' ? (
+                <UserX className="text-red-600" size={22} />
+              ) : (
+                <UserCheck className="text-emerald-600" size={22} />
+              )}
+              <h3 className="text-lg font-bold text-gray-900">
+                {actionStatus === 'LOCKED' ? 'Xác nhận khóa tài khoản' : 'Xác nhận mở khóa tài khoản'}
+              </h3>
+            </div>
 
             <p className="text-sm text-gray-600 mb-4">
               Bạn có chắc chắn muốn chuyển trạng thái của người dùng{' '}
               <strong>{selectedUser.username}</strong> ({selectedUser.email}) thành{' '}
               <span className={`font-semibold ${actionStatus === 'LOCKED' ? 'text-red-600' : 'text-emerald-600'}`}>
-                {actionStatus}
+                {actionStatus === 'LOCKED' ? 'Đã khóa' : 'Đang hoạt động'}
               </span>
               ?
             </p>

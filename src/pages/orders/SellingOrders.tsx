@@ -5,6 +5,7 @@ import type { PageResponse } from '../../types/marketplace';
 import type { Locker } from '../../types/locker';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
+import { Tag, Package, MapPin, Check, X, Cpu, AlertTriangle, DoorClosed } from 'lucide-react';
 
 const statusLabels: Record<OrderStatus, { label: string; color: string }> = {
   PENDING_SELLER: { label: 'Chờ bạn xác nhận', color: 'bg-amber-100 text-amber-800 border-amber-300 font-medium' },
@@ -147,8 +148,8 @@ export const SellingOrders = () => {
         </div>
       ) : pageData?.content.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="w-16 h-16 mx-auto mb-4 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-2xl font-bold">
-            🏷️
+          <div className="w-16 h-16 mx-auto mb-4 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center font-bold">
+            <Tag size={28} />
           </div>
           <h2 className="text-lg font-semibold text-gray-900 mb-1">Chưa có người mua đặt đơn</h2>
           <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
@@ -156,7 +157,7 @@ export const SellingOrders = () => {
           </p>
           <Link
             to="/marketplace/new"
-            className="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
+            className="px-5 py-2.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 shadow-sm"
           >
             Đăng thêm sản phẩm mới
           </Link>
@@ -201,14 +202,14 @@ export const SellingOrders = () => {
                         className="w-16 h-16 object-cover rounded-lg border border-gray-200 shrink-0"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 text-xl shrink-0">
-                        📦
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 shrink-0">
+                        <Package size={24} />
                       </div>
                     )}
                     <div>
                       <Link
                         to={`/marketplace/${order.productId}`}
-                        className="font-medium text-gray-900 hover:text-blue-600 line-clamp-1"
+                        className="font-medium text-gray-900 hover:text-purple-600 line-clamp-1"
                       >
                         {order.productTitle}
                       </Link>
@@ -226,11 +227,12 @@ export const SellingOrders = () => {
                     {order.lockerName ? (
                       <div>
                         <div className="font-medium text-gray-800 flex items-center gap-1.5">
-                          <span>📍</span> {order.lockerName}
+                          <MapPin size={15} className="text-purple-600" />
+                          <span>{order.lockerName}</span>
                         </div>
                         <div className="text-xs text-gray-500 mt-0.5">{order.lockerLocation}</div>
                         {order.compartmentCode && (
-                          <div className="text-xs font-semibold text-blue-700 mt-1">
+                          <div className="text-xs font-semibold text-purple-700 mt-1">
                             Ngăn tủ: {order.compartmentCode}
                           </div>
                         )}
@@ -246,15 +248,15 @@ export const SellingOrders = () => {
                       <>
                         <button
                           onClick={() => setAcceptModalOrder(order)}
-                          className="px-3.5 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 shadow-sm"
+                          className="inline-flex items-center gap-1 px-3.5 py-2 bg-purple-600 text-white text-xs font-semibold rounded-lg hover:bg-purple-700 shadow-sm transition"
                         >
-                          ✓ Chấp nhận đơn
+                          <Check size={14} /> Chấp nhận đơn
                         </button>
                         <button
                           onClick={() => setRejectModalOrder(order)}
-                          className="px-3 py-2 border border-rose-300 text-rose-600 text-xs font-medium rounded-lg hover:bg-rose-50"
+                          className="inline-flex items-center gap-1 px-3 py-2 border border-rose-300 text-rose-600 text-xs font-medium rounded-lg hover:bg-rose-50 transition"
                         >
-                          ✕ Từ chối
+                          <X size={14} /> Từ chối
                         </button>
                       </>
                     )}
@@ -262,9 +264,9 @@ export const SellingOrders = () => {
                     {order.status === 'AWAITING_DEPOSIT' && (
                       <button
                         onClick={() => setDepositModalOrder(order)}
-                        className="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 shadow-sm flex items-center gap-1.5"
+                        className="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 shadow-sm flex items-center gap-1.5 transition"
                       >
-                        <span>📦</span> Gửi hàng vào tủ
+                        <Package size={15} /> Gửi hàng vào tủ
                       </button>
                     )}
 
@@ -417,8 +419,8 @@ export const SellingOrders = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl">
-                🤖
+              <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                <Cpu size={24} />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900">Mô phỏng Gửi hàng Locker IoT</h3>
@@ -445,7 +447,8 @@ export const SellingOrders = () => {
 
             <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6 text-xs text-amber-800 space-y-1">
               <div className="font-bold flex items-center gap-1.5">
-                <span>⚠️</span> Các bước mô phỏng phần cứng:
+                <AlertTriangle size={15} className="text-amber-600" />
+                <span>Các bước mô phỏng phần cứng:</span>
               </div>
               <ol className="list-decimal list-inside space-y-0.5 text-amber-900">
                 <li>Lệnh mở chốt điện tử ngăn {depositModalOrder.compartmentCode}</li>
@@ -474,7 +477,7 @@ export const SellingOrders = () => {
                   </>
                 ) : (
                   <>
-                    <span>🚪</span> Xác nhận đã gửi đồ
+                    <DoorClosed size={16} /> Xác nhận đã gửi đồ
                   </>
                 )}
               </button>

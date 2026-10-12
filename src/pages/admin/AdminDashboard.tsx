@@ -3,6 +3,7 @@ import { axiosInstance } from '../../api/axios';
 import type { DashboardStatsResponse } from '../../types/admin';
 import { AdminNav } from '../../components/AdminNav';
 import {
+  LayoutDashboard,
   Users,
   ShoppingBag,
   Package,
@@ -33,13 +34,18 @@ export const AdminDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              📊 Tổng quan Quản trị Hệ thống
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Theo dõi tình trạng hoạt động của người dùng, sản phẩm, đơn hàng và hệ thống tủ thông minh.
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+              <LayoutDashboard size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Tổng quan Quản trị Hệ thống
+              </h1>
+              <p className="mt-0.5 text-sm text-gray-500">
+                Theo dõi tình trạng hoạt động của người dùng, sản phẩm, đơn hàng và hệ thống tủ thông minh.
+              </p>
+            </div>
           </div>
           <button
             onClick={() => refetch()}

@@ -4,15 +4,16 @@ import type { Category, Product } from '../../types/marketplace';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
+import { ArrowLeft, Save, PlusCircle, AlertCircle } from 'lucide-react';
 
 const productSchema = z.object({
-    title: z.string().min(1, 'Title is required').max(150),
-    description: z.string().max(2000, 'Description is too long').optional(),
-    price: z.number().min(0, 'Price must be non-negative'),
-    categoryId: z.number().min(1, 'Category is required'),
-    imageUrl: z.string().url('Must be a valid URL').or(z.literal('')).optional(),
+    title: z.string().min(1, 'Tiêu đề sản phẩm không được để trống').max(150, 'Tối đa 150 ký tự'),
+    description: z.string().max(2000, 'Mô tả quá dài (tối đa 2000 ký tự)').optional(),
+    price: z.number().min(0, 'Giá bán phải là số không âm'),
+    categoryId: z.number().min(1, 'Vui lòng chọn danh mục sản phẩm'),
+    imageUrl: z.string().url('Đường dẫn ảnh phải là URL hợp lệ').or(z.literal('')).optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -77,50 +78,70 @@ export const ProductForm = () => {
         }
     });
 
-    if (isEditing && isLoadingProduct) return <div className="text-center py-20">Loading...</div>;
+    if (isEditing && isLoadingProduct) return <div className="text-center py-20 text-gray-500">Đang tải thông tin sản phẩm...</div>;
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">{isEditing ? 'Edit Listing' : 'Create New Listing'}</h1>
+            <Link to="/marketplace/my-listings" className="inline-flex items-center gap-1 text-sm text-purple-600 hover:underline mb-6 font-medium">
+                <ArrowLeft size={16} /> Quay lại danh sách tin đăng
+            </Link>
+
+            <div className="flex items-center gap-3 mb-8">
+                <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+                    <PlusCircle size={24} />
+                </div>
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                        {isEditing ? 'Chỉnh sửa tin đăng' : 'Đăng bán sản phẩm mới'}
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                        {isEditing ? 'Cập nhật lại giá, mô tả hoặc hình ảnh món đồ.' : 'Chia sẻ đồ dùng, sách học tập đến các sinh viên khác.'}
+                    </p>
+                </div>
+            </div>
             
-            <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="space-y-6 bg-white p-6 rounded-2xl shadow-xs border border-gray-200">
                 
                 {mutation.isError && (
-                    <div className="p-4 bg-red-50 text-red-700 rounded border border-red-200 flex flex-col gap-2">
-                        <span className="font-medium">
-                            {(mutation.error as any).response?.status === 409 
-                                ? 'The product has been modified by another update. Please reload the latest data before continuing your edit.' 
-                                : 'Failed to save product. Please try again.'}
-                        </span>
+                    <div className="p-4 bg-red-50 text-red-700 rounded-xl border border-red-200 flex flex-col gap-2 text-sm">
+                        <div className="flex items-center gap-2 font-medium">
+                            <AlertCircle size={18} />
+                            <span>
+                                {(mutation.error as any).response?.status === 409 
+                                    ? 'Sản phẩm đã bị sửa đổi bởi phiên làm việc khác. Vui lòng tải lại dữ liệu mới nhất trước khi tiếp tục.' 
+                                    : 'Không thể lưu sản phẩm. Vui lòng thử lại.'}
+                            </span>
+                        </div>
                         {(mutation.error as any).response?.status === 409 && isEditing && (
                             <button
                                 type="button"
                                 onClick={() => queryClient.invalidateQueries({ queryKey: ['product', id] })}
                                 className="self-start text-xs font-semibold underline text-red-800 hover:text-red-900 cursor-pointer"
                             >
-                                Click here to reload latest data
+                                Nhấn vào đây để tải lại dữ liệu mới nhất
                             </button>
                         )}
                     </div>
                 )}
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Title</label>
+                    <label className="block text-sm font-semibold text-gray-700">Tiêu đề sản phẩm</label>
                     <input
                         type="text"
                         {...register('title')}
-                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="VD: Giáo trình Giải tích 1 còn mới 95%"
+                        className="mt-1 block w-full border border-gray-300 rounded-xl shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
                     />
                     {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Category</label>
+                    <label className="block text-sm font-semibold text-gray-700">Danh mục sản phẩm</label>
                     <select
                         {...register('categoryId', { valueAsNumber: true })}
-                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                        className="mt-1 block w-full border border-gray-300 rounded-xl shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 bg-white text-sm"
                     >
-                        <option value={0}>Select a category</option>
+                        <option value={0}>-- Chọn một danh mục --</option>
                         {categories?.map(c => (
                             <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
@@ -129,51 +150,54 @@ export const ProductForm = () => {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Price ($)</label>
+                    <label className="block text-sm font-semibold text-gray-700">Giá bán mong muốn (VNĐ)</label>
                     <input
                         type="number"
-                        step="0.01"
+                        step="1000"
                         {...register('price', { valueAsNumber: true })}
-                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="VD: 50000"
+                        className="mt-1 block w-full border border-gray-300 rounded-xl shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
                     />
                     {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Description</label>
+                    <label className="block text-sm font-semibold text-gray-700">Mô tả chi tiết</label>
                     <textarea
                         rows={4}
                         {...register('description')}
-                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Mô tả tình trạng sách/đồ, xuất xứ, phụ kiện đi kèm..."
+                        className="mt-1 block w-full border border-gray-300 rounded-xl shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
                     />
                     {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Image URL</label>
+                    <label className="block text-sm font-semibold text-gray-700">Đường dẫn ảnh sản phẩm (URL)</label>
                     <input
                         type="text"
                         {...register('imageUrl')}
-                        placeholder="https://..."
-                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="https://images.unsplash.com/..."
+                        className="mt-1 block w-full border border-gray-300 rounded-xl shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
                     />
                     {errors.imageUrl && <p className="mt-1 text-sm text-red-600">{errors.imageUrl.message}</p>}
                 </div>
 
-                <div className="flex justify-end space-x-3">
+                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
                     <button
                         type="button"
                         onClick={() => navigate(-1)}
-                        className="px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                        className="px-4 py-2 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
                     >
-                        Cancel
+                        Hủy
                     </button>
                     <button
                         type="submit"
                         disabled={mutation.isPending}
-                        className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition shadow-xs"
                     >
-                        {mutation.isPending ? 'Saving...' : 'Save'}
+                        <Save size={16} />
+                        {mutation.isPending ? 'Đang lưu...' : 'Lưu sản phẩm'}
                     </button>
                 </div>
             </form>

@@ -6,13 +6,13 @@ import * as z from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../../api/axios';
 import type { LockerDetail } from '../../../types/locker';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Save, Lock } from 'lucide-react';
 import { AdminNav } from '../../../components/AdminNav';
 
 const lockerSchema = z.object({
-    code: z.string().min(1, 'Locker code is required').max(50, 'Max 50 characters'),
-    name: z.string().min(1, 'Locker name is required').max(100, 'Max 100 characters'),
-    location: z.string().min(1, 'Location is required').max(255, 'Max 255 characters'),
+    code: z.string().min(1, 'Mã tủ không được để trống').max(50, 'Tối đa 50 ký tự'),
+    name: z.string().min(1, 'Tên tủ không được để trống').max(100, 'Tối đa 100 ký tự'),
+    location: z.string().min(1, 'Vị trí không được để trống').max(255, 'Tối đa 255 ký tự'),
 });
 
 type LockerFormData = z.infer<typeof lockerSchema>;
@@ -76,7 +76,7 @@ export const LockerForm = () => {
         return (
             <div className="min-h-screen bg-gray-50">
                 <AdminNav />
-                <div className="text-center py-20 text-gray-500">Loading locker...</div>
+                <div className="text-center py-20 text-gray-500">Đang tải thông tin tủ...</div>
             </div>
         );
     }
@@ -86,73 +86,84 @@ export const LockerForm = () => {
             <AdminNav />
             <div className="max-w-2xl mx-auto px-4 py-8">
                 <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-purple-600 hover:underline mb-6 font-medium">
-                <ArrowLeft size={16} /> Back to Locker List
-            </Link>
+                    <ArrowLeft size={16} /> Quay lại danh sách tủ
+                </Link>
 
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">
-                {isEditing ? `Edit Locker ${existingLocker?.code}` : 'Register New Locker'}
-            </h1>
-
-            <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                {mutation.isError && (
-                    <div className="p-4 bg-red-50 text-red-700 rounded border border-red-200 text-sm">
-                        {(mutation.error as any).response?.data?.message || 'Failed to save locker. Check if locker code is already taken.'}
+                <div className="flex items-center gap-3 mb-8">
+                    <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+                        <Lock size={24} />
                     </div>
-                )}
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Locker Code</label>
-                    <input
-                        type="text"
-                        {...register('code')}
-                        disabled={isEditing}
-                        placeholder="e.g. LK-A1"
-                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500 uppercase disabled:bg-gray-100 disabled:text-gray-500"
-                    />
-                    {errors.code && <p className="mt-1 text-sm text-red-600">{errors.code.message}</p>}
-                    {isEditing && <p className="mt-1 text-xs text-gray-400">Locker unique code cannot be modified after registration.</p>}
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                            {isEditing ? `Chỉnh sửa tủ ${existingLocker?.code}` : 'Thêm mới tủ thông minh'}
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-0.5">
+                            {isEditing ? 'Cập nhật vị trí và tên gợi nhớ cho tủ đồ.' : 'Đăng ký tủ locker mới vào hệ thống điểm giao nhận.'}
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Display Name / Label</label>
-                    <input
-                        type="text"
-                        {...register('name')}
-                        placeholder="e.g. Tủ Khu A - Tầng 1"
-                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
-                </div>
+                <form onSubmit={handleSubmit(data => mutation.mutate(data))} className="space-y-6 bg-white p-6 rounded-xl shadow-xs border border-gray-200">
+                    {mutation.isError && (
+                        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 text-sm">
+                            {(mutation.error as any).response?.data?.message || 'Không thể lưu tủ đồ. Vui lòng kiểm tra xem mã tủ đã tồn tại hay chưa.'}
+                        </div>
+                    )}
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Location</label>
-                    <input
-                        type="text"
-                        {...register('location')}
-                        placeholder="e.g. Sảnh chính Tòa nhà A, Tầng 1"
-                        className="mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
-                </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700">Mã định danh tủ (Code)</label>
+                        <input
+                            type="text"
+                            {...register('code')}
+                            disabled={isEditing}
+                            placeholder="VD: LK-A1"
+                            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 uppercase disabled:bg-gray-100 disabled:text-gray-500 text-sm"
+                        />
+                        {errors.code && <p className="mt-1 text-sm text-red-600">{errors.code.message}</p>}
+                        {isEditing && <p className="mt-1 text-xs text-gray-400">Mã định danh của tủ không thể thay đổi sau khi tạo.</p>}
+                    </div>
 
-                <div className="flex justify-end space-x-3 pt-4 border-t">
-                    <button
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className="px-4 py-2 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={mutation.isPending}
-                        className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                    >
-                        {mutation.isPending ? 'Saving...' : 'Save Locker'}
-                    </button>
-                </div>
-            </form>
-        </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700">Tên tủ / Tên gợi nhớ</label>
+                        <input
+                            type="text"
+                            {...register('name')}
+                            placeholder="VD: Tủ Khu A - Tầng 1"
+                            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
+                        />
+                        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700">Vị trí lắp đặt</label>
+                        <input
+                            type="text"
+                            {...register('location')}
+                            placeholder="VD: Sảnh chính Tòa nhà A, Tầng 1 (cạnh thang máy)"
+                            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
+                        />
+                        {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
+                    </div>
+
+                    <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                        <button
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={mutation.isPending}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition"
+                        >
+                            <Save size={16} />
+                            {mutation.isPending ? 'Đang lưu...' : 'Lưu tủ đồ'}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
