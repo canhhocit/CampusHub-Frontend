@@ -13,6 +13,8 @@ import {
   Menu,
   X,
   LayoutDashboard,
+  Search,
+  Lock,
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -20,6 +22,7 @@ export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navSearch, setNavSearch] = useState('');
 
   const isAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN';
 
@@ -28,19 +31,39 @@ export const Navbar = () => {
     navigate('/login');
   };
 
+  const handleGlobalSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (navSearch.trim()) {
+      navigate(`/marketplace?search=${encodeURIComponent(navSearch.trim())}`);
+    } else {
+      navigate('/marketplace');
+    }
+  };
+
   const navLinks = [
-    { to: '/marketplace', label: 'Chợ Đồ Cũ', icon: ShoppingBag },
+    { to: '/marketplace', label: 'Chợ sinh viên', icon: ShoppingBag },
     { to: '/orders/buying', label: 'Đơn mua', icon: Inbox, authOnly: true },
     { to: '/orders/selling', label: 'Đơn bán', icon: Send, authOnly: true },
     { to: '/marketplace/my-listings', label: 'Tin của tôi', icon: Package, authOnly: true },
   ];
 
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs font-sans">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 font-sans shadow-xs">
+      {/* Top Value Proposition Banner (Inspired by Oreka) */}
+      <div className="bg-purple-900 text-purple-100 text-[11px] sm:text-xs py-1.5 px-4 text-center font-medium flex items-center justify-center gap-2">
+        <span className="inline-flex items-center gap-1 font-bold text-amber-300">
+          <Lock size={12} /> Smart Locker Campus:
+        </span>
+        <span className="hidden sm:inline">Giao nhận đồ an toàn 100% qua tủ đồ thông minh</span>
+        <span className="hidden sm:inline">•</span>
+        <span>Không cần gặp mặt trực tiếp</span>
+        <span className="hidden md:inline">• Bảo vệ quyền lợi người mua & người bán</span>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 gap-4">
           {/* Logo & Brand */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6 shrink-0">
             <Link to={isAdmin ? '/admin/dashboard' : '/'} className="flex items-center gap-2.5 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-purple-600/20 group-hover:scale-105 transition-transform">
                 <Package size={22} />
@@ -50,13 +73,13 @@ export const Navbar = () => {
                   CampusHub
                 </span>
                 <span className="hidden sm:block text-[11px] text-slate-500 font-medium">
-                  Chợ Trao Đổi & Tủ Thông Minh
+                  Chợ Sinh Viên & Tủ Thông Minh
                 </span>
               </div>
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) => {
                 if (link.authOnly && !isAuthenticated) return null;
                 const Icon = link.icon;
@@ -79,29 +102,48 @@ export const Navbar = () => {
             </nav>
           </div>
 
+          {/* Center Global Search (Desktop - Oreka Pattern) */}
+          <form
+            onSubmit={handleGlobalSearch}
+            className="hidden md:flex flex-1 max-w-md relative items-center"
+          >
+            <input
+              type="text"
+              value={navSearch}
+              onChange={(e) => setNavSearch(e.target.value)}
+              placeholder="Tìm giáo trình, laptop, đồ KTX, tài liệu..."
+              className="w-full pl-9 pr-20 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-slate-50 hover:bg-white transition"
+            />
+            <Search className="absolute left-3 text-slate-400" size={16} />
+            <button
+              type="submit"
+              className="absolute right-1 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition"
+            >
+              Tìm
+            </button>
+          </form>
+
           {/* Right Action Icons & Account */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2.5 shrink-0">
             {/* Admin Portal Jump Badge */}
             {isAdmin && (
               <Link
                 to="/admin/dashboard"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-sm shadow-purple-600/30 transition"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-xs transition"
               >
                 <LayoutDashboard size={14} />
-                CỔNG QUẢN TRỊ ADMIN
+                Quản trị Admin
               </Link>
             )}
 
-            {/* Post Listing Action */}
-            {isAuthenticated && (
-              <Link
-                to="/marketplace/new"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition"
-              >
-                <Plus size={15} />
-                Đăng tin bán
-              </Link>
-            )}
+            {/* Post Listing Action (Prominent CTA inspired by Oreka's "Đăng bán") */}
+            <Link
+              to={isAuthenticated ? "/marketplace/new" : "/login"}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-sm shadow-purple-600/20 transition hover:scale-102"
+            >
+              <Plus size={16} />
+              Đăng tin bán
+            </Link>
 
             {/* CCCD Badge */}
             {isAuthenticated && !isAdmin && (
@@ -114,6 +156,7 @@ export const Navbar = () => {
                 <Link
                   to="/verify-identity"
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition"
+                  title="Xác minh CCCD để được đăng bán và đặt mua qua Locker"
                 >
                   <ShieldAlert size={13} className="text-amber-600" />
                   Xác minh CCCD
@@ -124,12 +167,17 @@ export const Navbar = () => {
             {/* User Profile & Logout */}
             {isAuthenticated ? (
               <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs">
-                  {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <span className="text-xs font-semibold text-slate-700 max-w-[120px] truncate">
-                  {user?.fullName || user?.username}
-                </span>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-2 hover:bg-slate-50 p-1.5 rounded-xl transition"
+                >
+                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs">
+                    {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <span className="text-xs font-semibold text-slate-700 max-w-[100px] truncate">
+                    {user?.fullName || user?.username}
+                  </span>
+                </Link>
                 <button
                   onClick={handleLogout}
                   title="Đăng xuất"
@@ -148,7 +196,7 @@ export const Navbar = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-3.5 py-1.5 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-xs"
+                  className="px-3.5 py-1.5 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
                 >
                   Đăng ký
                 </Link>
@@ -158,14 +206,12 @@ export const Navbar = () => {
 
           {/* Mobile Hamburger Button */}
           <div className="md:hidden flex items-center gap-2">
-            {isAdmin && (
-              <Link
-                to="/admin/dashboard"
-                className="px-2 py-1 rounded-lg text-[11px] font-bold bg-purple-600 text-white"
-              >
-                ADMIN
-              </Link>
-            )}
+            <Link
+              to="/marketplace/new"
+              className="p-1.5 bg-purple-600 text-white rounded-lg text-xs font-bold flex items-center gap-1"
+            >
+              <Plus size={15} /> Đăng bán
+            </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-slate-600 hover:text-slate-900 rounded-lg"
@@ -180,6 +226,24 @@ export const Navbar = () => {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-3">
+          {/* Mobile Search */}
+          <form onSubmit={handleGlobalSearch} className="relative flex items-center">
+            <input
+              type="text"
+              value={navSearch}
+              onChange={(e) => setNavSearch(e.target.value)}
+              placeholder="Tìm sản phẩm, sách giáo trình..."
+              className="w-full pl-9 pr-16 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-purple-500"
+            />
+            <Search className="absolute left-3 text-slate-400" size={16} />
+            <button
+              type="submit"
+              className="absolute right-1 px-3 py-1 bg-purple-600 text-white rounded-lg text-xs font-bold"
+            >
+              Tìm
+            </button>
+          </form>
+
           <nav className="space-y-1">
             {navLinks.map((link) => {
               if (link.authOnly && !isAuthenticated) return null;

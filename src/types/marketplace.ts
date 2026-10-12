@@ -18,6 +18,7 @@ export interface Product {
         id: number;
         username?: string;
         fullName: string;
+        identityVerified?: boolean;
     };
     createdAt: string;
     updatedAt: string;

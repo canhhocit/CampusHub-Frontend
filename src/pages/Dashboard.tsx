@@ -16,6 +16,8 @@ import {
   User as UserIcon,
 } from 'lucide-react';
 
+import { UserNavTabs } from '../components/UserNavTabs';
+
 export const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -32,8 +34,11 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xs border border-gray-200 overflow-hidden p-6 sm:p-8">
+    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-5xl mx-auto space-y-6">
+        <UserNavTabs />
+
+        <div className="bg-white rounded-3xl shadow-xs border border-slate-200 overflow-hidden p-6 sm:p-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Bảng điều khiển</h1>
           <button
@@ -253,5 +258,6 @@ export const Dashboard = () => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };

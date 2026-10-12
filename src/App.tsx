@@ -42,12 +42,13 @@ function App() {
 
           {/* Member & Marketplace Routes with Navbar */}
           <Route element={<UserLayout />}>
+            <Route path="/" element={<MarketplaceList />} />
             <Route path="/marketplace" element={<MarketplaceList />} />
             <Route path="/marketplace/:id" element={<ProductDetail />} />
 
             {/* Member Protected Routes */}
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/marketplace/new" element={<ProductForm />} />
               <Route path="/marketplace/edit/:id" element={<ProductForm />} />
               <Route path="/marketplace/my-listings" element={<MyListings />} />
