@@ -7,7 +7,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../../api/axios';
 import type { LockerDetail } from '../../../types/locker';
 import { ArrowLeft, Save, Lock } from 'lucide-react';
-import { AdminNav } from '../../../components/AdminNav';
 
 const lockerSchema = z.object({
     code: z.string().min(1, 'Mã tủ không được để trống').max(50, 'Tối đa 50 ký tự'),
@@ -74,18 +73,13 @@ export const LockerForm = () => {
 
     if (isEditing && isLoadingLocker) {
         return (
-            <div className="min-h-screen bg-gray-50">
-                <AdminNav />
-                <div className="text-center py-20 text-gray-500">Đang tải thông tin tủ...</div>
-            </div>
+            <div className="p-8 text-center py-20 text-gray-500">Đang tải thông tin tủ...</div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <AdminNav />
-            <div className="max-w-2xl mx-auto px-4 py-8">
-                <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-purple-600 hover:underline mb-6 font-medium">
+        <div className="max-w-2xl mx-auto px-4 py-8">
+            <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-purple-600 hover:underline mb-6 font-medium">
                     <ArrowLeft size={16} /> Quay lại danh sách tủ
                 </Link>
 
@@ -163,7 +157,6 @@ export const LockerForm = () => {
                         </button>
                     </div>
                 </form>
-            </div>
         </div>
     );
 };

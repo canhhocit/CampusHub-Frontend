@@ -21,6 +21,7 @@ import { LockerForm } from './pages/admin/lockers/LockerForm';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { UserManagement } from './pages/admin/UserManagement';
 import { AuditLogs } from './pages/admin/AuditLogs';
+import { AdminLayout } from './components/AdminLayout';
 
 import { BuyingOrders } from './pages/orders/BuyingOrders';
 import { SellingOrders } from './pages/orders/SellingOrders';
@@ -54,14 +55,16 @@ function App() {
 
           {/* Admin Protected Routes */}
           <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
-            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<UserManagement />} />
-            <Route path="/admin/audit" element={<AuditLogs />} />
-            <Route path="/admin/lockers" element={<LockerList />} />
-            <Route path="/admin/lockers/new" element={<LockerForm />} />
-            <Route path="/admin/lockers/edit/:id" element={<LockerForm />} />
-            <Route path="/admin/lockers/:id" element={<LockerDetail />} />
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<UserManagement />} />
+              <Route path="/admin/audit" element={<AuditLogs />} />
+              <Route path="/admin/lockers" element={<LockerList />} />
+              <Route path="/admin/lockers/new" element={<LockerForm />} />
+              <Route path="/admin/lockers/edit/:id" element={<LockerForm />} />
+              <Route path="/admin/lockers/:id" element={<LockerDetail />} />
+            </Route>
           </Route>
 
           {/* Catch all */}

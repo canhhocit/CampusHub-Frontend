@@ -5,6 +5,8 @@ export interface UserStats {
   lockedUsers: number;
   newUsersToday: number;
   newUsersThisWeek: number;
+  verifiedUsers?: number;
+  unverifiedUsers?: number;
 }
 
 export interface ProductStats {
