@@ -16,6 +16,9 @@ import {
   Calendar,
   AlertCircle,
   X,
+  CheckCircle2,
+  CreditCard,
+  ExternalLink,
 } from 'lucide-react';
 
 export const UserManagement = () => {
@@ -23,9 +26,11 @@ export const UserManagement = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<UserManagementItem | null>(null);
+  const [selectedCccdUser, setSelectedCccdUser] = useState<UserManagementItem | null>(null);
   const [actionStatus, setActionStatus] = useState<AdminUserStatus>('LOCKED');
   const [reason, setReason] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isCccdModalOpen, setIsCccdModalOpen] = useState<boolean>(false);
 
   const queryClient = useQueryClient();
 
@@ -166,6 +171,7 @@ export const UserManagement = () => {
                     <th className="px-6 py-4">Tài khoản & Email</th>
                     <th className="px-6 py-4">Họ và tên</th>
                     <th className="px-6 py-4">Vai trò</th>
+                    <th className="px-6 py-4">Xác minh CCCD</th>
                     <th className="px-6 py-4">Hoạt động</th>
                     <th className="px-6 py-4">Trạng thái</th>
                     <th className="px-6 py-4">Ngày tham gia</th>
@@ -197,6 +203,26 @@ export const UserManagement = () => {
                         ) : (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                             Thành viên
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {u.identityVerified ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedCccdUser(u);
+                              setIsCccdModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition cursor-pointer"
+                            title="Nhấn để xem chi tiết ảnh và số CCCD"
+                          >
+                            <CheckCircle2 size={13} className="text-emerald-600" />
+                            {u.citizenId ? `${u.citizenId.substring(0, 4)}****${u.citizenId.substring(8)}` : 'Đã xác minh'}
+                          </button>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 border border-gray-200">
+                            Chưa xác minh
                           </span>
                         )}
                       </td>
@@ -353,6 +379,110 @@ export const UserManagement = () => {
                 }`}
               >
                 {updateStatusMutation.isPending ? 'Đang cập nhật...' : 'Xác nhận thay đổi'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CCCD Identity Details Modal */}
+      {isCccdModalOpen && selectedCccdUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative animate-in fade-in duration-150 max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setIsCccdModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl">
+                <CreditCard size={22} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Chi tiết Hồ sơ CCCD</h3>
+                <p className="text-xs text-gray-500">
+                  {selectedCccdUser.fullName || selectedCccdUser.username} ({selectedCccdUser.email})
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-2 gap-3 p-3.5 bg-gray-50 rounded-xl border border-gray-200">
+                <div>
+                  <span className="text-xs text-gray-500 block">Số CCCD</span>
+                  <strong className="text-gray-900 font-mono text-base">
+                    {selectedCccdUser.citizenId || 'Chưa cập nhật'}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-500 block">Thời gian xác minh</span>
+                  <span className="text-gray-700 font-medium text-xs">
+                    {selectedCccdUser.identityVerifiedAt
+                      ? new Date(selectedCccdUser.identityVerifiedAt).toLocaleString('vi-VN')
+                      : 'Hệ thống xác thực'}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-xs font-semibold text-gray-700 block mb-1.5">
+                  Ảnh mặt trước CCCD
+                </span>
+                {selectedCccdUser.idCardFrontUrl ? (
+                  <div className="relative rounded-xl border border-gray-200 overflow-hidden bg-gray-100 group">
+                    <img
+                      src={selectedCccdUser.idCardFrontUrl}
+                      alt="Mặt trước CCCD"
+                      className="w-full h-48 object-cover"
+                    />
+                    <a
+                      href={selectedCccdUser.idCardFrontUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute bottom-2 right-2 px-2.5 py-1 bg-black/70 text-white rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-black transition"
+                    >
+                      <ExternalLink size={12} /> Xem ảnh gốc
+                    </a>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-gray-100 text-gray-400 rounded-xl text-center text-xs">
+                    Chưa có ảnh mặt trước
+                  </div>
+                )}
+              </div>
+
+              {selectedCccdUser.idCardBackUrl && (
+                <div>
+                  <span className="text-xs font-semibold text-gray-700 block mb-1.5">
+                    Ảnh mặt sau CCCD
+                  </span>
+                  <div className="relative rounded-xl border border-gray-200 overflow-hidden bg-gray-100 group">
+                    <img
+                      src={selectedCccdUser.idCardBackUrl}
+                      alt="Mặt sau CCCD"
+                      className="w-full h-48 object-cover"
+                    />
+                    <a
+                      href={selectedCccdUser.idCardBackUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute bottom-2 right-2 px-2.5 py-1 bg-black/70 text-white rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-black transition"
+                    >
+                      <ExternalLink size={12} /> Xem ảnh gốc
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setIsCccdModalOpen(false)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold transition"
+              >
+                Đóng
               </button>
             </div>
           </div>

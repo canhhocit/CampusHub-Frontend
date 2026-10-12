@@ -24,6 +24,12 @@ export const ProductDetail = () => {
             navigate(`/orders/${data.id}`);
         },
         onError: (err: any) => {
+            if (err.response?.status === 403) {
+                if (window.confirm('Bạn cần xác minh danh tính (CCCD) để thực hiện giao dịch này. Bạn có muốn đi tới trang xác minh CCCD ngay bây giờ không?')) {
+                    navigate('/verify-identity');
+                    return;
+                }
+            }
             alert(err.response?.data?.message || 'Không thể tạo đơn hàng');
         }
     });
@@ -31,6 +37,12 @@ export const ProductDetail = () => {
     const handleOrderClick = () => {
         if (!isAuthenticated) {
             navigate('/login');
+            return;
+        }
+        if (user && user.role !== 'ROLE_ADMIN' && user.role !== 'ADMIN' && !user.identityVerified) {
+            if (window.confirm('Yêu cầu xác minh danh tính: Bạn cần xác minh CCCD trước khi đặt mua hàng qua hệ thống Smart Locker. Chuyển đến trang xác minh ngay?')) {
+                navigate('/verify-identity');
+            }
             return;
         }
         if (window.confirm(`Xác nhận đặt mua sản phẩm "${product?.title}"?`)) {

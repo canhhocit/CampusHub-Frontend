@@ -8,6 +8,7 @@ import { Register } from './pages/auth/Register';
 import { VerifyEmail } from './pages/auth/VerifyEmail';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
 import { ResetPassword } from './pages/auth/ResetPassword';
+import { VerifyIdentity } from './pages/auth/VerifyIdentity';
 import { Dashboard } from './pages/Dashboard';
 import { MarketplaceList } from './pages/marketplace/MarketplaceList';
 import { ProductDetail } from './pages/marketplace/ProductDetail';
@@ -48,6 +49,7 @@ function App() {
             <Route path="/orders/buying" element={<BuyingOrders />} />
             <Route path="/orders/selling" element={<SellingOrders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
+            <Route path="/verify-identity" element={<VerifyIdentity />} />
           </Route>
 
           {/* Admin Protected Routes */}

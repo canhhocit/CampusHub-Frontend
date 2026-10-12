@@ -6,8 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ArrowLeft, Save, PlusCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, PlusCircle, AlertCircle, ShieldAlert } from 'lucide-react';
 import { ImageUpload } from '../../components/ImageUpload';
+import { useAuth } from '../../contexts/AuthContext';
 
 const productSchema = z.object({
     title: z.string().min(1, 'Tiêu đề sản phẩm không được để trống').max(150, 'Tối đa 150 ký tự'),
@@ -79,7 +80,38 @@ export const ProductForm = () => {
         }
     });
 
+    const { user } = useAuth();
+    const isUnverified = Boolean(user && user.role !== 'ROLE_ADMIN' && user.role !== 'ADMIN' && !user.identityVerified);
+
     if (isEditing && isLoadingProduct) return <div className="text-center py-20 text-gray-500">Đang tải thông tin sản phẩm...</div>;
+
+    if (isUnverified) {
+        return (
+            <div className="max-w-xl mx-auto px-4 py-16 text-center animate-in fade-in">
+                <div className="p-4 bg-amber-50 text-amber-600 border border-amber-200 rounded-3xl w-20 h-20 mx-auto flex items-center justify-center mb-5">
+                    <ShieldAlert size={38} />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900">Yêu cầu xác minh danh tính (CCCD)</h1>
+                <p className="mt-2 text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
+                    Nhằm đảm bảo an toàn giao dịch qua mạng lưới Tủ Locker toàn thành phố, thành viên bắt buộc phải xác minh Căn cước công dân trước khi đăng bán sản phẩm.
+                </p>
+                <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+                    <Link
+                        to="/verify-identity"
+                        className="px-6 py-3 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition shadow-xs"
+                    >
+                        Xác minh CCCD ngay &rarr;
+                    </Link>
+                    <Link
+                        to="/marketplace"
+                        className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition"
+                    >
+                        Quay lại Chợ
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-8">

@@ -4,6 +4,10 @@ import { axiosInstance, setAccessToken } from '../api/axios';
 interface User {
   username: string;
   role: string;
+  identityVerified?: boolean;
+  citizenId?: string | null;
+  fullName?: string;
+  email?: string;
 }
 
 interface AuthContextType {
@@ -16,6 +20,7 @@ interface AuthContextType {
   verifyEmail: (token: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (data: any) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,7 +35,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await axiosInstance.get('/api/v1/auth/me');
       const authorities = response.data.authorities;
       const role = authorities && authorities.length > 0 ? authorities[0].authority : '';
-      setUser({ username: response.data.username, role });
+      const identityVerified = Boolean(response.data.identityVerified);
+      setUser({
+        username: response.data.username,
+        role,
+        identityVerified,
+        fullName: response.data.fullName,
+        email: response.data.email,
+        citizenId: response.data.citizenId,
+      });
       setIsAuthenticated(true);
     } catch (error) {
       setUser(null);
@@ -100,6 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         verifyEmail,
         forgotPassword,
         resetPassword,
+        refreshUser: fetchUser,
       }}
     >
       {children}

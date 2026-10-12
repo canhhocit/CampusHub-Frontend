@@ -66,6 +66,11 @@ export interface UserManagementItem {
   role: AdminUserRole;
   status: AdminUserStatus;
   dateOfBirth?: string | null;
+  identityVerified?: boolean;
+  citizenId?: string | null;
+  idCardFrontUrl?: string | null;
+  idCardBackUrl?: string | null;
+  identityVerifiedAt?: string | null;
   createdAt: string;
   lastLogin?: string | null;
   totalProducts: number;
