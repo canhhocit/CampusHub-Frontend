@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ArrowLeft, Save, PlusCircle, AlertCircle } from 'lucide-react';
+import { ImageUpload } from '../../components/ImageUpload';
 
 const productSchema = z.object({
     title: z.string().min(1, 'Tiêu đề sản phẩm không được để trống').max(150, 'Tối đa 150 ký tự'),
@@ -35,7 +36,7 @@ export const ProductForm = () => {
         enabled: isEditing
     });
 
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<ProductFormData>({
+    const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<ProductFormData>({
         resolver: zodResolver(productSchema),
         defaultValues: {
             title: '',
@@ -172,16 +173,11 @@ export const ProductForm = () => {
                     {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
                 </div>
 
-                <div>
-                    <label className="block text-sm font-semibold text-gray-700">Đường dẫn ảnh sản phẩm (URL)</label>
-                    <input
-                        type="text"
-                        {...register('imageUrl')}
-                        placeholder="https://images.unsplash.com/..."
-                        className="mt-1 block w-full border border-gray-300 rounded-xl shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
-                    />
-                    {errors.imageUrl && <p className="mt-1 text-sm text-red-600">{errors.imageUrl.message}</p>}
-                </div>
+                <ImageUpload
+                    value={watch('imageUrl')}
+                    onChange={(url) => setValue('imageUrl', url, { shouldValidate: true })}
+                    error={errors.imageUrl?.message}
+                />
 
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
                     <button
