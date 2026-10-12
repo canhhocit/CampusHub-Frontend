@@ -5,6 +5,7 @@ import type { Locker, LockerStatus } from '../../../types/locker';
 import type { PageResponse } from '../../../types/marketplace';
 import { Link } from 'react-router-dom';
 import { Search, RefreshCw, Plus, ShieldAlert } from 'lucide-react';
+import { AdminNav } from '../../../components/AdminNav';
 
 export const LockerList = () => {
     const [page, setPage] = useState<number>(0);
@@ -39,7 +40,9 @@ export const LockerList = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen bg-gray-50">
+            <AdminNav />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Locker Administration</h1>
@@ -215,6 +218,7 @@ export const LockerList = () => {
                     )}
                 </div>
             )}
+        </div>
         </div>
     );
 };

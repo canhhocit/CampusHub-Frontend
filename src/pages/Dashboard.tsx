@@ -63,13 +63,45 @@ export const Dashboard = () => {
           </button>
 
           {user?.role === 'ROLE_ADMIN' && (
-            <button
-              onClick={() => navigate('/admin/lockers')}
-              className="p-4 bg-purple-50 border border-purple-200 rounded-lg shadow-sm hover:border-purple-500 hover:shadow-md text-left transition sm:col-span-2"
-            >
-              <h3 className="font-semibold text-purple-900">🔐 Locker Administration</h3>
-              <p className="text-sm text-purple-700 mt-1">Manage lockers, compartments and maintenance</p>
-            </button>
+            <div className="sm:col-span-2 mt-4 pt-4 border-t border-gray-200">
+              <h2 className="text-lg font-bold text-purple-900 mb-3 flex items-center gap-2">
+                <span className="px-2 py-0.5 text-xs bg-purple-600 text-white rounded">ADMIN</span>
+                Khu vực Quản trị Hệ thống
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={() => navigate('/admin/dashboard')}
+                  className="p-4 bg-purple-50/70 border border-purple-200 rounded-lg shadow-xs hover:border-purple-500 hover:shadow-md text-left transition"
+                >
+                  <h3 className="font-semibold text-purple-900">📊 Tổng quan Dashboard</h3>
+                  <p className="text-xs text-purple-700 mt-1">Xem thống kê người dùng, đơn hàng, tủ và bảo mật</p>
+                </button>
+
+                <button
+                  onClick={() => navigate('/admin/users')}
+                  className="p-4 bg-purple-50/70 border border-purple-200 rounded-lg shadow-xs hover:border-purple-500 hover:shadow-md text-left transition"
+                >
+                  <h3 className="font-semibold text-purple-900">👥 Quản lý Người dùng</h3>
+                  <p className="text-xs text-purple-700 mt-1">Tra cứu, xem thông tin và khóa/mở khóa tài khoản</p>
+                </button>
+
+                <button
+                  onClick={() => navigate('/admin/lockers')}
+                  className="p-4 bg-purple-50/70 border border-purple-200 rounded-lg shadow-xs hover:border-purple-500 hover:shadow-md text-left transition"
+                >
+                  <h3 className="font-semibold text-purple-900">🔐 Quản lý Tủ Locker</h3>
+                  <p className="text-xs text-purple-700 mt-1">Quản lý các điểm tủ, tình trạng các ngăn chứa</p>
+                </button>
+
+                <button
+                  onClick={() => navigate('/admin/audit')}
+                  className="p-4 bg-purple-50/70 border border-purple-200 rounded-lg shadow-xs hover:border-purple-500 hover:shadow-md text-left transition"
+                >
+                  <h3 className="font-semibold text-purple-900">📝 Nhật ký Audit Logs</h3>
+                  <p className="text-xs text-purple-700 mt-1">Truy vết lịch sử đăng nhập, đơn hàng và sự kiện</p>
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>

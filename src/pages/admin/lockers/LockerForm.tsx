@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../../api/axios';
 import type { LockerDetail } from '../../../types/locker';
 import { ArrowLeft } from 'lucide-react';
+import { AdminNav } from '../../../components/AdminNav';
 
 const lockerSchema = z.object({
     code: z.string().min(1, 'Locker code is required').max(50, 'Max 50 characters'),
@@ -72,12 +73,19 @@ export const LockerForm = () => {
     });
 
     if (isEditing && isLoadingLocker) {
-        return <div className="text-center py-20">Loading locker...</div>;
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <AdminNav />
+                <div className="text-center py-20 text-gray-500">Loading locker...</div>
+            </div>
+        );
     }
 
     return (
-        <div className="max-w-2xl mx-auto px-4 py-8">
-            <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mb-6">
+        <div className="min-h-screen bg-gray-50">
+            <AdminNav />
+            <div className="max-w-2xl mx-auto px-4 py-8">
+                <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-purple-600 hover:underline mb-6 font-medium">
                 <ArrowLeft size={16} /> Back to Locker List
             </Link>
 
@@ -144,6 +152,7 @@ export const LockerForm = () => {
                     </button>
                 </div>
             </form>
+        </div>
         </div>
     );
 };

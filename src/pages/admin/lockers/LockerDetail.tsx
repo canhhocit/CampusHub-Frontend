@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../../api/axios';
 import type { LockerDetail as LockerDetailType, CompartmentStatus } from '../../../types/locker';
 import { ArrowLeft, Plus, ShieldCheck, Box } from 'lucide-react';
+import { AdminNav } from '../../../components/AdminNav';
 
 export const LockerDetail = () => {
     const { id } = useParams<{ id: string }>();
@@ -50,10 +51,13 @@ export const LockerDetail = () => {
     if (isLoading) return <div className="text-center py-20">Loading locker details...</div>;
     if (isError || !locker) {
         return (
-            <div className="max-w-4xl mx-auto py-12 px-4 text-center">
-                <h2 className="text-2xl font-bold text-gray-800">Locker Not Found</h2>
-                <p className="mt-2 text-gray-600">{(error as any)?.message || 'The requested locker does not exist.'}</p>
-                <Link to="/admin/lockers" className="text-blue-600 hover:underline mt-4 inline-block">&larr; Back to Locker List</Link>
+            <div className="min-h-screen bg-gray-50">
+                <AdminNav />
+                <div className="max-w-4xl mx-auto py-12 px-4 text-center">
+                    <h2 className="text-2xl font-bold text-gray-800">Locker Not Found</h2>
+                    <p className="mt-2 text-gray-600">{(error as any)?.message || 'The requested locker does not exist.'}</p>
+                    <Link to="/admin/lockers" className="text-blue-600 hover:underline mt-4 inline-block">&larr; Back to Locker List</Link>
+                </div>
             </div>
         );
     }
@@ -61,8 +65,10 @@ export const LockerDetail = () => {
     const { compartmentSummary: summary } = locker;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mb-6">
+        <div className="min-h-screen bg-gray-50">
+            <AdminNav />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-purple-600 hover:underline mb-6 font-medium">
                 <ArrowLeft size={16} /> Back to Locker List
             </Link>
 
@@ -217,6 +223,7 @@ export const LockerDetail = () => {
                     </div>
                 )}
             </div>
+        </div>
         </div>
     );
 };
