@@ -206,7 +206,7 @@ export const MarketplaceList = () => {
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Tìm tên sản phẩm/ ..."
+                placeholder="Tìm tên sản phẩm/ chủ sở hữu..."
                 className="w-full pl-9 pr-24 py-2 border border-slate-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 bg-slate-50 focus:bg-white transition"
               />
               <Search className="absolute left-3 text-slate-400" size={16} />
