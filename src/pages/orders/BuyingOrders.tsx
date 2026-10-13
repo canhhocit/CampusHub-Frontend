@@ -235,7 +235,7 @@ export const BuyingOrders = () => {
               to="/marketplace"
               className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
             >
-              <ShoppingBag size={15} /> Khám phá Chợ sinh viên ngay
+              <ShoppingBag size={15} /> Khám phá Chợ ngay
             </Link>
           </div>
         ) : (

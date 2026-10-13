@@ -123,7 +123,7 @@ export const ProductDetail = () => {
           </Link>
           <span>/</span>
           <Link to="/marketplace" className="hover:text-purple-600">
-            Chợ sinh viên
+            Chợ 
           </Link>
           <span>/</span>
           <Link

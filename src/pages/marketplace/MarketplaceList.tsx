@@ -120,14 +120,14 @@ export const MarketplaceList = () => {
         <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white p-6 sm:p-10 shadow-lg">
           <div className="relative z-10 max-w-2xl space-y-3">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 uppercase tracking-wider">
-              <Sparkles size={13} /> Sàn Trao Đổi Đồ Sinh Viên
+              <Sparkles size={13} /> Sàn chuyển giao chủ mới cho những món đồ hữu ích
             </span>
             <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
               Mua Bán & Thanh Lý Đồ Cũ <br className="hidden sm:inline" />
               Giao Nhận Qua <span className="text-purple-300">Tủ Smart Locker</span>
             </h1>
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xl">
-              Tiết kiệm chi phí, tái sử dụng tài nguyên sinh viên. Đặt mua và nhận hàng 24/7 tại các trạm tủ đồ thông minh trong khuôn viên trường không cần hẹn gặp mặt.
+              Tiết kiệm chi phí, đặt mua và nhận hàng 24/7 tại các trạm tủ đồ thông minh trong thời đại số bận rộn !
             </p>
 
             {/* Quick feature tags */}
@@ -206,7 +206,7 @@ export const MarketplaceList = () => {
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Tìm tên sách, tác giả, đồ dùng KTX, model thiết bị..."
+                placeholder="Tìm tên sản phẩm/ ..."
                 className="w-full pl-9 pr-24 py-2 border border-slate-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 bg-slate-50 focus:bg-white transition"
               />
               <Search className="absolute left-3 text-slate-400" size={16} />

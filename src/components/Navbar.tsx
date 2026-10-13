@@ -41,7 +41,7 @@ export const Navbar = () => {
   };
 
   const navLinks = [
-    { to: '/marketplace', label: 'Chợ sinh viên', icon: ShoppingBag },
+    { to: '/marketplace', label: 'Chợ ', icon: ShoppingBag },
     { to: '/orders/buying', label: 'Đơn mua', icon: Inbox, authOnly: true },
     { to: '/orders/selling', label: 'Đơn bán', icon: Send, authOnly: true },
     { to: '/marketplace/my-listings', label: 'Tin của tôi', icon: Package, authOnly: true },
@@ -73,7 +73,7 @@ export const Navbar = () => {
                   CampusHub
                 </span>
                 <span className="hidden sm:block text-[11px] text-slate-500 font-medium">
-                  Chợ Sinh Viên & Tủ Thông Minh
+                  Trao đổi thông minh, thông tin minh bạch
                 </span>
               </div>
             </Link>
