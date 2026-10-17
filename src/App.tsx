@@ -14,6 +14,7 @@ import { MarketplaceList } from './pages/marketplace/MarketplaceList';
 import { ProductDetail } from './pages/marketplace/ProductDetail';
 import { ProductForm } from './pages/marketplace/ProductForm';
 import { MyListings } from './pages/marketplace/MyListings';
+import { AboutGuide } from './pages/AboutGuide';
 
 import { LockerList } from './pages/admin/lockers/LockerList';
 import { LockerDetail } from './pages/admin/lockers/LockerDetail';
@@ -45,6 +46,7 @@ function App() {
             <Route path="/" element={<MarketplaceList />} />
             <Route path="/marketplace" element={<MarketplaceList />} />
             <Route path="/marketplace/:id" element={<ProductDetail />} />
+            <Route path="/about-guide" element={<AboutGuide />} />
 
             {/* Member Protected Routes */}
             <Route element={<ProtectedRoute />}>

@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Search,
   Lock,
+  BookOpen,
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -41,7 +42,8 @@ export const Navbar = () => {
   };
 
   const navLinks = [
-    { to: '/marketplace', label: 'Chợ ', icon: ShoppingBag },
+    { to: '/marketplace', label: 'Chợ đồ cũ', icon: ShoppingBag },
+    { to: '/about-guide', label: 'Giới thiệu & Hướng dẫn', icon: BookOpen },
     { to: '/orders/buying', label: 'Đơn mua', icon: Inbox, authOnly: true },
     { to: '/orders/selling', label: 'Đơn bán', icon: Send, authOnly: true },
     { to: '/marketplace/my-listings', label: 'Tin của tôi', icon: Package, authOnly: true },
