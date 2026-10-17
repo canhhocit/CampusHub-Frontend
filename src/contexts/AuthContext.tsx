@@ -1,10 +1,12 @@
-import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
-import { axiosInstance, setAccessToken, getAccessToken } from '../api/axios';
+import { createContext, useContext, useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { axiosInstance, setAccessToken, getAccessToken, refreshAccessToken } from '../api/axios';
 
 interface User {
   username: string;
   role: string;
   identityVerified?: boolean;
+  identityReviewStatus?: 'NOT_SUBMITTED' | 'PENDING' | 'APPROVED' | 'REJECTED';
   citizenId?: string | null;
   fullName?: string;
   email?: string;
@@ -26,6 +28,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -42,13 +45,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         username: response.data.username,
         role,
         identityVerified,
+        identityReviewStatus: response.data.identityReviewStatus,
         fullName: response.data.fullName,
         email: response.data.email,
         citizenId: response.data.citizenId,
       });
       setIsAuthenticated(true);
       return true;
-    } catch (error) {
+    } catch {
       setUser(null);
       setIsAuthenticated(false);
       return false;
@@ -59,19 +63,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const token = getAccessToken();
       if (token) {
-        const ok = await fetchUser();
-        if (ok) {
-          setIsLoading(false);
-          return;
-        }
+        await fetchUser(); // Its API request already performs the single refresh retry.
+        return;
       }
 
       // Attempt to refresh token if no token or token expired
-      const response = await axiosInstance.post('/api/v1/auth/refresh');
-      setAccessToken(response.data.accessToken);
+      await refreshAccessToken();
       await fetchUser();
-    } catch (error) {
-      setAccessToken(null);
+    } catch {
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -85,10 +84,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initializeAuth();
   }, []);
 
+  useEffect(() => {
+    const onExpired = () => {
+      queryClient.clear();
+      setUser(null);
+      setIsAuthenticated(false);
+    };
+    window.addEventListener('campushub:session-expired', onExpired);
+    return () => window.removeEventListener('campushub:session-expired', onExpired);
+  }, [queryClient]);
+
   const login = async (data: any) => {
     const response = await axiosInstance.post('/api/v1/auth/login', data);
+    queryClient.clear();
     setAccessToken(response.data.accessToken);
-    await fetchUser();
+    if (!await fetchUser()) throw new Error('Không thể tải thông tin tài khoản');
   };
 
   const register = async (data: any) => {
@@ -100,14 +110,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await axiosInstance.post('/api/v1/auth/logout');
     } finally {
       setAccessToken(null);
+      queryClient.clear();
       setUser(null);
       setIsAuthenticated(false);
     }
   };
 
-  const verifyEmail = async (token: string) => {
+  const verifyEmail = useCallback(async (token: string) => {
     await axiosInstance.post('/api/v1/auth/verify-email', { token });
-  };
+  }, []);
 
   const forgotPassword = async (email: string) => {
     await axiosInstance.post('/api/v1/auth/forgot-password', { email });

@@ -24,6 +24,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const productSchema = z.object({
   title: z
     .string()
+    .trim()
     .min(1, 'Tiêu đề sản phẩm không được để trống')
     .max(150, 'Tiêu đề tối đa 150 ký tự'),
   description: z
@@ -60,6 +61,7 @@ export const ProductForm = () => {
     data: existingProduct,
     isLoading: isLoadingProduct,
     refetch: refetchProduct,
+    isError: productLoadFailed,
   } = useQuery<Product>({
     queryKey: ['product', id],
     queryFn: () => axiosInstance.get(`/api/v1/products/${id}`).then((res) => res.data),
@@ -116,6 +118,7 @@ export const ProductForm = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product', id] });
       queryClient.invalidateQueries({ queryKey: ['my-products'] });
       navigate('/marketplace/my-listings');
     },
@@ -135,6 +138,10 @@ export const ProductForm = () => {
     );
   }
 
+  if (isEditing && (productLoadFailed || !existingProduct || existingProduct.owner.username !== user?.username || existingProduct.status === 'SOLD')) {
+    return <div role="alert" className="p-8 text-center">Không thể chỉnh sửa tin đăng này. <Link to="/marketplace/my-listings">Quay lại tin đăng</Link></div>;
+  }
+
   if (isUnverified) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
@@ -143,7 +150,7 @@ export const ProductForm = () => {
         </div>
         <h1 className="text-2xl font-bold text-slate-900">Yêu cầu xác minh danh tính (CCCD)</h1>
         <p className="mt-2 text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-          Nhằm bảo vệ an toàn cho các giao dịch qua mạng lưới Smart Locker sinh viên, mọi thành viên cần hoàn tất xác thực Căn cước công dân trước khi đăng bán sản phẩm.
+          Nhằm bảo vệ an toàn cho các giao dịch qua mạng lưới Smart Locker, mọi thành viên cần hoàn tất xác thực Căn cước công dân trước khi đăng bán sản phẩm.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
           <Link

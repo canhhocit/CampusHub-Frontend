@@ -23,7 +23,8 @@ import { ProductCard } from '../../components/ProductCard';
 
 export const MarketplaceList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = parseInt(searchParams.get('page') || '0', 10);
+  const rawPage = Number(searchParams.get('page') || 0);
+  const page = Number.isSafeInteger(rawPage) && rawPage >= 0 ? rawPage : 0;
   const categoryId = searchParams.get('categoryId') || '';
   const search = searchParams.get('search') || '';
   const sort = searchParams.get('sort') || 'createdAt';
@@ -206,7 +207,7 @@ export const MarketplaceList = () => {
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Tìm tên sản phẩm/ chủ sở hữu..."
+                placeholder="Tìm tên hoặc mô tả sản phẩm..."
                 className="w-full pl-9 pr-24 py-2 border border-slate-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 bg-slate-50 focus:bg-white transition"
               />
               <Search className="absolute left-3 text-slate-400" size={16} />
@@ -420,9 +421,9 @@ export const MarketplaceList = () => {
               <ShieldCheck size={20} />
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-slate-900">Định Danh Sinh Viên (CCCD)</h4>
+              <h4 className="text-sm font-bold text-slate-900">Xét duyệt danh tính thành viên</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Tất cả người bán đều được yêu cầu xác thực CCCD trước khi đăng bán, loại bỏ tài khoản ảo.
+                Tất cả người bán đều được yêu cầu xác thực CCCD trước khi đăng bán, hỗ trợ đánh giá độ tin cậy của tài khoản.
               </p>
             </div>
           </div>

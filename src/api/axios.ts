@@ -1,6 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
-const RAW_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const RAW_BASE_URL = import.meta.env?.VITE_API_BASE_URL;
 const BASE_URL = RAW_BASE_URL ? RAW_BASE_URL.trim().replace(/\/+$/, '') : 'http://localhost:8080';
 
 export const axiosInstance = axios.create({
@@ -15,8 +15,10 @@ const TOKEN_STORAGE_KEY = 'campushub_access_token';
 
 let accessToken: string | null =
   typeof window !== 'undefined' ? localStorage.getItem(TOKEN_STORAGE_KEY) : null;
+let tokenVersion = 0;
 
 export const setAccessToken = (token: string | null) => {
+  tokenVersion++;
   accessToken = token;
   if (typeof window !== 'undefined') {
     if (token) {
@@ -34,22 +36,30 @@ export const getAccessToken = () => {
   return accessToken;
 };
 
-// Single-flight refresh token pattern
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (error: any) => void;
-}> = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token as string);
-    }
-  });
-  failedQueue = [];
+// All callers, including AuthContext bootstrap, share rotation of the HttpOnly cookie.
+let refreshPromise: Promise<string> | null = null;
+export const refreshAccessToken = (): Promise<string> => {
+  if (!refreshPromise) {
+    const startedVersion = tokenVersion;
+    refreshPromise = axiosInstance.post('/api/v1/auth/refresh')
+      .then(({ data }) => {
+        if (tokenVersion !== startedVersion) throw new Error('Session changed during refresh');
+        if (typeof data.accessToken !== 'string' || !data.accessToken) {
+          throw new Error('Invalid refresh response');
+        }
+        setAccessToken(data.accessToken);
+        return data.accessToken as string;
+      })
+      .catch((error: AxiosError) => {
+        if (error.response && [401, 403].includes(error.response.status)) {
+          setAccessToken(null);
+          window.dispatchEvent(new Event('campushub:session-expired'));
+        }
+        throw error;
+      })
+      .finally(() => { refreshPromise = null; });
+  }
+  return refreshPromise;
 };
 
 axiosInstance.interceptors.request.use(
@@ -72,50 +82,24 @@ axiosInstance.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      // Prevent infinite loop if the refresh itself returns 401
-      if (originalRequest.url === '/api/v1/auth/refresh') {
-        setAccessToken(null);
-        return Promise.reject(error);
-      }
-
-      if (isRefreshing) {
-        // If already refreshing, add to queue
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = 'Bearer ' + token;
-            }
-            return axiosInstance(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const response = await axiosInstance.post('/api/v1/auth/refresh');
-        const newToken = response.data.accessToken;
-        setAccessToken(newToken);
-        processQueue(null, newToken);
-
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = 'Bearer ' + newToken;
-        }
-        return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        setAccessToken(null);
-        // Force redirect to login on failure could be handled here or in AuthContext
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+    const authEndpoint = originalRequest?.url?.startsWith('/api/v1/auth/')
+      && originalRequest.url !== '/api/v1/auth/me';
+    if (error.response?.status !== 401 || !originalRequest || originalRequest._retry || authEndpoint) {
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    originalRequest._retry = true;
+    try {
+      // A delayed failure may belong to the token that another request already refreshed.
+      const currentToken = getAccessToken();
+      const usedToken = originalRequest.headers?.Authorization;
+      const token = currentToken && usedToken !== `Bearer ${currentToken}`
+        ? currentToken
+        : await refreshAccessToken();
+      originalRequest.headers.Authorization = `Bearer ${token}`;
+      return axiosInstance(originalRequest);
+    } catch (refreshError) {
+      return Promise.reject(refreshError);
+    }
   }
 );

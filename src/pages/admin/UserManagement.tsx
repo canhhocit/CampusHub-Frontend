@@ -63,6 +63,17 @@ export const UserManagement = () => {
     },
   });
 
+  const reviewIdentityMutation = useMutation({
+    mutationFn: ({ id, approved }: { id: number; approved: boolean }) =>
+      axiosInstance.patch<UserManagementItem>(`/api/v1/admin/users/${id}/identity`, { approved }),
+    onSuccess: ({ data }) => {
+      setSelectedCccdUser(data);
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
+    },
+    onError: (err: any) => alert(err.response?.data?.message || 'Không thể duyệt hồ sơ'),
+  });
+
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -203,7 +214,7 @@ export const UserManagement = () => {
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        {u.identityVerified ? (
+                        {u.identityVerified || u.citizenId ? (
                           <button
                             type="button"
                             onClick={() => {
@@ -214,7 +225,7 @@ export const UserManagement = () => {
                             title="Nhấn để xem chi tiết ảnh và số CCCD"
                           >
                             <CheckCircle2 size={13} className="text-emerald-600" />
-                            {u.citizenId ? `${u.citizenId.substring(0, 4)}****${u.citizenId.substring(8)}` : 'Đã xác minh'}
+                            {u.identityVerified ? 'Đã xác minh' : u.identityReviewStatus === 'REJECTED' ? 'Chưa chấp thuận' : 'Chờ xét duyệt'}
                           </button>
                         ) : (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 border border-gray-200">
@@ -404,6 +415,16 @@ export const UserManagement = () => {
             </div>
 
             <div className="space-y-4 text-sm">
+              {selectedCccdUser.citizenId && selectedCccdUser.idCardFrontUrl && (
+                <div className="flex gap-3">
+                  <button disabled={reviewIdentityMutation.isPending || !!selectedCccdUser.identityVerified}
+                    onClick={() => { if (window.confirm('Xác nhận đã kiểm tra hồ sơ và phê duyệt danh tính?')) reviewIdentityMutation.mutate({ id: selectedCccdUser.id, approved: true }); }}
+                    className="rounded-xl bg-emerald-600 px-4 py-2 text-white disabled:opacity-50">Phê duyệt danh tính</button>
+                  <button disabled={reviewIdentityMutation.isPending}
+                    onClick={() => { if (window.confirm('Từ chối hoặc thu hồi xác minh danh tính?')) reviewIdentityMutation.mutate({ id: selectedCccdUser.id, approved: false }); }}
+                    className="rounded-xl bg-red-600 px-4 py-2 text-white disabled:opacity-50">Từ chối / Thu hồi</button>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3 p-3.5 bg-gray-50 rounded-xl border border-gray-200">
                 <div>
                   <span className="text-xs text-gray-500 block">Số CCCD</span>
@@ -416,7 +437,7 @@ export const UserManagement = () => {
                   <span className="text-gray-700 font-medium text-xs">
                     {selectedCccdUser.identityVerifiedAt
                       ? new Date(selectedCccdUser.identityVerifiedAt).toLocaleString('vi-VN')
-                      : 'Hệ thống xác thực'}
+                      : 'Chưa được phê duyệt'}
                   </span>
                 </div>
               </div>

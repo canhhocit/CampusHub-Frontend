@@ -376,7 +376,7 @@ export const AdminDashboard = () => {
                   <div className="mt-3 text-2xl font-extrabold text-blue-950">
                     {stats.orderStats.awaitingDepositOrders}
                   </div>
-                  <div className="text-[11px] text-blue-700 mt-1">Đã cấp mã gửi đồ OTP</div>
+                  <div className="text-[11px] text-blue-700 mt-1">Đã phân ngăn tủ, chờ người bán gửi hàng</div>
                 </div>
 
                 {/* 3. Ready For Pickup */}

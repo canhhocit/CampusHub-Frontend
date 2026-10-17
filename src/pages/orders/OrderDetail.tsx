@@ -49,11 +49,15 @@ export const OrderDetail = () => {
     mutationFn: (code: string) =>
       axiosInstance.post(`/api/v1/orders/${id}/pickup`, { pickupCode: code }),
     onSuccess: () => {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
       setPickupErrorMessage('');
       queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
     },
     onError: (err: any) => {
+      queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
       setPickupErrorMessage(err.response?.data?.message || 'Mã nhận hàng không chính xác');
     },
   });
@@ -62,6 +66,9 @@ export const OrderDetail = () => {
   const depositMutation = useMutation({
     mutationFn: () => axiosInstance.post(`/api/v1/orders/${id}/deposit`),
     onSuccess: () => {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
       queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
       queryClient.invalidateQueries({ queryKey: ['selling-orders'] });
     },
@@ -74,6 +81,9 @@ export const OrderDetail = () => {
   const cancelMutation = useMutation({
     mutationFn: () => axiosInstance.post(`/api/v1/orders/${id}/cancel`),
     onSuccess: () => {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
       queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
     },
@@ -178,6 +188,9 @@ export const OrderDetail = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-6 sm:py-8 font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+          Chế độ mô phỏng Smart Locker: thao tác gửi và nhận hàng chưa điều khiển thiết bị vật lý.
+        </p>
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-slate-500">
           <Link to="/" className="hover:text-purple-600">

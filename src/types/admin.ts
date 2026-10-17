@@ -69,6 +69,7 @@ export interface UserManagementItem {
   status: AdminUserStatus;
   dateOfBirth?: string | null;
   identityVerified?: boolean;
+  identityReviewStatus?: 'NOT_SUBMITTED' | 'PENDING' | 'APPROVED' | 'REJECTED';
   citizenId?: string | null;
   idCardFrontUrl?: string | null;
   idCardBackUrl?: string | null;

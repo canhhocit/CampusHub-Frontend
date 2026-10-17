@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { AlertCircle, CheckCircle } from 'lucide-react';
@@ -10,6 +10,8 @@ export const VerifyEmail = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const { verifyEmail } = useAuth();
 
+  const pendingVerification = useRef<{ token: string; promise: Promise<void> } | null>(null);
+
   useEffect(() => {
     if (!token) {
       setStatus('error');
@@ -19,7 +21,10 @@ export const VerifyEmail = () => {
 
     const verify = async () => {
       try {
-        await verifyEmail(token);
+        if (pendingVerification.current?.token !== token) {
+          pendingVerification.current = { token, promise: verifyEmail(token) };
+        }
+        await pendingVerification.current.promise;
         setStatus('success');
       } catch (err: any) {
         setStatus('error');

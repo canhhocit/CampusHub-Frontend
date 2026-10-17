@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
 import type { Product } from '../../types/marketplace';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -18,6 +18,7 @@ import {
 export const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, isAuthenticated } = useAuth();
 
   const { data: product, isLoading, error } = useQuery<Product>({
@@ -33,6 +34,8 @@ export const ProductDetail = () => {
   const createOrderMutation = useMutation({
     mutationFn: () => axiosInstance.post('/api/v1/orders', { productId: Number(id) }).then((res) => res.data),
     onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['selling-orders'] });
       navigate(`/orders/${data.id}`);
     },
     onError: (err: any) => {
@@ -51,6 +54,7 @@ export const ProductDetail = () => {
   });
 
   const handleOrderClick = () => {
+    if (createOrderMutation.isPending) return;
     if (!isAuthenticated) {
       navigate('/login');
       return;

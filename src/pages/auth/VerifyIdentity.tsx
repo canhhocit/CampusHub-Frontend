@@ -26,10 +26,11 @@ export const VerifyIdentity = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const isVerified = user?.identityVerified || isSuccess;
+  const isVerified = user?.identityVerified;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setErrorMessage('');
 
     const cleanCitizenId = citizenId.trim();
@@ -77,7 +78,7 @@ export const VerifyIdentity = () => {
             &larr; Quay lại Chợ
           </Link>
           <span className="inline-flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-            <Lock size={13} className="text-gray-400" /> Kết nối bảo mật SSL
+            <Lock size={13} className="text-gray-400" /> Hồ sơ xác minh danh tính
           </span>
         </div>
 
@@ -98,6 +99,16 @@ export const VerifyIdentity = () => {
             </div>
           </div>
 
+          {(isSuccess || user?.identityReviewStatus === 'PENDING') && !isVerified && (
+            <p role="status" className="mb-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">
+              Hồ sơ đã được gửi và đang chờ quản trị viên xét duyệt. Bạn chưa được xác minh danh tính.
+            </p>
+          )}
+          {user?.identityReviewStatus === 'REJECTED' && !isSuccess && (
+            <p role="alert" className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-800">
+              Hồ sơ chưa được chấp thuận hoặc đã bị thu hồi xác minh. Bạn có thể cập nhật và gửi lại hồ sơ để xét duyệt.
+            </p>
+          )}
           {/* If Already Verified */}
           {isVerified ? (
             <div className="text-center py-8 animate-in fade-in duration-300">

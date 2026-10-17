@@ -91,6 +91,9 @@ export const BuyingOrders = () => {
   const cancelMutation = useMutation({
     mutationFn: (id: number) => axiosInstance.post(`/api/v1/orders/${id}/cancel`),
     onSuccess: () => {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
     },
     onError: (err: any) => {

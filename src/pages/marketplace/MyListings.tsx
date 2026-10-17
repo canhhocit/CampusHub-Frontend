@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
 import type { PageResponse, Product, ProductStatus } from '../../types/marketplace';
@@ -17,13 +17,14 @@ import { UserNavTabs } from '../../components/UserNavTabs';
 
 export const MyListings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const page = parseInt(searchParams.get('page') || '0', 10);
+  const rawPage = Number(searchParams.get('page') || 0);
+  const page = Number.isSafeInteger(rawPage) && rawPage >= 0 ? rawPage : 0;
   const [statusTab, setStatusTab] = useState<'ALL' | ProductStatus>('ALL');
   const queryClient = useQueryClient();
 
   const { data: pageData, isLoading, isError, refetch } = useQuery<PageResponse<Product>>({
-    queryKey: ['my-products', page],
-    queryFn: () => axiosInstance.get('/api/v1/products/me', { params: { page, size: 15 } }).then((res) => res.data),
+    queryKey: ['my-products', page, statusTab],
+    queryFn: () => axiosInstance.get('/api/v1/products/me', { params: { page, size: 15, status: statusTab === 'ALL' ? undefined : statusTab } }).then((res) => res.data),
   });
 
   const statusMutation = useMutation({
@@ -32,6 +33,7 @@ export const MyListings = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-products'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product'] });
     },
     onError: (err: any) => {
       if (err.response?.status === 409) {
@@ -50,11 +52,11 @@ export const MyListings = () => {
     }
   };
 
-  const filteredProducts = useMemo(() => {
-    if (!pageData?.content) return [];
-    if (statusTab === 'ALL') return pageData.content;
-    return pageData.content.filter((p) => p.status === statusTab);
-  }, [pageData?.content, statusTab]);
+  const filteredProducts = pageData?.content ?? [];
+  const changeStatusTab = (status: 'ALL' | ProductStatus) => {
+    setStatusTab(status);
+    setSearchParams({ page: '0' });
+  };
 
   const renderStatusBadge = (status: ProductStatus) => {
     switch (status) {
@@ -109,17 +111,17 @@ export const MyListings = () => {
           {/* Status Filter Tabs (Oreka Style) */}
           <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs text-xs font-bold">
             <button
-              onClick={() => setStatusTab('ALL')}
+              onClick={() => changeStatusTab('ALL')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'ALL'
                   ? 'bg-purple-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Tất cả ({pageData?.content?.length || 0})
+              Tất cả ({pageData?.totalElements || 0})
             </button>
             <button
-              onClick={() => setStatusTab('ACTIVE')}
+              onClick={() => changeStatusTab('ACTIVE')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'ACTIVE'
                   ? 'bg-purple-600 text-white shadow-xs'
@@ -129,7 +131,7 @@ export const MyListings = () => {
               Đang bán
             </button>
             <button
-              onClick={() => setStatusTab('HIDDEN')}
+              onClick={() => changeStatusTab('HIDDEN')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'HIDDEN'
                   ? 'bg-purple-600 text-white shadow-xs'
@@ -139,7 +141,7 @@ export const MyListings = () => {
               Đang ẩn
             </button>
             <button
-              onClick={() => setStatusTab('SOLD')}
+              onClick={() => changeStatusTab('SOLD')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'SOLD'
                   ? 'bg-purple-600 text-white shadow-xs'
@@ -252,13 +254,13 @@ export const MyListings = () => {
                           <Eye size={12} /> Xem
                         </Link>
 
-                        <Link
+                        {p.status !== 'SOLD' && <Link
                           to={`/marketplace/edit/${p.id}`}
                           className="inline-flex items-center gap-1 px-2.5 py-1 text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 rounded-lg transition"
                           title="Chỉnh sửa"
                         >
                           <Edit3 size={12} /> Sửa
-                        </Link>
+                        </Link>}
 
                         {p.status === 'ACTIVE' && (
                           <button
