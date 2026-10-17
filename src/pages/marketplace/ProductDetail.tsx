@@ -18,6 +18,7 @@ import {
   X,
   Play,
   Film,
+  MapPin,
 } from 'lucide-react';
 import { getMediaUrl } from '../../api/cloudinary';
 
@@ -372,9 +373,15 @@ export const ProductDetail = () => {
                       <Clock size={13} /> Đăng ngày {formatDate(product.createdAt)}
                     </span>
                     <span>•</span>
-                    <span className="inline-flex items-center gap-1 text-slate-700 font-medium">
-                      <Lock size={12} /> Hỗ trợ Smart Locker
-                    </span>
+                    {product.locker ? (
+                      <span className="inline-flex items-center gap-1 text-[#eb6e34] font-semibold bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
+                        <MapPin size={12} /> {product.locker.name} ({product.locker.location})
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-slate-700 font-medium">
+                        <Lock size={12} /> Hỗ trợ Smart Locker
+                      </span>
+                    )}
                   </div>
                 </div>
 

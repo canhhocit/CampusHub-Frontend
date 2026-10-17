@@ -44,17 +44,22 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         )}
 
         {/* Top Badges */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 items-start">
-          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-900/70 backdrop-blur-xs text-white shadow-2xs">
+        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
+          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-900/70 backdrop-blur-xs text-white shadow-2xs truncate max-w-[120px]">
             {product.category?.name || 'Khác'}
           </span>
+          {product.listingType === 'BOTH' && (
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-600/90 backdrop-blur-xs text-white shadow-2xs">
+              Cho thuê
+            </span>
+          )}
         </div>
 
-        {/* Smart Locker Delivery Pill */}
-        <div className="absolute bottom-2.5 left-2.5">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-[#eb6e34]/90 backdrop-blur-xs text-white shadow-2xs">
-            <Lock size={10} className="text-white" />
-            Nhận tại Locker
+        {/* Smart Locker Delivery Pill with Location */}
+        <div className="absolute bottom-2.5 left-2.5 right-2.5 pointer-events-none">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-[#eb6e34]/90 backdrop-blur-xs text-white shadow-2xs max-w-full truncate">
+            <Lock size={10} className="text-white shrink-0" />
+            <span className="truncate">{product.locker?.name || 'Smart Locker'}</span>
           </span>
         </div>
 
@@ -84,10 +89,15 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           </h3>
 
           {/* Price */}
-          <div className="mt-1.5 flex items-baseline gap-1.5">
+          <div className="mt-1.5 flex flex-wrap items-baseline gap-1.5">
             <span className="text-base sm:text-lg font-bold text-[#eb6e34] tracking-tight">
               {formatPrice(product.price)}
             </span>
+            {product.listingType === 'BOTH' && product.rentPricePerDay && (
+              <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                Thuê: {formatPrice(product.rentPricePerDay)}/ngày
+              </span>
+            )}
           </div>
         </div>
 

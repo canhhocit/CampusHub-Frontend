@@ -46,6 +46,7 @@ const productSchema = z.object({
   categoryId: z
     .number()
     .min(1, 'Vui lòng chọn danh mục sản phẩm'),
+  lockerId: z.number().optional().nullable(),
   imageUrl: z
     .string()
     .url('Đường dẫn ảnh phải là URL hợp lệ')
@@ -65,6 +66,12 @@ export const ProductForm = () => {
     queryKey: ['categories'],
     queryFn: () => axiosInstance.get('/api/v1/categories').then((res) => res.data),
   });
+
+  const { data: lockersPage } = useQuery<{ content: Array<{ id: number; name: string; location: string }> }>({
+    queryKey: ['lockers-form'],
+    queryFn: () => axiosInstance.get('/api/v1/lockers?size=50').then((res) => res.data),
+  });
+  const lockers = lockersPage?.content || [];
 
   const {
     data: existingProduct,
@@ -94,6 +101,7 @@ export const ProductForm = () => {
       rentPricePerDay: 0,
       depositAmount: 0,
       categoryId: 0,
+      lockerId: 0,
       imageUrl: '',
     },
   });
@@ -135,6 +143,7 @@ export const ProductForm = () => {
         rentPricePerDay: existingProduct.rentPricePerDay || 0,
         depositAmount: existingProduct.depositAmount || 0,
         categoryId: existingProduct.category.id,
+        lockerId: existingProduct.locker?.id || 0,
         imageUrl: existingProduct.imageUrl || '',
       });
       setDetailImages(existingProduct.detailImageUrls || []);
@@ -219,6 +228,7 @@ export const ProductForm = () => {
         listingType: data.listingType,
         rentPricePerDay: (data.listingType === 'RENT' || data.listingType === 'BOTH') ? data.rentPricePerDay : null,
         depositAmount: (data.listingType === 'RENT' || data.listingType === 'BOTH') ? data.depositAmount : null,
+        lockerId: data.lockerId && data.lockerId > 0 ? data.lockerId : null,
         imageUrl: data.imageUrl || null,
         detailImageUrls: detailImages,
         videoUrl: videoUrl || null,
@@ -384,6 +394,24 @@ export const ProductForm = () => {
               {errors.categoryId && (
                 <p className="text-rose-600 text-[11px] mt-1 font-medium">{errors.categoryId.message}</p>
               )}
+            </div>
+
+            {/* Smart Locker Select */}
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">
+                Tủ Smart Locker gửi hàng (Trạm giao nhận)
+              </label>
+              <select
+                {...register('lockerId', { valueAsNumber: true })}
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 focus:outline-hidden bg-white"
+              >
+                <option value={0}>-- Chọn tủ gửi đồ thuận tiện nhất --</option>
+                {lockers.map((lk) => (
+                  <option key={lk.id} value={lk.id}>
+                    {lk.name} ({lk.location})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

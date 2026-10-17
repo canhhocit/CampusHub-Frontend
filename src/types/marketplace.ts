@@ -21,6 +21,12 @@ export interface Product {
     detailImageUrls?: string[];
     status: ProductStatus;
     category: Category;
+    locker?: {
+        id: number;
+        code: string;
+        name: string;
+        location: string;
+    } | null;
     owner: {
         id: number;
         username?: string;
@@ -50,6 +56,7 @@ export interface ProductCreatePayload {
     videoUrl?: string | null;
     detailImageUrls?: string[];
     categoryId: number;
+    lockerId?: number | null;
 }
 
 export interface ProductUpdatePayload {
@@ -63,6 +70,7 @@ export interface ProductUpdatePayload {
     videoUrl?: string | null;
     detailImageUrls?: string[];
     categoryId?: number;
+    lockerId?: number | null;
 }
 
 export interface PageResponse<T> {
