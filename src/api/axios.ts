@@ -1,7 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 const RAW_BASE_URL = import.meta.env?.VITE_API_BASE_URL;
-const BASE_URL = RAW_BASE_URL ? RAW_BASE_URL.trim().replace(/\/+$/, '') : 'http://localhost:8080';
+export const BASE_URL = RAW_BASE_URL ? RAW_BASE_URL.trim().replace(/\/+$/, '') : 'http://localhost:8080';
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,

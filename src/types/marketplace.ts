@@ -17,6 +17,8 @@ export interface Product {
     rentPricePerDay?: number | null;
     depositAmount?: number | null;
     imageUrl: string;
+    videoUrl?: string | null;
+    detailImageUrls?: string[];
     status: ProductStatus;
     category: Category;
     owner: {
@@ -28,6 +30,39 @@ export interface Product {
     createdAt: string;
     updatedAt: string;
     version: number;
+}
+
+export interface ProductMediaSettings {
+    maxProductImages: number;
+    maxProductVideos: number;
+    allowProductVideo: boolean;
+    maxVideoSizeMb: number;
+}
+
+export interface ProductCreatePayload {
+    title: string;
+    description: string;
+    price: number;
+    listingType?: ListingType;
+    rentPricePerDay?: number | null;
+    depositAmount?: number | null;
+    imageUrl: string;
+    videoUrl?: string | null;
+    detailImageUrls?: string[];
+    categoryId: number;
+}
+
+export interface ProductUpdatePayload {
+    title?: string;
+    description?: string;
+    price?: number;
+    listingType?: ListingType;
+    rentPricePerDay?: number | null;
+    depositAmount?: number | null;
+    imageUrl?: string;
+    videoUrl?: string | null;
+    detailImageUrls?: string[];
+    categoryId?: number;
 }
 
 export interface PageResponse<T> {

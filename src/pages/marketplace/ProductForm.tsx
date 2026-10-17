@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
-import type { Category, Product } from '../../types/marketplace';
+import type { Category, Product, ProductMediaSettings } from '../../types/marketplace';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -17,9 +17,15 @@ import {
   DollarSign,
   ImageIcon,
   X,
+  Video,
+  Film,
+  UploadCloud,
+  Trash2,
+  Loader2,
 } from 'lucide-react';
 import { ImageUpload } from '../../components/ImageUpload';
 import { useAuth } from '../../contexts/AuthContext';
+import { uploadImageToCloudinary, uploadVideoToCloudinary, getMediaUrl } from '../../api/cloudinary';
 
 const productSchema = z.object({
   title: z
@@ -97,6 +103,25 @@ export const ProductForm = () => {
   const currentImageUrl = watch('imageUrl');
   const currentPrice = watch('price') || 0;
   const currentListingType = watch('listingType') || 'SALE';
+  const [detailImages, setDetailImages] = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState<string>('');
+  const [isUploadingDetailImage, setIsUploadingDetailImage] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [mediaError, setMediaError] = useState<string | null>(null);
+
+  const detailImageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: mediaSettings } = useQuery<ProductMediaSettings>({
+    queryKey: ['marketplace-media-settings'],
+    queryFn: () => axiosInstance.get('/api/v1/marketplace/media-settings').then((res) => res.data),
+  });
+
+  const maxImages = mediaSettings?.maxProductImages ?? 6;
+  const allowVideo = mediaSettings?.allowProductVideo ?? true;
+  const maxVideos = mediaSettings?.maxProductVideos ?? 1;
+  const maxVideoSizeMb = mediaSettings?.maxVideoSizeMb ?? 50;
+
   const currentRentPrice = watch('rentPricePerDay') || 0;
   const currentDeposit = watch('depositAmount') || 0;
 
@@ -112,8 +137,80 @@ export const ProductForm = () => {
         categoryId: existingProduct.category.id,
         imageUrl: existingProduct.imageUrl || '',
       });
+      setDetailImages(existingProduct.detailImageUrls || []);
+      setVideoUrl(existingProduct.videoUrl || '');
     }
   }, [isEditing, existingProduct, reset]);
+
+  const handleDetailImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setMediaError(null);
+
+    const remainingSlots = maxImages - detailImages.length;
+    if (remainingSlots <= 0) {
+      setMediaError(`Bạn đã tải đủ số lượng ảnh mô tả tối đa (${maxImages} ảnh).`);
+      return;
+    }
+
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+    setIsUploadingDetailImage(true);
+
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of filesToUpload) {
+        const url = await uploadImageToCloudinary(file);
+        uploadedUrls.push(url);
+      }
+      setDetailImages((prev) => [...prev, ...uploadedUrls]);
+    } catch (err: any) {
+      setMediaError(err.message || 'Lỗi khi tải ảnh mô tả lên.');
+    } finally {
+      setIsUploadingDetailImage(false);
+      if (detailImageInputRef.current) {
+        detailImageInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveDetailImage = (indexToRemove: number) => {
+    setDetailImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMediaError(null);
+
+    if (!allowVideo || maxVideos <= 0) {
+      setMediaError('Tính năng upload video hiện đang tạm khóa bởi Quản trị viên.');
+      return;
+    }
+
+    const maxSizeBytes = maxVideoSizeMb * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      setMediaError(`Dung lượng video (${(file.size / (1024 * 1024)).toFixed(1)}MB) vượt quá giới hạn ${maxVideoSizeMb}MB do Quản trị viên quy định.`);
+      return;
+    }
+
+    setIsUploadingVideo(true);
+
+    try {
+      const url = await uploadVideoToCloudinary(file);
+      setVideoUrl(url);
+    } catch (err: any) {
+      setMediaError(err.message || 'Không thể tải video lên.');
+    } finally {
+      setIsUploadingVideo(false);
+      if (videoInputRef.current) {
+        videoInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveVideo = () => {
+    setVideoUrl('');
+  };
 
   const mutation = useMutation({
     mutationFn: (data: ProductFormData) => {
@@ -123,6 +220,8 @@ export const ProductForm = () => {
         rentPricePerDay: (data.listingType === 'RENT' || data.listingType === 'BOTH') ? data.rentPricePerDay : null,
         depositAmount: (data.listingType === 'RENT' || data.listingType === 'BOTH') ? data.depositAmount : null,
         imageUrl: data.imageUrl || null,
+        detailImageUrls: detailImages,
+        videoUrl: videoUrl || null,
         version: existingProduct?.version,
       };
       if (isEditing) {
@@ -417,43 +516,216 @@ export const ProductForm = () => {
             </div>
           </div>
 
-          {/* Section 3: Hình ảnh & Mô tả chi tiết */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <ImageIcon size={14} className="text-purple-600" />
-              3. Hình ảnh & Mô tả chi tiết
-            </h2>
+          {/* Section 3: Hình ảnh & Video mô tả chi tiết */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <ImageIcon size={14} className="text-purple-600" />
+                3. Hình ảnh & Video mô tả sản phẩm
+              </h2>
+              <span className="text-[11px] text-slate-500 font-medium">
+                Tối đa {maxImages} ảnh mô tả {allowVideo ? `• 1 video (<${maxVideoSizeMb}MB)` : ''}
+              </span>
+            </div>
 
-            {/* Image Upload Component */}
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Hình ảnh sản phẩm
-              </label>
-              <ImageUpload
-                value={currentImageUrl || ''}
-                onChange={(url) => setValue('imageUrl', url)}
-              />
-              {currentImageUrl && (
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-[11px] text-slate-500 truncate max-w-sm">
-                    {currentImageUrl}
-                  </span>
+            {/* Error Banner for Media */}
+            {mediaError && (
+              <div className="p-3.5 bg-rose-50 text-rose-800 rounded-2xl border border-rose-200 flex items-center justify-between text-xs font-medium">
+                <div className="flex items-center gap-2">
+                  <AlertCircle size={16} className="shrink-0 text-rose-600" />
+                  <span>{mediaError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMediaError(null)}
+                  className="p-1 hover:bg-rose-100 rounded-lg text-rose-600 transition"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+
+            {/* 3.1: Cover Image (Ảnh biểu trưng) */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-700 block">
+                  Ảnh biểu trưng (Cover Image) <span className="text-slate-400 font-normal">- Hiển thị trên danh sách tìm kiếm</span>
+                </label>
+                {currentImageUrl && (
                   <button
                     type="button"
                     onClick={() => setValue('imageUrl', '')}
                     className="text-rose-600 text-xs font-bold hover:underline flex items-center gap-0.5"
                   >
-                    <X size={12} /> Xóa ảnh
+                    <Trash2 size={12} /> Xóa ảnh bìa
                   </button>
+                )}
+              </div>
+              <ImageUpload
+                value={currentImageUrl || ''}
+                onChange={(url) => setValue('imageUrl', url)}
+              />
+            </div>
+
+            {/* 3.2: Gallery Images (Ảnh mô tả chi tiết) */}
+            <div className="space-y-3 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block">
+                    Ảnh mô tả chi tiết (Gallery Images)
+                  </label>
+                  <p className="text-[11px] text-slate-400">
+                    Thêm các góc chụp khác, phụ kiện đi kèm hoặc chi tiết linh kiện
+                  </p>
+                </div>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">
+                  {detailImages.length} / {maxImages} ảnh
+                </span>
+              </div>
+
+              {/* Thumbnails grid */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                {detailImages.map((imgUrl, index) => (
+                  <div
+                    key={index}
+                    className="group relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-2xs"
+                  >
+                    <img
+                      src={getMediaUrl(imgUrl)}
+                      alt={`Ảnh mô tả ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-1 left-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                      #{index + 1}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDetailImage(index)}
+                      className="absolute top-1 right-1 p-1 bg-rose-600 text-white rounded-md shadow-xs opacity-90 hover:opacity-100 hover:scale-105 transition"
+                      title="Xóa ảnh này"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Upload Button Box */}
+                {detailImages.length < maxImages && (
+                  <div>
+                    <input
+                      ref={detailImageInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      multiple
+                      className="hidden"
+                      onChange={handleDetailImageUpload}
+                    />
+                    <button
+                      type="button"
+                      disabled={isUploadingDetailImage}
+                      onClick={() => detailImageInputRef.current?.click()}
+                      className="w-full aspect-square rounded-xl border-2 border-dashed border-slate-300 hover:border-purple-500 hover:bg-purple-50/40 text-slate-400 hover:text-purple-700 flex flex-col items-center justify-center gap-1.5 transition disabled:opacity-50"
+                    >
+                      {isUploadingDetailImage ? (
+                        <>
+                          <Loader2 size={20} className="animate-spin text-purple-600" />
+                          <span className="text-[10px] font-bold text-purple-600">Đang tải...</span>
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud size={20} />
+                          <span className="text-[10px] font-bold">+ Thêm ảnh</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 3.3: Product Video */}
+            <div className="space-y-3 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Video size={14} className="text-purple-600" />
+                    Video thực tế sản phẩm (Tùy chọn)
+                  </label>
+                  <p className="text-[11px] text-slate-400">
+                    {allowVideo
+                      ? `Quay video ngắn 10-30s ngoại quan và chức năng (Tối đa ${maxVideoSizeMb}MB, định dạng MP4/WebM/MOV)`
+                      : 'Tính năng upload video hiện đang tạm đóng bởi Quản trị viên.'}
+                  </p>
+                </div>
+                {videoUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveVideo}
+                    className="text-rose-600 text-xs font-bold hover:underline flex items-center gap-0.5"
+                  >
+                    <Trash2 size={12} /> Xóa video
+                  </button>
+                )}
+              </div>
+
+              {allowVideo && (
+                <div>
+                  {videoUrl ? (
+                    <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 max-h-72 flex items-center justify-center">
+                      <video
+                        src={getMediaUrl(videoUrl)}
+                        controls
+                        className="max-h-72 w-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        ref={videoInputRef}
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime,video/x-matroska"
+                        className="hidden"
+                        onChange={handleVideoUpload}
+                      />
+                      <button
+                        type="button"
+                        disabled={isUploadingVideo}
+                        onClick={() => videoInputRef.current?.click()}
+                        className="w-full py-6 px-4 rounded-2xl border-2 border-dashed border-slate-300 hover:border-purple-500 hover:bg-purple-50/40 text-slate-500 hover:text-purple-700 flex flex-col items-center justify-center gap-2 transition disabled:opacity-50"
+                      >
+                        {isUploadingVideo ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <Loader2 size={24} className="animate-spin text-purple-600" />
+                            <span className="text-xs font-bold text-purple-700">Đang tải video lên hệ thống...</span>
+                            <span className="text-[10px] text-slate-400">Vui lòng chờ trong giây lát</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="p-3 bg-purple-100 text-purple-700 rounded-xl">
+                              <Film size={22} />
+                            </div>
+                            <div className="text-center">
+                              <span className="text-xs font-bold block text-slate-800">
+                                Bấm để tải lên video thực tế
+                              </span>
+                              <span className="text-[11px] text-slate-400 block mt-0.5">
+                                Hỗ trợ MP4, WebM, MOV dung lượng dưới {maxVideoSizeMb}MB
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* Description Textarea */}
-            <div>
+            {/* 3.4: Description Textarea */}
+            <div className="space-y-1.5 pt-2 border-t border-slate-100">
               <div className="flex justify-between items-center mb-1">
                 <label className="text-xs font-bold text-slate-700">
-                  Mô tả sản phẩm
+                  Mô tả chi tiết sản phẩm <span className="text-rose-500">*</span>
                 </label>
                 <span className="text-[11px] text-slate-400">{descValue.length}/2000</span>
               </div>

@@ -159,3 +159,18 @@ export interface UpdateFeeConfigRequest {
   rentalFeeMode: FeeMode;
   rentalFeeValue: number;
 }
+
+export interface ProductMediaSettingsResponse {
+  maxProductImages: number;
+  maxProductVideos: number;
+  allowProductVideo: boolean;
+  maxVideoSizeMb: number;
+}
+
+export interface UpdateProductMediaSettingsRequest {
+  maxProductImages: number;
+  maxProductVideos: number;
+  allowProductVideo: boolean;
+  maxVideoSizeMb: number;
+}
+

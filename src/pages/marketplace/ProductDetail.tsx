@@ -16,7 +16,10 @@ import {
   AlertCircle,
   Calendar,
   X,
+  Play,
+  Film,
 } from 'lucide-react';
+import { getMediaUrl } from '../../api/cloudinary';
 
 export const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +31,9 @@ export const ProductDetail = () => {
   const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
   const [selectedRentalDays, setSelectedRentalDays] = useState<number>(3);
   const [customDays, setCustomDays] = useState<string>('');
+
+  // Media Gallery State
+  const [selectedMedia, setSelectedMedia] = useState<{ type: 'IMAGE' | 'VIDEO'; url: string } | null>(null);
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ['product', id],
@@ -164,6 +170,15 @@ export const ProductDetail = () => {
   const isForSale = product.listingType === 'SALE' || product.listingType === 'BOTH' || !product.listingType;
   const isForRent = product.listingType === 'RENT' || product.listingType === 'BOTH';
 
+  const allImages = [
+    ...(product.imageUrl ? [product.imageUrl] : []),
+    ...(product.detailImageUrls || []),
+  ];
+
+  const currentMedia = selectedMedia || (allImages.length > 0 ? { type: 'IMAGE' as const, url: allImages[0] } : (product.videoUrl ? { type: 'VIDEO' as const, url: product.videoUrl } : null));
+
+  const hasMultipleMedia = allImages.length > 1 || Boolean(product.videoUrl && allImages.length > 0);
+
   return (
     <div className="min-h-screen bg-slate-50 py-6 sm:py-8 font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
@@ -193,62 +208,147 @@ export const ProductDetail = () => {
         <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
             {/* Left Column: Product Imagery (lg:col-span-6) */}
-            <div className="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between bg-slate-50/50">
-              <div className="aspect-square bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative flex items-center justify-center">
-                {product.imageUrl ? (
-                  <img
-                    src={product.imageUrl}
-                    alt={product.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-slate-400 gap-2 p-6 text-center">
-                    <ImageOff size={48} className="text-slate-300" />
-                    <span className="text-xs font-medium">Người bán chưa đính kèm ảnh</span>
-                  </div>
-                )}
-
-                {/* Status Badges Overlay */}
-                <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-purple-700 text-white shadow-xs">
-                    {product.category?.name}
-                  </span>
-                  {product.listingType === 'RENT' && (
-                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-600 text-white shadow-xs">
-                      Cho thuê
-                    </span>
+            <div className="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between bg-slate-50/50 space-y-4">
+              <div className="space-y-4">
+                {/* Main Media Viewer */}
+                <div className="aspect-square bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative flex items-center justify-center shadow-xs">
+                  {currentMedia?.type === 'VIDEO' ? (
+                    <video
+                      src={getMediaUrl(currentMedia.url)}
+                      controls
+                      autoPlay
+                      className="w-full h-full object-contain bg-black"
+                    />
+                  ) : currentMedia?.url ? (
+                    <img
+                      src={getMediaUrl(currentMedia.url)}
+                      alt={product.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-slate-400 gap-2 p-6 text-center">
+                      <ImageOff size={48} className="text-slate-300" />
+                      <span className="text-xs font-medium">Người bán chưa đính kèm ảnh</span>
+                    </div>
                   )}
-                  {product.listingType === 'BOTH' && (
-                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white shadow-xs">
-                      Bán & Cho thuê
+
+                  {/* Status Badges Overlay */}
+                  <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start pointer-events-none">
+                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-purple-700 text-white shadow-xs">
+                      {product.category?.name}
                     </span>
+                    {product.listingType === 'RENT' && (
+                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-600 text-white shadow-xs">
+                        Cho thuê
+                      </span>
+                    )}
+                    {product.listingType === 'BOTH' && (
+                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white shadow-xs">
+                        Bán & Cho thuê
+                      </span>
+                    )}
+                  </div>
+
+                  {product.status === 'SOLD' && (
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center pointer-events-none">
+                      <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-rose-600 text-white shadow-md">
+                        SẢN PHẨM ĐÃ BÁN
+                      </span>
+                    </div>
+                  )}
+
+                  {product.status === 'RENTED' && (
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center pointer-events-none">
+                      <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-purple-600 text-white shadow-md">
+                        SẢN PHẨM ĐANG ĐƯỢC THUÊ
+                      </span>
+                    </div>
+                  )}
+
+                  {product.status === 'HIDDEN' && (
+                    <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center pointer-events-none">
+                      <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-slate-700 text-white shadow-md">
+                        TIN ĐÃ ẨN
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                {product.status === 'SOLD' && (
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center">
-                    <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-rose-600 text-white shadow-md">
-                      SẢN PHẨM ĐÃ BÁN
-                    </span>
-                  </div>
-                )}
+                {/* Thumbnails Gallery Selector */}
+                {hasMultipleMedia && (
+                  <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
+                    {/* Images thumbnails */}
+                    {allImages.map((imgUrl, idx) => {
+                      const isActive = currentMedia?.type === 'IMAGE' && currentMedia.url === imgUrl;
+                      return (
+                        <button
+                          key={`img-${idx}`}
+                          type="button"
+                          onClick={() => setSelectedMedia({ type: 'IMAGE', url: imgUrl })}
+                          className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition ${
+                            isActive
+                              ? 'border-purple-600 ring-2 ring-purple-500/30 scale-102'
+                              : 'border-slate-200 hover:border-purple-300 opacity-80 hover:opacity-100'
+                          }`}
+                        >
+                          <img
+                            src={getMediaUrl(imgUrl)}
+                            alt={`Thumbnail ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          {idx === 0 && (
+                            <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] font-bold text-center py-0.5">
+                              Bìa
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
 
-                {product.status === 'RENTED' && (
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center">
-                    <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-purple-600 text-white shadow-md">
-                      SẢN PHẨM ĐANG ĐƯỢC THUÊ
-                    </span>
-                  </div>
-                )}
-
-                {product.status === 'HIDDEN' && (
-                  <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center">
-                    <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-slate-700 text-white shadow-md">
-                      TIN ĐÃ ẨN
-                    </span>
+                    {/* Video thumbnail if available */}
+                    {product.videoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMedia({ type: 'VIDEO', url: product.videoUrl! })}
+                        className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 bg-slate-900 flex flex-col items-center justify-center text-white transition ${
+                          currentMedia?.type === 'VIDEO'
+                            ? 'border-purple-600 ring-2 ring-purple-500/30 scale-102'
+                            : 'border-slate-200 hover:border-purple-300 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <Play size={20} className="text-purple-400 fill-purple-400" />
+                        <span className="text-[9px] font-bold text-slate-300 mt-1">Video</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
+
+              {/* Video Player Section beneath Left Column if video exists */}
+              {product.videoUrl && (
+                <div className="pt-4 border-t border-slate-200/80">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <Film size={14} className="text-purple-600" />
+                      Video giới thiệu sản phẩm
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMedia({ type: 'VIDEO', url: product.videoUrl! })}
+                      className="text-xs font-bold text-purple-600 hover:text-purple-700 flex items-center gap-1"
+                    >
+                      <Play size={11} className="fill-purple-600" /> Xem trên khung lớn
+                    </button>
+                  </div>
+                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-black aspect-video max-h-48">
+                    <video
+                      src={getMediaUrl(product.videoUrl)}
+                      controls
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right Column: Information, Pricing, Seller & CTAs (lg:col-span-6) */}

@@ -7,6 +7,8 @@ import type {
   AuditAction,
   FeeConfigResponse,
   UpdateFeeConfigRequest,
+  ProductMediaSettingsResponse,
+  UpdateProductMediaSettingsRequest,
 } from '../../types/admin';
 import type { PageResponse } from '../../types/marketplace';
 import { useAuth } from '../../contexts/AuthContext';
@@ -33,6 +35,8 @@ import {
   Layers,
   Coins,
   Sliders,
+  Video,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -115,10 +119,53 @@ export const AdminDashboard = () => {
     setIsFeeModalOpen(true);
   };
 
+  // 4. Product Media Limits Configuration
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const [mediaFormData, setMediaFormData] = useState<UpdateProductMediaSettingsRequest>({
+    maxProductImages: 6,
+    maxProductVideos: 1,
+    allowProductVideo: true,
+    maxVideoSizeMb: 50,
+  });
+
+  const {
+    data: mediaConfig,
+    refetch: refetchMedia,
+  } = useQuery<ProductMediaSettingsResponse>({
+    queryKey: ['admin-media-config'],
+    queryFn: () => axiosInstance.get('/api/v1/admin/settings/media').then((res) => res.data),
+  });
+
+  const updateMediaMutation = useMutation({
+    mutationFn: (data: UpdateProductMediaSettingsRequest) =>
+      axiosInstance.put('/api/v1/admin/settings/media', data).then((res) => res.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-media-config'] });
+      setIsMediaModalOpen(false);
+      alert('Cập nhật giới hạn ảnh và video sản phẩm thành công!');
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.message || 'Không thể cập nhật cấu hình media');
+    },
+  });
+
+  const handleOpenMediaModal = () => {
+    if (mediaConfig) {
+      setMediaFormData({
+        maxProductImages: mediaConfig.maxProductImages,
+        maxProductVideos: mediaConfig.maxProductVideos,
+        allowProductVideo: mediaConfig.allowProductVideo,
+        maxVideoSizeMb: mediaConfig.maxVideoSizeMb,
+      });
+    }
+    setIsMediaModalOpen(true);
+  };
+
   const handleRefreshAll = () => {
     refetchStats();
     refetchLogs();
     refetchFees();
+    refetchMedia();
   };
 
   const isRefreshing = isFetchingStats || isFetchingLogs;
@@ -635,6 +682,114 @@ export const AdminDashboard = () => {
             </div>
           </div>
 
+          {/* PRODUCT MEDIA LIMITS CONFIGURATION CARD */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-blue-100 text-blue-700 rounded-xl">
+                  <ImageIcon size={22} />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">
+                    Cấu hình Giới hạn Đăng Ảnh & Video Sản phẩm (Media Limits)
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Quản lý số lượng ảnh mô tả tối đa, quyền đăng tải video và dung lượng video tải lên hệ thống
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleOpenMediaModal}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
+              >
+                <Sliders size={14} /> Điều chỉnh giới hạn Media
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+              {/* Max Images */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
+                    Ảnh mô tả tối đa
+                  </span>
+                  <div className="text-2xl font-black text-slate-900">
+                    {mediaConfig?.maxProductImages ?? 6} ảnh
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Kèm 1 ảnh biểu trưng
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                  <ImageIcon size={20} />
+                </div>
+              </div>
+
+              {/* Allow Video */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
+                    Tính năng Video
+                  </span>
+                  <div className="text-2xl font-black text-slate-900 flex items-center gap-2">
+                    {mediaConfig?.allowProductVideo ? (
+                      <span className="text-emerald-600 flex items-center gap-1 text-lg">
+                        <CheckCircle2 size={20} /> Cho phép
+                      </span>
+                    ) : (
+                      <span className="text-rose-600 flex items-center gap-1 text-lg">
+                        <XCircle size={20} /> Tạm tắt
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    {mediaConfig?.allowProductVideo ? 'Người bán được đăng video' : 'Chặn tải video'}
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                  <Video size={20} />
+                </div>
+              </div>
+
+              {/* Max Videos */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
+                    Số video tối đa
+                  </span>
+                  <div className="text-2xl font-black text-slate-900">
+                    {mediaConfig?.maxProductVideos ?? 1} video
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Cho mỗi tin đăng
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                  <Video size={20} />
+                </div>
+              </div>
+
+              {/* Max Video Size */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
+                    Dung lượng video
+                  </span>
+                  <div className="text-2xl font-black text-slate-900">
+                    {mediaConfig?.maxVideoSizeMb ?? 50} MB
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Tối đa cho 1 file tải lên
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <Sliders size={20} />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* 4. LIVE AUDIT LOGS REPORT (Nhật ký Hệ thống thời gian thực) */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
@@ -1028,6 +1183,152 @@ export const AdminDashboard = () => {
                   className="flex-1 py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/20"
                 >
                   {updateFeesMutation.isPending ? 'Đang lưu...' : 'Lưu biểu phí'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Product Media Settings Modal */}
+      {isMediaModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-100 text-blue-700 rounded-xl">
+                  <ImageIcon size={18} />
+                </div>
+                <h3 className="font-extrabold text-slate-900 text-base">
+                  Cài đặt Giới hạn Media Sản phẩm
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsMediaModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                updateMediaMutation.mutate(mediaFormData);
+              }}
+              className="space-y-4 text-xs"
+            >
+              {/* Max Images */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  Số lượng ảnh mô tả tối đa (1 - 20):
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  required
+                  value={mediaFormData.maxProductImages}
+                  onChange={(e) =>
+                    setMediaFormData((prev) => ({
+                      ...prev,
+                      maxProductImages: parseInt(e.target.value) || 1,
+                    }))
+                  }
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-[11px] text-slate-400">
+                  Người bán được upload tối đa bấy nhiêu ảnh chi tiết kèm 1 ảnh biểu trưng đại diện.
+                </p>
+              </div>
+
+              {/* Allow Video Toggle */}
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 text-xs">
+                    Cho phép người bán đăng tải video:
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={mediaFormData.allowProductVideo}
+                    onChange={(e) =>
+                      setMediaFormData((prev) => ({
+                        ...prev,
+                        allowProductVideo: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Nếu tắt, form đăng sản phẩm sẽ khóa mục upload video của thành viên.
+                </p>
+              </div>
+
+              {/* Max Videos */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  Số video tối đa mỗi tin đăng (0 - 5):
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="5"
+                  required
+                  value={mediaFormData.maxProductVideos}
+                  onChange={(e) =>
+                    setMediaFormData((prev) => ({
+                      ...prev,
+                      maxProductVideos: parseInt(e.target.value) || 0,
+                    }))
+                  }
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Max Video Size MB */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  Dung lượng video tối đa (MB, 1 - 100):
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    required
+                    value={mediaFormData.maxVideoSizeMb}
+                    onChange={(e) =>
+                      setMediaFormData((prev) => ({
+                        ...prev,
+                        maxVideoSizeMb: parseInt(e.target.value) || 1,
+                      }))
+                    }
+                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-bold">
+                    MB
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Hệ thống từ chối các file video có dung lượng vượt quá giá trị này.
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setIsMediaModalOpen(false)}
+                  className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateMediaMutation.isPending}
+                  className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20"
+                >
+                  {updateMediaMutation.isPending ? 'Đang lưu...' : 'Lưu cài đặt'}
                 </button>
               </div>
             </form>
