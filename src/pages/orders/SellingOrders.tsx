@@ -35,16 +35,16 @@ const statusConfig: Record<
   },
   AWAITING_DEPOSIT: {
     label: 'Cần gửi hàng vào tủ',
-    bg: 'bg-blue-50',
-    text: 'text-blue-800',
-    border: 'border-blue-200 font-bold',
+    bg: 'bg-slate-100',
+    text: 'text-slate-800',
+    border: 'border-slate-200 font-semibold',
     icon: Package,
   },
   READY_FOR_PICKUP: {
     label: 'Đang chờ người mua lấy',
-    bg: 'bg-purple-50',
-    text: 'text-purple-800',
-    border: 'border-purple-200',
+    bg: 'bg-slate-100',
+    text: 'text-slate-800',
+    border: 'border-slate-200',
     icon: Lock,
   },
   COMPLETED: {
@@ -70,30 +70,30 @@ const statusConfig: Record<
   },
   EXPIRED: {
     label: 'Quá hạn nhận (Chờ xử lý)',
-    bg: 'bg-orange-50',
-    text: 'text-orange-800',
-    border: 'border-orange-200',
+    bg: 'bg-amber-50',
+    text: 'text-amber-800',
+    border: 'border-amber-200',
     icon: AlertTriangle,
   },
   RENTING: {
     label: 'Khách đang thuê đồ',
-    bg: 'bg-purple-50',
-    text: 'text-purple-800',
-    border: 'border-purple-200 font-bold',
+    bg: 'bg-slate-100',
+    text: 'text-slate-800',
+    border: 'border-slate-200 font-semibold',
     icon: Clock,
   },
   AWAITING_RETURN_DEPOSIT: {
     label: 'Khách đang gửi trả đồ',
-    bg: 'bg-indigo-50',
-    text: 'text-indigo-800',
-    border: 'border-indigo-200',
+    bg: 'bg-slate-100',
+    text: 'text-slate-800',
+    border: 'border-slate-200',
     icon: Package,
   },
   READY_FOR_RETURN_PICKUP: {
     label: 'Cần ra tủ lấy lại đồ',
-    bg: 'bg-teal-50',
-    text: 'text-teal-800',
-    border: 'border-teal-300 font-bold',
+    bg: 'bg-slate-100',
+    text: 'text-slate-800',
+    border: 'border-slate-200 font-semibold',
     icon: Lock,
   },
 };
@@ -231,12 +231,12 @@ export const SellingOrders = () => {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs text-xs font-bold overflow-x-auto">
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-medium overflow-x-auto">
             <button
               onClick={() => setFilterGroup('ALL')}
               className={`px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
                 filterGroup === 'ALL'
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -246,7 +246,7 @@ export const SellingOrders = () => {
               onClick={() => setFilterGroup('PENDING')}
               className={`px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
                 filterGroup === 'PENDING'
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -256,7 +256,7 @@ export const SellingOrders = () => {
               onClick={() => setFilterGroup('DEPOSIT')}
               className={`px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
                 filterGroup === 'DEPOSIT'
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -266,7 +266,7 @@ export const SellingOrders = () => {
               onClick={() => setFilterGroup('DONE')}
               className={`px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
                 filterGroup === 'DONE'
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -277,27 +277,27 @@ export const SellingOrders = () => {
 
         {/* Content */}
         {isLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-600 border-t-transparent" />
-            <p className="mt-3 text-xs text-slate-500">Đang tải danh sách đơn bán...</p>
+          <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-slate-900 border-t-transparent" />
+            <p className="mt-3 text-xs text-slate-500 font-medium">Đang tải danh sách đơn bán...</p>
           </div>
         ) : isError ? (
-          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center space-y-3">
-            <AlertTriangle size={24} className="mx-auto text-rose-600" />
-            <p className="text-xs sm:text-sm text-rose-700 font-semibold">
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3 shadow-2xs">
+            <AlertTriangle size={24} className="mx-auto text-slate-500" />
+            <p className="text-xs sm:text-sm text-slate-700 font-medium">
               Không thể tải danh sách đơn bán lúc này.
             </p>
             <button
               onClick={() => refetch()}
-              className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 transition"
+              className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-medium hover:bg-slate-800 transition"
             >
               Thử lại
             </button>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4 shadow-xs">
-            <div className="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 mx-auto flex items-center justify-center">
-              <Send size={32} />
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-4 shadow-2xs">
+            <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 mx-auto flex items-center justify-center">
+              <Send size={24} />
             </div>
             <div className="space-y-1">
               <h3 className="text-base font-bold text-slate-900">
@@ -309,7 +309,7 @@ export const SellingOrders = () => {
             </div>
             <Link
               to="/marketplace/new"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-medium transition shadow-2xs"
             >
               <Plus size={15} /> Đăng thêm sản phẩm mới
             </Link>
@@ -366,14 +366,14 @@ export const SellingOrders = () => {
                       <div className="min-w-0">
                         <Link
                           to={`/marketplace/${order.productId}`}
-                          className="font-bold text-slate-900 hover:text-purple-600 transition text-sm line-clamp-1 block"
+                          className="font-bold text-slate-900 hover:text-slate-600 transition text-sm line-clamp-1 block"
                         >
                           {order.productTitle}
                         </Link>
                         <p className="text-xs text-slate-500 mt-0.5 truncate">
-                          Người mua: <span className="font-semibold text-slate-700">{order.buyerFullName}</span> (@{order.buyerUsername})
+                          Người mua: <span className="font-medium text-slate-700">{order.buyerFullName}</span> (@{order.buyerUsername})
                         </p>
-                        <p className="text-sm font-extrabold text-purple-700 mt-1">
+                        <p className="text-sm font-bold text-slate-900 mt-1">
                           {formatPrice(order.priceSnapshot)}
                         </p>
                       </div>
@@ -382,18 +382,18 @@ export const SellingOrders = () => {
                     {/* Locker & Compartment (4 cols) */}
                     <div className="md:col-span-4 text-xs space-y-1">
                       {order.lockerName ? (
-                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                          <div className="font-bold text-slate-900 flex items-center gap-1">
-                            <MapPin size={12} className="text-purple-600" />
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                          <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                            <MapPin size={13} className="text-slate-400" />
                             {order.lockerName}
                           </div>
                           <div className="text-[11px] text-slate-500 mt-0.5">
                             {order.lockerLocation}
                           </div>
                           {order.compartmentCode && (
-                            <div className="mt-1 font-bold text-purple-700 flex items-center gap-1">
-                              <Lock size={11} />
-                              Ngăn tủ chỉ định: {order.compartmentCode}
+                            <div className="mt-1.5 font-mono text-xs font-bold text-slate-900 flex items-center gap-1.5 pt-1.5 border-t border-slate-200/60">
+                              <Lock size={12} className="text-slate-400" />
+                              Ngăn tủ: {order.compartmentCode}
                             </div>
                           )}
                         </div>
@@ -410,13 +410,13 @@ export const SellingOrders = () => {
                         <>
                           <button
                             onClick={() => setAcceptModalOrder(order)}
-                            className="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-xs transition"
+                            className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-xl shadow-2xs transition"
                           >
                             Chấp nhận đơn
                           </button>
                           <button
                             onClick={() => setRejectModalOrder(order)}
-                            className="px-3 py-2 border border-rose-300 text-rose-700 hover:bg-rose-50 text-xs font-semibold rounded-xl transition"
+                            className="px-3 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-medium rounded-xl transition"
                           >
                             Từ chối
                           </button>
@@ -426,7 +426,7 @@ export const SellingOrders = () => {
                       {order.status === 'AWAITING_DEPOSIT' && (
                         <button
                           onClick={() => setDepositModalOrder(order)}
-                          className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5"
+                          className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-xl shadow-2xs transition flex items-center gap-1.5"
                         >
                           <Package size={13} /> Gửi hàng vào tủ
                         </button>
@@ -434,7 +434,7 @@ export const SellingOrders = () => {
 
                       <Link
                         to={`/orders/${order.id}`}
-                        className="px-3 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold rounded-xl transition flex items-center gap-1"
+                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-xl transition flex items-center gap-1"
                       >
                         Chi tiết <ArrowRight size={12} />
                       </Link>
@@ -490,13 +490,13 @@ export const SellingOrders = () => {
               </p>
 
               <div className="mb-6 space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 block">
+                <label className="text-xs font-semibold text-slate-700 block">
                   Chọn tủ đồ gửi hàng (Tùy chọn)
                 </label>
                 <select
                   value={selectedLockerId}
                   onChange={(e) => setSelectedLockerId(e.target.value ? Number(e.target.value) : '')}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-purple-500 bg-white"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-slate-900 focus:border-slate-900 bg-white"
                 >
                   <option value="">-- Tự động tìm ngăn trống tại tủ gần nhất --</option>
                   {activeLockers?.map((l) => (
@@ -513,7 +513,7 @@ export const SellingOrders = () => {
               <div className="flex justify-end gap-2.5">
                 <button
                   onClick={() => setAcceptModalOrder(null)}
-                  className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-medium text-slate-700 transition"
                 >
                   Hủy
                 </button>
@@ -525,7 +525,7 @@ export const SellingOrders = () => {
                       lockerId: selectedLockerId ? Number(selectedLockerId) : null,
                     })
                   }
-                  className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 transition"
+                  className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-medium disabled:opacity-50 transition shadow-2xs"
                 >
                   {acceptMutation.isPending ? 'Đang cấp ngăn...' : 'Xác nhận cấp tủ đồ'}
                 </button>
@@ -612,19 +612,19 @@ export const SellingOrders = () => {
                   <span className="text-slate-500">Vị trí:</span>
                   <span className="font-medium text-slate-700">{depositModalOrder.lockerLocation}</span>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-slate-200">
-                  <span className="text-slate-500">Ngăn tủ được mở:</span>
-                  <span className="font-black text-purple-700 bg-purple-100 px-2 py-0.5 rounded-lg text-sm">
+                <div className="flex justify-between items-center pt-1.5 border-t border-slate-200">
+                  <span className="text-slate-500 font-medium">Ngăn tủ được mở:</span>
+                  <span className="font-mono text-sm font-bold text-slate-900 bg-slate-200/80 px-2.5 py-0.5 rounded-lg">
                     {depositModalOrder.compartmentCode}
                   </span>
                 </div>
               </div>
 
-              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl mb-6 text-xs text-amber-900 space-y-1">
-                <div className="font-bold flex items-center gap-1 text-amber-950">
-                  <AlertTriangle size={13} /> Quy trình phần cứng:
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl mb-6 text-xs text-slate-700 space-y-1">
+                <div className="font-semibold flex items-center gap-1.5 text-slate-900">
+                  <AlertTriangle size={13} className="text-slate-500" /> Quy trình phần cứng:
                 </div>
-                <ol className="list-decimal list-inside space-y-0.5 text-[11px] text-amber-800">
+                <ol className="list-decimal list-inside space-y-0.5 text-[11px] text-slate-600">
                   <li>Lệnh mở chốt điện tử ngăn {depositModalOrder.compartmentCode}</li>
                   <li>Người bán đặt sản phẩm vào bên trong ngăn tủ</li>
                   <li>Cảm biến xác nhận hàng và đóng chốt an toàn</li>
@@ -635,14 +635,14 @@ export const SellingOrders = () => {
               <div className="flex justify-end gap-2.5">
                 <button
                   onClick={() => setDepositModalOrder(null)}
-                  className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-medium text-slate-700 transition"
                 >
                   Hủy
                 </button>
                 <button
                   disabled={depositMutation.isPending}
                   onClick={() => depositMutation.mutate(depositModalOrder.id)}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 transition flex items-center gap-1.5"
+                  className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-medium disabled:opacity-50 transition flex items-center gap-1.5 shadow-2xs"
                 >
                   {depositMutation.isPending ? (
                     'Đang xử lý...'

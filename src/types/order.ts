@@ -12,6 +12,9 @@ export type OrderStatus =
 
 export type OrderType = 'PURCHASE' | 'RENTAL';
 
+export type PaymentStatus = 'UNPAID' | 'PAID' | 'REFUNDED';
+export type PaymentMethod = 'MOCK' | 'PAYOS';
+
 export interface Order {
   id: number;
   orderNumber: string;
@@ -27,6 +30,13 @@ export interface Order {
   platformFee?: number | null;
   sellerPayout?: number | null;
   totalAmount?: number | null;
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: PaymentMethod | null;
+  payosOrderCode?: number | null;
+  paymentPaidAt?: string | null;
+  refundedAt?: string | null;
+  checkoutUrl?: string | null;
+  qrCode?: string | null;
   buyerId: number;
   buyerUsername: string;
   buyerFullName: string;
@@ -91,3 +101,22 @@ export interface OrderReturnPayload {
   lockerId: number;
   compartmentId?: number | null;
 }
+
+export interface PaymentCreatePayload {
+  paymentMethod: PaymentMethod;
+}
+
+export interface PaymentResponse {
+  success: boolean;
+  orderId: number;
+  orderNumber: string;
+  paymentStatus: PaymentStatus;
+  paymentMethod: PaymentMethod;
+  totalAmount: number;
+  payosOrderCode?: number | null;
+  checkoutUrl?: string | null;
+  qrCode?: string | null;
+  message?: string;
+  paidAt?: string | null;
+}
+

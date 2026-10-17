@@ -19,6 +19,13 @@ import {
   X,
   Radio,
   RotateCcw,
+  CreditCard,
+  QrCode,
+  ShieldCheck,
+  ExternalLink,
+  RefreshCw,
+  Sparkles,
+  CheckCircle,
 } from 'lucide-react';
 
 const purchaseStepConfig: { key: OrderStatus; label: string; desc: string }[] = [
@@ -47,11 +54,24 @@ export const OrderDetail = () => {
   const [pickupErrorMessage, setPickupErrorMessage] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
-  // Fetch Order Details
+  // Payment states
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'PAYOS' | 'MOCK'>('PAYOS');
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+  const [paymentNotice, setPaymentNotice] = useState<string | null>(null);
+
+  // Fetch Order Details with dynamic polling when waiting for PayOS Webhook
   const { data: order, isLoading, isError, error } = useQuery<OrderDetailType>({
     queryKey: ['order-detail', id],
     queryFn: () => axiosInstance.get(`/api/v1/orders/${id}`).then((res) => res.data),
     enabled: !!id,
+    refetchInterval: (query) => {
+      const currentOrder = query.state.data as OrderDetailType | undefined;
+      // Tự động polling mỗi 3 giây nếu đơn chưa thanh toán và đã tạo mã PayOS để webhook cập nhật ngay lập tức
+      if (currentOrder && currentOrder.paymentStatus !== 'PAID' && currentOrder.paymentMethod === 'PAYOS') {
+        return 3000;
+      }
+      return false;
+    },
   });
 
   // Pickup Mutation
@@ -167,6 +187,54 @@ export const OrderDetail = () => {
     },
   });
 
+  // Pay Order Mutation (Supports MOCK and PAYOS)
+  const payMutation = useMutation({
+    mutationFn: (paymentMethod: 'MOCK' | 'PAYOS') =>
+      axiosInstance.post(`/api/v1/orders/${id}/pay`, { paymentMethod }).then((res) => res.data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
+      queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
+      if (data.message) {
+        setPaymentNotice(data.message);
+      }
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.message || 'Không thể khởi tạo thanh toán');
+    },
+  });
+
+  // Simulate PayOS Webhook Success (Local testing demo)
+  const simulatePayOSSuccessMutation = useMutation({
+    mutationFn: () =>
+      axiosInstance.post(`/api/v1/orders/${id}/pay/simulate-success`).then((res) => res.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
+      queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
+      setPaymentNotice('Đã giả lập quét mã PayOS thành công! Đơn hàng đã chuyển sang trạng thái ĐÃ KÝ QUỸ.');
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.message || 'Lỗi khi kích hoạt giả lập PayOS');
+    },
+  });
+
+  // Manual payment status check button
+  const handleManualCheckPayment = async () => {
+    setIsCheckingPayment(true);
+    try {
+      const res = await axiosInstance.get(`/api/v1/orders/${id}/payment-status`);
+      queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
+      if (res.data.paymentStatus === 'PAID') {
+        setPaymentNotice('Thanh toán thành công! Tiền cọc/tiền hàng đã được giữ an toàn trong ví Escrow.');
+      } else {
+        alert('Giao dịch chưa hoàn tất hoặc tiền chưa vào tài khoản. Vui lòng thử lại sau vài giây.');
+      }
+    } catch (err: any) {
+      alert('Không thể kiểm tra trạng thái thanh toán.');
+    } finally {
+      setIsCheckingPayment(false);
+    }
+  };
+
   const isBuyer = Boolean(order && user && order.buyerUsername === user.username);
   const isSeller = Boolean(order && user && order.sellerUsername === user.username);
 
@@ -226,9 +294,9 @@ export const OrderDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-20 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-600 border-t-transparent" />
-        <p className="mt-3 text-xs text-slate-500">Đang tải chi tiết phiên giao dịch...</p>
+      <div className="max-w-5xl mx-auto px-4 py-24 text-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-slate-900 border-t-transparent" />
+        <p className="mt-3 text-xs text-slate-500 font-medium">Đang tải chi tiết đơn hàng...</p>
       </div>
     );
   }
@@ -236,15 +304,15 @@ export const OrderDetail = () => {
   if (isError || !order) {
     const errorStatus = (error as any)?.response?.status;
     return (
-      <div className="max-w-md mx-auto my-20 p-8 bg-white rounded-3xl border border-slate-200 text-center shadow-xs space-y-4">
-        <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
-          <AlertTriangle size={32} />
+      <div className="max-w-md mx-auto my-20 p-8 bg-white rounded-2xl border border-slate-200 text-center shadow-2xs space-y-4">
+        <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-500 mx-auto flex items-center justify-center">
+          <AlertTriangle size={24} />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-900">
             {errorStatus === 403 ? 'Không có quyền truy cập' : 'Không tìm thấy đơn hàng'}
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 mt-1 leading-relaxed">
             {errorStatus === 403
               ? 'Bạn không phải là người mua hoặc người bán của đơn hàng này.'
               : 'Đơn hàng không tồn tại hoặc đã bị xóa khỏi hệ thống.'}
@@ -252,7 +320,7 @@ export const OrderDetail = () => {
         </div>
         <button
           onClick={() => navigate(-1)}
-          className="px-5 py-2.5 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-700 transition"
+          className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-medium hover:bg-slate-800 transition shadow-2xs"
         >
           Quay lại
         </button>
@@ -261,36 +329,37 @@ export const OrderDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-6 sm:py-8 font-sans">
+    <div className="min-h-screen bg-slate-50/70 py-6 sm:py-8 font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+        <p role="status" className="rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-2xs">
           Chế độ mô phỏng Smart Locker: thao tác gửi và nhận hàng chưa điều khiển thiết bị vật lý.
         </p>
+
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-slate-500">
-          <Link to="/" className="hover:text-purple-600">
+          <Link to="/" className="hover:text-slate-900 transition">
             Trang chủ
           </Link>
           <span>/</span>
           <Link
             to={isSeller ? '/orders/selling' : '/orders/buying'}
-            className="hover:text-purple-600"
+            className="hover:text-slate-900 transition"
           >
             {isSeller ? 'Đơn bán' : 'Đơn mua'}
           </Link>
           <span>/</span>
-          <span className="text-slate-900 font-mono font-bold">{order.orderNumber}</span>
+          <span className="text-slate-900 font-mono font-medium">{order.orderNumber}</span>
         </nav>
 
         {/* Header Info Banner */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-6">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                   Chi tiết đơn hàng
                 </h1>
-                <span className="font-mono text-xs bg-slate-100 text-slate-800 px-2.5 py-1 rounded-lg font-bold">
+                <span className="font-mono text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-semibold border border-slate-200">
                   {order.orderNumber}
                 </span>
               </div>
@@ -300,61 +369,70 @@ export const OrderDetail = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`px-2.5 py-1 rounded-xl text-xs font-bold border ${
-                order.orderType === 'RENTAL'
-                  ? 'bg-purple-100 text-purple-900 border-purple-200'
-                  : 'bg-slate-100 text-slate-800 border-slate-200'
-              }`}>
-                {order.orderType === 'RENTAL' ? `ĐƠN THUÊ (${order.rentalDurationDays} NGÀY)` : 'ĐƠN MUA ĐỨT'}
+              <span className="px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 bg-slate-50 text-slate-700">
+                {order.orderType === 'RENTAL' ? `Đơn thuê (${order.rentalDurationDays} ngày)` : 'Đơn mua đứt'}
               </span>
 
+              {/* Escrow Payment Badge */}
+              {order.paymentStatus === 'PAID' ? (
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-emerald-700" />
+                  Đã ký quỹ ({order.paymentMethod === 'PAYOS' ? 'VietQR PayOS' : 'Giả lập'})
+                </span>
+              ) : (
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5">
+                  <Clock size={13} className="text-slate-500" />
+                  Chờ ký quỹ cọc/tiền hàng
+                </span>
+              )}
+
               {order.status === 'EXPIRED' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-orange-50 text-orange-800 border border-orange-200 flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
                   <AlertTriangle size={13} /> Quá hạn nhận đồ
                 </span>
               )}
               {order.status === 'CANCELLED' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1">
                   <XCircle size={13} /> Đã hủy đơn
                 </span>
               )}
               {order.status === 'REJECTED' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
                   <XCircle size={13} /> Người bán từ chối
                 </span>
               )}
               {order.status === 'COMPLETED' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                   <CheckCircle2 size={13} /> Hoàn tất giao dịch
                 </span>
               )}
               {order.status === 'READY_FOR_PICKUP' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-300 animate-pulse flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-white flex items-center gap-1">
                   <Lock size={13} /> Đang ở tủ chờ nhận
                 </span>
               )}
               {order.status === 'AWAITING_DEPOSIT' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200 flex items-center gap-1">
                   <Package size={13} /> Chờ người bán gửi tủ
                 </span>
               )}
               {order.status === 'PENDING_SELLER' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1">
                   <Clock size={13} /> Chờ xác nhận
                 </span>
               )}
               {order.status === 'RENTING' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-purple-50 text-purple-800 border border-purple-300 animate-pulse flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200 flex items-center gap-1">
                   <Clock size={13} /> Đang trong hạn thuê
                 </span>
               )}
               {order.status === 'AWAITING_RETURN_DEPOSIT' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-300 flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200 flex items-center gap-1">
                   <Package size={13} /> Chờ gửi trả vào tủ
                 </span>
               )}
               {order.status === 'READY_FOR_RETURN_PICKUP' && (
-                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-teal-50 text-teal-800 border border-teal-300 animate-pulse flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-white flex items-center gap-1">
                   <Lock size={13} /> Đồ đã trả về tủ
                 </span>
               )}
@@ -370,22 +448,22 @@ export const OrderDetail = () => {
                   return (
                     <div key={s.key} className="flex flex-col items-center text-center relative">
                       <div
-                        className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm mb-2 transition-all ${
+                        className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs mb-2 transition-all ${
                           status === 'completed'
-                            ? 'bg-emerald-600 text-white shadow-xs'
+                            ? 'bg-slate-900 text-white'
                             : status === 'current'
-                            ? 'bg-purple-600 text-white ring-4 ring-purple-100 shadow-xs'
+                            ? 'border-2 border-slate-900 text-slate-900 bg-white'
                             : 'bg-slate-100 text-slate-400'
                         }`}
                       >
-                        {status === 'completed' ? <Check size={16} /> : idx + 1}
+                        {status === 'completed' ? <Check size={14} /> : idx + 1}
                       </div>
                       <span
-                        className={`text-xs font-bold ${
+                        className={`text-xs ${
                           status === 'current'
-                            ? 'text-purple-600'
+                            ? 'font-bold text-slate-900'
                             : status === 'completed'
-                            ? 'text-slate-900'
+                            ? 'font-medium text-slate-800'
                             : 'text-slate-400'
                         }`}
                       >
@@ -398,20 +476,20 @@ export const OrderDetail = () => {
               </div>
             </div>
           ) : order.status === 'EXPIRED' ? (
-            <div className="p-4 rounded-2xl bg-orange-50 border border-orange-200 text-orange-900 text-xs flex items-start gap-2.5">
-              <AlertTriangle size={18} className="text-orange-600 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs flex items-start gap-2.5">
+              <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="block font-bold">Đơn hàng đã hết hạn nhận hàng:</strong>
+                <strong className="block font-semibold">Đơn hàng đã hết hạn nhận hàng:</strong>
                 <span>
                   Mã PIN 6 số đã hết hiệu lực bảo mật. Kiện hàng hiện vẫn được lưu giữ an toàn bên trong ngăn tủ và chờ ban quản trị kiểm tra xử lý thu hồi trước khi giải phóng tủ.
                 </span>
               </div>
             </div>
           ) : (
-            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-2.5">
-              <XCircle size={18} className="text-rose-600 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs flex items-start gap-2.5">
+              <XCircle size={16} className="text-slate-500 shrink-0 mt-0.5" />
               <div>
-                <strong className="block font-bold">Giao dịch đã kết thúc:</strong>
+                <strong className="block font-semibold">Giao dịch đã kết thúc:</strong>
                 <span>
                   {order.rejectionReason ||
                     (order.status === 'CANCELLED'
@@ -428,8 +506,8 @@ export const OrderDetail = () => {
           {/* Left Column: Product & Transaction Snapshot (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
             {/* Product Card */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+              <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Sản phẩm giao dịch
               </h2>
 
@@ -438,24 +516,24 @@ export const OrderDetail = () => {
                   <img
                     src={order.productImageUrl}
                     alt={order.productTitle}
-                    className="w-20 h-20 object-cover rounded-2xl border border-slate-200 shrink-0"
+                    className="w-20 h-20 object-cover rounded-xl border border-slate-200 shrink-0"
                   />
                 ) : (
-                  <div className="w-20 h-20 bg-slate-100 rounded-2xl border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
+                  <div className="w-20 h-20 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
                     <ImageOff size={24} />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <Link
                     to={`/marketplace/${order.productId}`}
-                    className="text-base font-bold text-slate-900 hover:text-purple-600 transition block truncate"
+                    className="text-base font-semibold text-slate-900 hover:text-slate-600 transition block truncate"
                   >
                     {order.productTitle}
                   </Link>
-                  <div className="text-xl font-black text-purple-700 mt-1">
+                  <div className="text-xl font-bold text-slate-900 mt-1">
                     {formatPrice(order.priceSnapshot)}
                   </div>
-                  <span className="text-[11px] text-slate-400 block mt-0.5">
+                  <span className="text-[11px] text-slate-500 block mt-0.5">
                     Giá niêm yết tại thời điểm tạo đơn (Snapshot bảo lưu)
                   </span>
                 </div>
@@ -465,72 +543,72 @@ export const OrderDetail = () => {
               {order.orderType === 'RENTAL' && (
                 <div className="pt-4 border-t border-slate-100 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-purple-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <Clock size={14} /> Gói thuê qua Smart Locker
+                    <span className="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <Clock size={14} className="text-slate-500" /> Gói thuê qua Smart Locker
                     </span>
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800">
+                    <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
                       {order.rentalDurationDays} ngày thuê
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-100 space-y-1">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                       <span className="text-slate-500 block">Đơn giá thuê theo ngày</span>
-                      <strong className="text-purple-900 font-bold block text-sm">
+                      <strong className="text-slate-900 font-bold block text-sm">
                         {order.rentalDurationDays && order.rentalDurationDays > 0
                           ? formatPrice(Math.round((order.priceSnapshot || 0) / order.rentalDurationDays))
                           : formatPrice(order.priceSnapshot || 0)}
                         /ngày
                       </strong>
                     </div>
-                    <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-100 space-y-1">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                       <span className="text-slate-500 block">Tiền cọc bảo đảm (hoàn lại)</span>
-                      <strong className="text-purple-900 font-bold block text-sm">
+                      <strong className="text-slate-900 font-bold block text-sm">
                         {formatPrice(order.depositAmount || 0)}
                       </strong>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                       <span className="text-slate-500 block">Phí dịch vụ nền tảng</span>
-                      <strong className="text-slate-700 font-bold block">
+                      <strong className="text-slate-700 font-medium block">
                         {formatPrice(order.platformFee || 0)}
                       </strong>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
                       <span className="text-slate-500 block">Thực nhận người cho thuê</span>
-                      <strong className="text-emerald-700 font-bold block">
+                      <strong className="text-slate-900 font-medium block">
                         {formatPrice(order.sellerPayout || 0)}
                       </strong>
                     </div>
                   </div>
 
                   {(order.pickedUpAt || order.dueReturnAt) && (
-                    <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs space-y-1 text-amber-900">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1 text-slate-700">
                       {order.pickedUpAt && (
                         <div>
                           Thời điểm nhận đồ & kích hoạt:{' '}
-                          <strong className="font-bold">{formatDate(order.pickedUpAt)}</strong>
+                          <strong className="font-semibold text-slate-900">{formatDate(order.pickedUpAt)}</strong>
                         </div>
                       )}
                       {order.dueReturnAt && (
                         <div>
                           Hạn chót hoàn trả vào tủ:{' '}
-                          <strong className="font-bold text-amber-950">{formatDate(order.dueReturnAt)}</strong>
+                          <strong className="font-semibold text-slate-900">{formatDate(order.dueReturnAt)}</strong>
                         </div>
                       )}
                     </div>
                   )}
 
                   {order.returnLockerName && (
-                    <div className="p-3 bg-purple-50 rounded-xl border border-purple-200 text-xs text-purple-900 flex justify-between items-center">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-800 flex justify-between items-center">
                       <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider block text-purple-700">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider block text-slate-500">
                           Tủ Locker hoàn trả
                         </span>
-                        <strong className="block text-sm">{order.returnLockerName}</strong>
+                        <strong className="block text-sm text-slate-900">{order.returnLockerName}</strong>
                       </div>
                       <div className="text-right">
-                        <span className="text-[11px] text-purple-600 block">Ngăn tủ</span>
-                        <span className="text-base font-black font-mono text-purple-900">
+                        <span className="text-[11px] text-slate-500 block">Ngăn tủ</span>
+                        <span className="text-base font-bold font-mono text-slate-900">
                           {order.returnCompartmentCode || 'Đang cấp'}
                         </span>
                       </div>
@@ -541,52 +619,52 @@ export const OrderDetail = () => {
 
               {/* Counterparties */}
               <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-4 text-xs">
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                   <span className="text-[11px] text-slate-400 block">Người bán</span>
-                  <strong className="text-slate-800 font-bold block">{order.sellerFullName}</strong>
+                  <strong className="text-slate-900 font-semibold block">{order.sellerFullName}</strong>
                   <span className="text-slate-500 font-mono text-[11px]">@{order.sellerUsername}</span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                   <span className="text-[11px] text-slate-400 block">Người mua</span>
-                  <strong className="text-slate-800 font-bold block">{order.buyerFullName}</strong>
+                  <strong className="text-slate-900 font-semibold block">{order.buyerFullName}</strong>
                   <span className="text-slate-500 font-mono text-[11px]">@{order.buyerUsername}</span>
                 </div>
               </div>
             </div>
 
             {/* Smart Locker Location & Station Details */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <MapPin size={14} className="text-purple-600" />
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+              <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <MapPin size={14} className="text-slate-600" />
                 Địa điểm Smart Locker
               </h2>
 
               {order.lockerName ? (
                 <div className="space-y-3">
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                    <div className="text-sm font-bold text-slate-900">{order.lockerName}</div>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <div className="text-sm font-semibold text-slate-900">{order.lockerName}</div>
                     <div className="text-xs text-slate-600">{order.lockerLocation}</div>
                     <div className="text-[11px] font-mono text-slate-400 pt-0.5">
                       Mã trạm tủ: {order.lockerCode}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-purple-50 border border-purple-200 rounded-2xl">
+                  <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
                     <div>
-                      <span className="text-[11px] font-bold text-purple-700 uppercase tracking-wider block">
+                      <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
                         Ngăn tủ chỉ định
                       </span>
-                      <span className="text-xl font-black text-purple-900 font-mono">
+                      <span className="text-xl font-bold text-slate-900 font-mono">
                         {order.compartmentCode || 'Đang cấp'}
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-purple-200/50 flex items-center justify-center text-purple-800">
-                      <Lock size={20} />
+                    <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs">
+                      <Lock size={18} />
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="p-8 text-center bg-slate-50 rounded-2xl text-slate-400 text-xs">
+                <div className="p-8 text-center bg-slate-50 rounded-xl text-slate-400 text-xs">
                   Ngăn tủ sẽ được tự động phân bổ ngay sau khi người bán xác nhận đơn hàng.
                 </div>
               )}
@@ -595,41 +673,287 @@ export const OrderDetail = () => {
 
           {/* Right Column: Keypad Terminal, Actions & Secret PIN (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
+            {/* ESCROW & PAYMENT CARD */}
+            {order.paymentStatus === 'PAID' ? (
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
+                      Ký quỹ bảo chứng (Escrow)
+                    </span>
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900">
+                      Tiền cọc & tiền hàng đã được giữ an toàn
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 text-xs space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Tổng tiền ký quỹ:</span>
+                    <strong className="text-base font-bold text-slate-900">
+                      {formatPrice(order.totalAmount || (order.priceSnapshot + (order.depositAmount || 0)))}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Phương thức:</span>
+                    <span className="font-semibold text-slate-800">
+                      {order.paymentMethod === 'PAYOS' ? 'VietQR (Cổng PayOS)' : 'Thanh toán giả lập (Demo)'}
+                    </span>
+                  </div>
+                  {order.paymentPaidAt && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Thời điểm thanh toán:</span>
+                      <span className="text-slate-700">{formatDate(order.paymentPaidAt)}</span>
+                    </div>
+                  )}
+                  {order.payosOrderCode && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Mã đơn PayOS:</span>
+                      <span className="font-mono text-slate-700">{order.payosOrderCode}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-[11px] text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200/70 flex items-start gap-2.5">
+                  <CheckCircle size={15} className="text-slate-500 shrink-0 mt-0.5" />
+                  <span>
+                    Khoản tiền đang được giữ trong quỹ bảo chứng của CampusHub và chỉ giải ngân cho người bán sau khi đơn hàng hoàn tất đúng quy trình.
+                  </span>
+                </div>
+              </div>
+            ) : isBuyer ? (
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                      <CreditCard size={20} />
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
+                        Ký quỹ thanh toán (Escrow)
+                      </span>
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900">
+                        Thanh toán cọc / tiền hàng
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[11px] text-slate-400 block">Cần thanh toán</span>
+                    <span className="text-base sm:text-lg font-bold text-slate-900">
+                      {formatPrice(order.totalAmount || (order.priceSnapshot + (order.depositAmount || 0)))}
+                    </span>
+                  </div>
+                </div>
+
+                {paymentNotice && (
+                  <div className="p-3 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-700 flex items-center justify-between">
+                    <span>{paymentNotice}</span>
+                    <button onClick={() => setPaymentNotice(null)} className="text-slate-400 hover:text-slate-700">
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+
+                {/* 2-Stream Selector Tabs */}
+                <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPaymentMethod('PAYOS')}
+                    className={`py-2 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+                      selectedPaymentMethod === 'PAYOS'
+                        ? 'bg-white text-slate-900 shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <QrCode size={14} /> Quét VietQR (PayOS)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPaymentMethod('MOCK')}
+                    className={`py-2 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+                      selectedPaymentMethod === 'MOCK'
+                        ? 'bg-white text-slate-900 shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Sparkles size={14} /> Giả lập tức thì
+                  </button>
+                </div>
+
+                {/* Stream 1: VietQR PayOS */}
+                {selectedPaymentMethod === 'PAYOS' && (
+                  <div className="space-y-4 pt-1">
+                    {order.qrCode || order.checkoutUrl ? (
+                      <div className="text-center space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        {order.qrCode && (
+                          <div className="relative inline-block">
+                            <img
+                              src={order.qrCode}
+                              alt="VietQR PayOS"
+                              className="w-44 h-44 mx-auto rounded-xl border border-slate-200 bg-white p-2.5 shadow-2xs"
+                            />
+                            <div className="text-[11px] font-medium text-slate-500 mt-2 flex items-center justify-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block" />
+                              Quét bằng ứng dụng ngân hàng bất kỳ
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="text-xs text-slate-600 space-y-1.5 text-left bg-white p-3.5 rounded-xl border border-slate-200">
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Số tiền:</span>
+                            <strong className="text-slate-900 font-bold">
+                              {formatPrice(order.totalAmount || (order.priceSnapshot + (order.depositAmount || 0)))}
+                            </strong>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Mã đơn PayOS:</span>
+                            <span className="font-mono text-slate-800 font-medium">{order.payosOrderCode}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+                            Trạng thái sẽ tự động cập nhật khi tiền được chuyển vào tài khoản bảo chứng.
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                          {order.checkoutUrl && (
+                            <a
+                              href={order.checkoutUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-2xs"
+                            >
+                              <ExternalLink size={14} /> Mở cổng thanh toán PayOS
+                            </a>
+                          )}
+                          <button
+                            type="button"
+                            disabled={isCheckingPayment}
+                            onClick={handleManualCheckPayment}
+                            className="py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-700 font-medium border border-slate-200 rounded-xl text-xs transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+                          >
+                            <RefreshCw size={13} className={isCheckingPayment ? 'animate-spin' : ''} />
+                            Kiểm tra kết quả
+                          </button>
+                        </div>
+
+                        {/* Demo helper button when running locally */}
+                        <div className="pt-2 border-t border-slate-200/80">
+                          <button
+                            type="button"
+                            disabled={simulatePayOSSuccessMutation.isPending}
+                            onClick={() => simulatePayOSSuccessMutation.mutate()}
+                            className="w-full py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-medium rounded-xl text-xs transition flex items-center justify-center gap-1.5"
+                          >
+                            <CheckCircle2 size={13} className="text-slate-500" />
+                            {simulatePayOSSuccessMutation.isPending ? 'Đang kích hoạt...' : 'Mô phỏng thanh toán thành công (Test Webhook)'}
+                          </button>
+                          <span className="text-[10px] text-slate-400 block mt-1">
+                            Dành cho kiểm thử cục bộ khi chưa cấu hình Webhook public domain
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <p className="text-xs text-slate-500 leading-relaxed">
+                          Tạo mã VietQR động được bảo chứng bởi cổng thanh toán PayOS. Bạn có thể mở ứng dụng ngân hàng quét mã để ký quỹ ngay tức thì.
+                        </p>
+                        <button
+                          type="button"
+                          disabled={payMutation.isPending}
+                          onClick={() => payMutation.mutate('PAYOS')}
+                          className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-2xs disabled:opacity-50"
+                        >
+                          {payMutation.isPending ? (
+                            <span>Đang kết nối PayOS...</span>
+                          ) : (
+                            <>
+                              <QrCode size={16} /> Tạo mã thanh toán VietQR (PayOS)
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Stream 2: Mock Simulated Payment */}
+                {selectedPaymentMethod === 'MOCK' && (
+                  <div className="space-y-4 pt-1">
+                    <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 space-y-1">
+                      <strong className="block font-semibold text-slate-900">Chế độ giả lập (Demo Testing):</strong>
+                      <span>
+                        Hệ thống sẽ ngay lập tức ghi nhận đơn hàng đã thanh toán và chuyển trạng thái tiền cọc vào quỹ ký quỹ mà không cần chuyển khoản thực tế.
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={payMutation.isPending}
+                      onClick={() => payMutation.mutate('MOCK')}
+                      className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-2xs disabled:opacity-50"
+                    >
+                      {payMutation.isPending ? (
+                        <span>Đang xử lý giả lập...</span>
+                      ) : (
+                        <>
+                          <CheckCircle2 size={16} /> Xác nhận thanh toán ngay (Giả lập)
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : isSeller ? (
+              <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5 text-xs text-slate-600 space-y-2">
+                <div className="flex items-center gap-2 font-semibold text-slate-900 text-sm">
+                  <Clock size={16} className="text-slate-500" />
+                  Chờ người mua ký quỹ thanh toán
+                </div>
+                <p className="leading-relaxed">
+                  Người mua đang thực hiện thanh toán tiền cọc/tiền hàng vào quỹ bảo chứng CampusHub. Bạn sẽ nhận được thông báo để gửi đồ vào tủ ngay khi tiền được bảo đảm an toàn.
+                </p>
+              </div>
+            ) : null}
+
             {/* Buyer Pickup Terminal Flow */}
             {order.status === 'READY_FOR_PICKUP' && (
-              <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-xl border border-slate-800 space-y-5">
+              <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-sm border border-slate-800 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Radio size={16} className="text-purple-400" />
-                    <span className="text-xs uppercase font-extrabold tracking-wider text-purple-300">
+                    <Radio size={16} className="text-slate-400" />
+                    <span className="text-xs uppercase font-semibold tracking-wider text-slate-300">
                       Smart Locker Terminal
                     </span>
                   </div>
-                  <span className="px-2.5 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full">
+                  <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-white/10 text-slate-200 border border-white/15 rounded-full">
                     SẴN SÀNG LẤY ĐỒ
                   </span>
                 </div>
 
                 {/* Secret Pickup PIN for Buyer */}
                 {isBuyer && order.pickupCode && (
-                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 text-center space-y-2">
-                    <span className="text-[11px] font-bold text-purple-200 uppercase tracking-wider block">
-                      Mã PIN bí mật của bạn (6 chữ số)
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center space-y-2">
+                    <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
+                      Mã PIN lấy đồ (6 chữ số)
                     </span>
                     <div className="flex items-center justify-center gap-3">
-                      <span className="font-mono text-3xl font-black text-amber-300 tracking-widest">
+                      <span className="font-mono text-3xl font-bold text-white tracking-widest">
                         {order.pickupCode}
                       </span>
                       <button
                         onClick={handleCopyCode}
-                        className="p-2 bg-white/20 hover:bg-white/30 rounded-xl text-xs transition flex items-center gap-1"
+                        className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white transition flex items-center gap-1"
                         title="Sao chép mã"
                       >
                         {isCopied ? <Check size={14} /> : <Copy size={14} />}
                       </button>
                     </div>
                     {order.pickupDeadline && (
-                      <span className="text-[11px] text-purple-200/80 block">
+                      <span className="text-[11px] text-slate-400 block">
                         Hạn lấy đồ: {formatDate(order.pickupDeadline)}
                       </span>
                     )}
@@ -637,18 +961,18 @@ export const OrderDetail = () => {
                 )}
 
                 {/* Keypad Touch Screen Simulator */}
-                <div className="bg-black/50 rounded-2xl p-4 border border-white/10 space-y-4">
+                <div className="bg-black/30 rounded-xl p-4 border border-white/10 space-y-4">
                   <div className="text-center space-y-1.5">
                     <span className="text-[11px] text-slate-400">
-                      Màn hình cảm ứng nhập mã tại trạm Locker
+                      Màn hình cảm ứng trạm tủ Locker
                     </span>
-                    <div className="bg-slate-950 border border-purple-500/40 rounded-xl p-3 font-mono text-center">
-                      <span className="text-2xl font-black tracking-widest text-emerald-400">
+                    <div className="bg-slate-950 border border-slate-700/60 rounded-xl p-3 font-mono text-center">
+                      <span className="text-2xl font-bold tracking-widest text-white">
                         {pickupCodeInput || '------'}
                       </span>
                     </div>
                     {pickupErrorMessage && (
-                      <div className="text-xs text-rose-400 font-bold flex items-center justify-center gap-1 pt-1">
+                      <div className="text-xs text-rose-400 font-medium flex items-center justify-center gap-1 pt-1">
                         <AlertTriangle size={13} /> {pickupErrorMessage}
                       </div>
                     )}
@@ -660,27 +984,27 @@ export const OrderDetail = () => {
                       <button
                         key={digit}
                         onClick={() => handleKeypadPress(digit)}
-                        className="py-2.5 bg-white/10 hover:bg-white/20 active:bg-white/30 rounded-xl font-mono text-base font-bold transition text-white"
+                        className="py-2.5 bg-white/10 hover:bg-white/15 active:bg-white/25 rounded-xl font-mono text-base font-semibold transition text-white"
                       >
                         {digit}
                       </button>
                     ))}
                     <button
                       onClick={handleKeypadClear}
-                      className="py-2.5 bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 rounded-xl text-xs font-bold"
+                      className="py-2.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl text-xs font-medium transition"
                     >
                       Xóa
                     </button>
                     <button
                       onClick={() => handleKeypadPress('0')}
-                      className="py-2.5 bg-white/10 hover:bg-white/20 rounded-xl font-mono text-base font-bold text-white"
+                      className="py-2.5 bg-white/10 hover:bg-white/15 rounded-xl font-mono text-base font-semibold text-white transition"
                     >
                       0
                     </button>
                     <button
                       disabled={pickupCodeInput.length !== 6 || pickupMutation.isPending}
                       onClick={() => pickupMutation.mutate(pickupCodeInput)}
-                      className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold disabled:opacity-30"
+                      className="py-2.5 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-semibold disabled:opacity-30 transition"
                     >
                       {pickupMutation.isPending ? '...' : 'OK'}
                     </button>
@@ -689,10 +1013,10 @@ export const OrderDetail = () => {
                   <button
                     disabled={pickupCodeInput.length !== 6 || pickupMutation.isPending}
                     onClick={() => pickupMutation.mutate(pickupCodeInput)}
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition text-xs sm:text-sm disabled:opacity-40 flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-xl transition text-xs sm:text-sm disabled:opacity-30 flex items-center justify-center gap-2"
                   >
                     {pickupMutation.isPending ? (
-                      <span>Đang kích hoạt chốt khóa mở ngăn...</span>
+                      <span>Đang mở chốt khóa ngăn tủ...</span>
                     ) : (
                       <>
                         <KeyRound size={16} /> Xác nhận mở ngăn tủ lấy hàng
@@ -705,32 +1029,32 @@ export const OrderDetail = () => {
 
             {/* Rental Active: Renting Period State */}
             {order.status === 'RENTING' && (
-              <div className="bg-white rounded-3xl border border-purple-200 p-6 shadow-xs space-y-4">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
                     <Clock size={20} />
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-900">Đang trong thời gian thuê</h3>
                     <p className="text-xs text-slate-500">
                       Gói thuê {order.rentalDurationDays} ngày • Hạn trả:{' '}
-                      <strong className="text-purple-700">{formatDate(order.dueReturnAt)}</strong>
+                      <strong className="text-slate-900 font-semibold">{formatDate(order.dueReturnAt)}</strong>
                     </p>
                   </div>
                 </div>
 
-                <div className="p-4 bg-purple-50/60 rounded-2xl border border-purple-100 text-xs space-y-2">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 text-xs space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-600">Bắt đầu tính thời hạn:</span>
-                    <strong className="text-slate-800">{formatDate(order.pickedUpAt)}</strong>
+                    <span className="text-slate-500">Bắt đầu tính thời hạn:</span>
+                    <strong className="text-slate-800 font-medium">{formatDate(order.pickedUpAt)}</strong>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-600">Hạn chót hoàn trả:</span>
-                    <strong className="text-amber-700 font-bold">{formatDate(order.dueReturnAt)}</strong>
+                    <span className="text-slate-500">Hạn chót hoàn trả:</span>
+                    <strong className="text-slate-900 font-bold">{formatDate(order.dueReturnAt)}</strong>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-600">Tiền cọc bảo đảm:</span>
-                    <strong className="text-emerald-700 font-bold">{formatPrice(order.depositAmount || 0)}</strong>
+                    <span className="text-slate-500">Tiền cọc bảo đảm:</span>
+                    <strong className="text-slate-900 font-bold">{formatPrice(order.depositAmount || 0)}</strong>
                   </div>
                 </div>
 
@@ -741,7 +1065,7 @@ export const OrderDetail = () => {
                     </p>
                     <button
                       onClick={() => setIsReturnModalOpen(true)}
-                      className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm"
+                      className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-2xs"
                     >
                       <RotateCcw size={16} /> Chọn tủ Locker để hoàn trả đồ
                     </button>
@@ -756,9 +1080,9 @@ export const OrderDetail = () => {
 
             {/* Buyer Deposit Return Item Into Locker */}
             {order.status === 'AWAITING_RETURN_DEPOSIT' && (
-              <div className="bg-white rounded-3xl border border-purple-200 p-6 shadow-xs space-y-4">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
                     <RotateCcw size={20} />
                   </div>
                   <div>
@@ -769,17 +1093,17 @@ export const OrderDetail = () => {
                   </div>
                 </div>
 
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-1.5">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-500">Trạm tủ trả đồ:</span>
-                    <strong className="text-slate-900">{order.returnLockerName}</strong>
+                    <strong className="text-slate-900 font-semibold">{order.returnLockerName}</strong>
                   </div>
                   {order.returnLockerLocation && (
                     <div className="text-slate-500 text-[11px]">{order.returnLockerLocation}</div>
                   )}
-                  <div className="flex justify-between items-center pt-1 border-t border-slate-200">
-                    <span className="text-purple-700 font-bold">Ngăn tủ chỉ định:</span>
-                    <strong className="text-purple-900 font-mono text-base font-black">
+                  <div className="flex justify-between items-center pt-1.5 border-t border-slate-200">
+                    <span className="text-slate-600 font-medium">Ngăn tủ chỉ định:</span>
+                    <strong className="text-slate-900 font-mono text-base font-bold">
                       {order.returnCompartmentCode}
                     </strong>
                   </div>
@@ -789,7 +1113,7 @@ export const OrderDetail = () => {
                   <button
                     disabled={depositReturnMutation.isPending}
                     onClick={() => depositReturnMutation.mutate()}
-                    className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs sm:text-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs sm:text-sm transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-2xs"
                   >
                     {depositReturnMutation.isPending ? (
                       <span>Đang mở tủ và xác nhận trả đồ...</span>
@@ -800,7 +1124,7 @@ export const OrderDetail = () => {
                     )}
                   </button>
                 ) : (
-                  <div className="p-3 bg-purple-50 rounded-xl text-xs text-purple-700 text-center">
+                  <div className="p-3 bg-slate-50 rounded-xl text-xs text-slate-600 text-center">
                     Người thuê đã chỉ định trạm tủ và đang thực hiện gửi đồ trả lại ngăn tủ.
                   </div>
                 )}
@@ -809,27 +1133,27 @@ export const OrderDetail = () => {
 
             {/* Seller Return Pickup Terminal Flow */}
             {order.status === 'READY_FOR_RETURN_PICKUP' && (
-              <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-xl border border-slate-800 space-y-5">
+              <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-sm border border-slate-800 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Radio size={16} className="text-purple-400" />
-                    <span className="text-xs uppercase font-extrabold tracking-wider text-purple-300">
+                    <Radio size={16} className="text-slate-400" />
+                    <span className="text-xs uppercase font-semibold tracking-wider text-slate-300">
                       Locker Return Terminal
                     </span>
                   </div>
-                  <span className="px-2.5 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full">
+                  <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-white/10 text-slate-200 border border-white/15 rounded-full">
                     SẴN SÀNG NHẬN LẠI ĐỒ
                   </span>
                 </div>
 
                 {/* Secret Return Pickup PIN for Seller */}
                 {isSeller && (order.pickupCode || order.returnPickupCode) && (
-                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 text-center space-y-2">
-                    <span className="text-[11px] font-bold text-purple-200 uppercase tracking-wider block">
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center space-y-2">
+                    <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
                       Mã PIN lấy lại đồ (6 chữ số)
                     </span>
                     <div className="flex items-center justify-center gap-3">
-                      <span className="font-mono text-3xl font-black text-amber-300 tracking-widest">
+                      <span className="font-mono text-3xl font-bold text-white tracking-widest">
                         {order.pickupCode || order.returnPickupCode}
                       </span>
                       <button
@@ -841,13 +1165,13 @@ export const OrderDetail = () => {
                             setTimeout(() => setIsCopied(false), 2000);
                           }
                         }}
-                        className="p-2 bg-white/20 hover:bg-white/30 rounded-xl text-xs transition flex items-center gap-1"
+                        className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white transition flex items-center gap-1"
                         title="Sao chép mã"
                       >
                         {isCopied ? <Check size={14} /> : <Copy size={14} />}
                       </button>
                     </div>
-                    <span className="text-[11px] text-purple-200/80 block">
+                    <span className="text-[11px] text-slate-400 block">
                       Tủ: {order.returnLockerName} • Ngăn: {order.returnCompartmentCode}
                     </span>
                   </div>
@@ -855,11 +1179,11 @@ export const OrderDetail = () => {
 
                 {/* Buyer waiting notice */}
                 {isBuyer && (
-                  <div className="p-4 bg-white/10 rounded-2xl border border-white/20 text-center space-y-2 text-xs">
-                    <p className="text-emerald-300 font-bold">
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10 text-center space-y-2 text-xs">
+                    <p className="text-slate-200 font-semibold">
                       Bạn đã hoàn trả đồ vào ngăn {order.returnCompartmentCode} tại tủ {order.returnLockerName}!
                     </p>
-                    <p className="text-slate-300">
+                    <p className="text-slate-400">
                       Đang đợi chủ sở hữu tới trạm tủ mở ngăn lấy lại đồ để hoàn tất tất toán và hoàn tiền cọc cho bạn.
                     </p>
                   </div>
@@ -867,18 +1191,18 @@ export const OrderDetail = () => {
 
                 {/* Keypad Touch Screen Simulator for Seller */}
                 {isSeller && (
-                  <div className="bg-black/50 rounded-2xl p-4 border border-white/10 space-y-4">
+                  <div className="bg-black/30 rounded-xl p-4 border border-white/10 space-y-4">
                     <div className="text-center space-y-1.5">
                       <span className="text-[11px] text-slate-400">
                         Màn hình cảm ứng tại trạm {order.returnLockerName}
                       </span>
-                      <div className="bg-slate-950 border border-purple-500/40 rounded-xl p-3 font-mono text-center">
-                        <span className="text-2xl font-black tracking-widest text-emerald-400">
+                      <div className="bg-slate-950 border border-slate-700/60 rounded-xl p-3 font-mono text-center">
+                        <span className="text-2xl font-bold tracking-widest text-white">
                           {pickupCodeInput || '------'}
                         </span>
                       </div>
                       {pickupErrorMessage && (
-                        <div className="text-xs text-rose-400 font-bold flex items-center justify-center gap-1 pt-1">
+                        <div className="text-xs text-rose-400 font-medium flex items-center justify-center gap-1 pt-1">
                           <AlertTriangle size={13} /> {pickupErrorMessage}
                         </div>
                       )}
@@ -890,27 +1214,27 @@ export const OrderDetail = () => {
                         <button
                           key={digit}
                           onClick={() => handleKeypadPress(digit)}
-                          className="py-2.5 bg-white/10 hover:bg-white/20 active:bg-white/30 rounded-xl font-mono text-base font-bold transition text-white"
+                          className="py-2.5 bg-white/10 hover:bg-white/15 active:bg-white/25 rounded-xl font-mono text-base font-semibold transition text-white"
                         >
                           {digit}
                         </button>
                       ))}
                       <button
                         onClick={handleKeypadClear}
-                        className="py-2.5 bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 rounded-xl text-xs font-bold"
+                        className="py-2.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl text-xs font-medium transition"
                       >
                         Xóa
                       </button>
                       <button
                         onClick={() => handleKeypadPress('0')}
-                        className="py-2.5 bg-white/10 hover:bg-white/20 rounded-xl font-mono text-base font-bold text-white"
+                        className="py-2.5 bg-white/10 hover:bg-white/15 rounded-xl font-mono text-base font-semibold text-white transition"
                       >
                         0
                       </button>
                       <button
                         disabled={pickupCodeInput.length !== 6 || pickupReturnMutation.isPending}
                         onClick={() => pickupReturnMutation.mutate(pickupCodeInput)}
-                        className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold disabled:opacity-30"
+                        className="py-2.5 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-semibold disabled:opacity-30 transition"
                       >
                         {pickupReturnMutation.isPending ? '...' : 'OK'}
                       </button>
@@ -919,7 +1243,7 @@ export const OrderDetail = () => {
                     <button
                       disabled={pickupCodeInput.length !== 6 || pickupReturnMutation.isPending}
                       onClick={() => pickupReturnMutation.mutate(pickupCodeInput)}
-                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition text-xs sm:text-sm disabled:opacity-40 flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-xl transition text-xs sm:text-sm disabled:opacity-30 flex items-center justify-center gap-2"
                     >
                       {pickupReturnMutation.isPending ? (
                         <span>Đang kích hoạt chốt khóa mở ngăn...</span>
@@ -936,9 +1260,9 @@ export const OrderDetail = () => {
 
             {/* Seller Deposit Item Action */}
             {order.status === 'AWAITING_DEPOSIT' && isSeller && (
-              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
                     <Package size={20} />
                   </div>
                   <div>
@@ -949,20 +1273,20 @@ export const OrderDetail = () => {
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-1">
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
                   <div>
                     Tủ đồ: <strong className="text-slate-900">{order.lockerName}</strong>
                   </div>
                   <div>
                     Ngăn phân bổ:{' '}
-                    <strong className="text-purple-700 font-bold">{order.compartmentCode}</strong>
+                    <strong className="text-slate-900 font-bold">{order.compartmentCode}</strong>
                   </div>
                 </div>
 
                 <button
                   disabled={depositMutation.isPending}
                   onClick={() => depositMutation.mutate()}
-                  className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs sm:text-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs sm:text-sm transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-2xs"
                 >
                   {depositMutation.isPending ? (
                     <span>Đang mở tủ và xác nhận cảm biến...</span>
@@ -977,7 +1301,7 @@ export const OrderDetail = () => {
 
             {/* Buyer Cancel if still PENDING_SELLER */}
             {order.status === 'PENDING_SELLER' && isBuyer && (
-              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">Hủy đơn đặt mua</h3>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -991,7 +1315,7 @@ export const OrderDetail = () => {
                       cancelMutation.mutate();
                     }
                   }}
-                  className="w-full py-2.5 border border-rose-300 text-rose-700 hover:bg-rose-50 rounded-xl text-xs font-bold transition disabled:opacity-50"
+                  className="w-full py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-medium transition disabled:opacity-50"
                 >
                   {cancelMutation.isPending ? 'Đang hủy...' : 'Hủy đơn hàng'}
                 </button>
@@ -1000,12 +1324,12 @@ export const OrderDetail = () => {
 
             {/* Completed State Celebration Card */}
             {order.status === 'COMPLETED' && (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-6 text-center space-y-2">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center">
-                  <CheckCircle2 size={24} />
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 mx-auto flex items-center justify-center">
+                  <CheckCircle2 size={20} />
                 </div>
-                <h3 className="text-base font-bold text-emerald-900">Giao dịch thành công!</h3>
-                <p className="text-xs text-emerald-700 leading-relaxed">
+                <h3 className="text-base font-bold text-slate-900">Giao dịch thành công</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
                   Hàng hóa đã được lấy thành công vào lúc {formatDate(order.pickedUpAt)}. Ngăn tủ đã được giải phóng trở lại trạng thái sẵn sàng.
                 </p>
               </div>
@@ -1013,12 +1337,12 @@ export const OrderDetail = () => {
 
             {/* Expired State Warning Card */}
             {order.status === 'EXPIRED' && (
-              <div className="bg-orange-50 border border-orange-200 rounded-3xl p-6 text-center space-y-2">
-                <div className="w-12 h-12 rounded-2xl bg-orange-100 text-orange-700 mx-auto flex items-center justify-center">
-                  <AlertTriangle size={24} />
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 mx-auto flex items-center justify-center">
+                  <AlertTriangle size={20} />
                 </div>
-                <h3 className="text-base font-bold text-orange-950">Mã nhận đồ đã quá hạn</h3>
-                <p className="text-xs text-orange-800 leading-relaxed">
+                <h3 className="text-base font-bold text-slate-900">Mã nhận đồ đã quá hạn</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
                   Thời hạn nhận đồ tại trạm tủ đã kết thúc. Vui lòng liên hệ ban quản trị để được hỗ trợ kiểm tra và nhận lại kiện hàng.
                 </p>
               </div>
@@ -1029,15 +1353,15 @@ export const OrderDetail = () => {
 
       {/* Return Locker Selection Modal */}
       {isReturnModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-5 animate-in fade-in duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-purple-100 text-purple-700 rounded-xl">
-                  <RotateCcw size={18} />
+                <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                  <RotateCcw size={16} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base">Chọn tủ Smart Locker để trả đồ</h3>
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base">Chọn tủ Smart Locker để trả đồ</h3>
                   <p className="text-xs text-slate-500">Hệ thống sẽ cấp một ngăn trống tại trạm bạn chọn</p>
                 </div>
               </div>
@@ -1050,7 +1374,7 @@ export const OrderDetail = () => {
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block">
                 Chọn trạm Smart Locker tiện lợi cho bạn:
               </label>
 
@@ -1059,10 +1383,10 @@ export const OrderDetail = () => {
                   {activeLockers.map((locker) => (
                     <label
                       key={locker.id}
-                      className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition ${
+                      className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition ${
                         selectedReturnLockerId === String(locker.id)
-                          ? 'border-purple-600 bg-purple-50/60 shadow-xs'
-                          : 'border-slate-200 hover:border-purple-300 bg-white'
+                          ? 'border-slate-900 bg-slate-50 shadow-2xs'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
                       }`}
                     >
                       <input
@@ -1071,27 +1395,27 @@ export const OrderDetail = () => {
                         value={locker.id}
                         checked={selectedReturnLockerId === String(locker.id)}
                         onChange={(e) => setSelectedReturnLockerId(e.target.value)}
-                        className="mt-1 text-purple-600 focus:ring-purple-500"
+                        className="mt-1 accent-slate-900"
                       />
                       <div className="flex-1 text-xs">
-                        <strong className="text-slate-900 font-bold block">{locker.name}</strong>
+                        <strong className="text-slate-900 font-semibold block">{locker.name}</strong>
                         <span className="text-slate-500 mt-0.5 block">{locker.location}</span>
                       </div>
                     </label>
                   ))}
                 </div>
               ) : (
-                <div className="p-6 text-center text-xs text-slate-400 bg-slate-50 rounded-2xl">
+                <div className="p-6 text-center text-xs text-slate-400 bg-slate-50 rounded-xl">
                   Đang tìm các trạm tủ Smart Locker khả dụng...
                 </div>
               )}
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setIsReturnModalOpen(false)}
-                className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
+                className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-medium transition"
               >
                 Hủy bỏ
               </button>
@@ -1099,7 +1423,7 @@ export const OrderDetail = () => {
                 type="button"
                 disabled={!selectedReturnLockerId || initiateReturnMutation.isPending}
                 onClick={() => initiateReturnMutation.mutate(Number(selectedReturnLockerId))}
-                className="flex-1 py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/20"
+                className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-medium transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-2xs"
               >
                 {initiateReturnMutation.isPending ? 'Đang cấp ngăn tủ...' : 'Xác nhận giữ ngăn trả'}
               </button>
