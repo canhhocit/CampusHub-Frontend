@@ -474,6 +474,13 @@ export const VerifyIdentity = () => {
                         >
                           Mẫu: Trần Thị Mai (user02)
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => applySampleQr('001205000004||Phạm Đức Huy (K66)|24032005|Nam|Hai Bà Trưng, Hà Nội|15082023')}
+                          className="px-2.5 py-1 bg-white hover:bg-orange-50 border border-slate-200 hover:border-orange-300 text-slate-700 rounded-lg text-[11px] transition"
+                        >
+                          Mẫu: Phạm Đức Huy (user04)
+                        </button>
                       </div>
                       <div className="flex gap-2 mt-2">
                         <input
