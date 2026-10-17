@@ -234,16 +234,16 @@ export const ProductDetail = () => {
 
                   {/* Status Badges Overlay */}
                   <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start pointer-events-none">
-                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-purple-700 text-white shadow-xs">
+                    <span className="px-2.5 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider bg-slate-900/80 backdrop-blur-xs text-white shadow-xs">
                       {product.category?.name}
                     </span>
                     {product.listingType === 'RENT' && (
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-600 text-white shadow-xs">
+                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-800 text-white shadow-xs">
                         Cho thuê
                       </span>
                     )}
                     {product.listingType === 'BOTH' && (
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white shadow-xs">
+                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-800 text-white shadow-xs">
                         Bán & Cho thuê
                       </span>
                     )}
@@ -259,7 +259,7 @@ export const ProductDetail = () => {
 
                   {product.status === 'RENTED' && (
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center pointer-events-none">
-                      <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-purple-600 text-white shadow-md">
+                      <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-slate-900 text-white shadow-md">
                         SẢN PHẨM ĐANG ĐƯỢC THUÊ
                       </span>
                     </div>
@@ -287,8 +287,8 @@ export const ProductDetail = () => {
                           onClick={() => setSelectedMedia({ type: 'IMAGE', url: imgUrl })}
                           className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition ${
                             isActive
-                              ? 'border-purple-600 ring-2 ring-purple-500/30 scale-102'
-                              : 'border-slate-200 hover:border-purple-300 opacity-80 hover:opacity-100'
+                              ? 'border-slate-900 ring-2 ring-slate-900/10 scale-102'
+                              : 'border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100'
                           }`}
                         >
                           <img
@@ -312,11 +312,11 @@ export const ProductDetail = () => {
                         onClick={() => setSelectedMedia({ type: 'VIDEO', url: product.videoUrl! })}
                         className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 bg-slate-900 flex flex-col items-center justify-center text-white transition ${
                           currentMedia?.type === 'VIDEO'
-                            ? 'border-purple-600 ring-2 ring-purple-500/30 scale-102'
-                            : 'border-slate-200 hover:border-purple-300 opacity-80 hover:opacity-100'
+                            ? 'border-slate-900 ring-2 ring-slate-900/10 scale-102'
+                            : 'border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100'
                         }`}
                       >
-                        <Play size={20} className="text-purple-400 fill-purple-400" />
+                        <Play size={20} className="text-white fill-white" />
                         <span className="text-[9px] font-bold text-slate-300 mt-1">Video</span>
                       </button>
                     )}
@@ -328,16 +328,16 @@ export const ProductDetail = () => {
               {product.videoUrl && (
                 <div className="pt-4 border-t border-slate-200/80">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <Film size={14} className="text-purple-600" />
+                    <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                      <Film size={14} className="text-slate-700" />
                       Video giới thiệu sản phẩm
                     </span>
                     <button
                       type="button"
                       onClick={() => setSelectedMedia({ type: 'VIDEO', url: product.videoUrl! })}
-                      className="text-xs font-bold text-purple-600 hover:text-purple-700 flex items-center gap-1"
+                      className="text-xs font-semibold text-slate-700 hover:text-slate-950 flex items-center gap-1"
                     >
-                      <Play size={11} className="fill-purple-600" /> Xem trên khung lớn
+                      <Play size={11} className="fill-slate-700" /> Xem trên khung lớn
                     </button>
                   </div>
                   <div className="rounded-xl overflow-hidden border border-slate-200 bg-black aspect-video max-h-48">
@@ -356,14 +356,14 @@ export const ProductDetail = () => {
               <div className="space-y-6">
                 {/* Title & Metadata */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-purple-600 font-bold uppercase tracking-wider">
+                  <div className="flex items-center gap-2 text-xs text-slate-600 font-semibold uppercase tracking-wider">
                     <Tag size={13} />
                     <span>{product.category?.name}</span>
                     <span>•</span>
                     <span className="text-slate-400">Mã tin: #{product.id}</span>
                   </div>
 
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug">
                     {product.title}
                   </h1>
 
@@ -372,7 +372,7 @@ export const ProductDetail = () => {
                       <Clock size={13} /> Đăng ngày {formatDate(product.createdAt)}
                     </span>
                     <span>•</span>
-                    <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
+                    <span className="inline-flex items-center gap-1 text-slate-700 font-medium">
                       <Lock size={12} /> Hỗ trợ Smart Locker
                     </span>
                   </div>
@@ -387,11 +387,11 @@ export const ProductDetail = () => {
                         <span className="text-xs text-slate-500 block">
                           {product.listingType === 'BOTH' ? 'Giá mua đứt:' : 'Giá chuyển nhượng:'}
                         </span>
-                        <span className="text-3xl font-black text-purple-700 tracking-tight">
+                        <span className="text-3xl font-bold text-slate-900 tracking-tight">
                           {formatPrice(product.price)}
                         </span>
                       </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg">
+                      <span className="text-xs font-medium px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg border border-slate-200">
                         Thanh lý sinh viên
                       </span>
                     </div>
@@ -478,13 +478,13 @@ export const ProductDetail = () => {
                     <div className="flex gap-2">
                       <Link
                         to={`/marketplace/edit/${product.id}`}
-                        className="flex-1 py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-1.5"
+                        className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold text-center transition flex items-center justify-center gap-1.5"
                       >
                         <Edit3 size={14} /> Chỉnh sửa tin
                       </Link>
                       <Link
                         to="/marketplace/my-listings"
-                        className="py-2.5 px-4 bg-white border border-slate-300 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 transition"
+                        className="py-2.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-medium hover:bg-slate-50 transition"
                       >
                         Quản lý tin đăng
                       </Link>
@@ -498,14 +498,14 @@ export const ProductDetail = () => {
                         <button
                           onClick={handlePurchaseClick}
                           disabled={createOrderMutation.isPending}
-                          className="py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                          className="py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                         >
                           <ShoppingBag size={16} /> Mua đứt ({formatPrice(product.price)})
                         </button>
                         <button
                           onClick={handleOpenRentalModal}
                           disabled={createOrderMutation.isPending}
-                          className="py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                          className="py-3 px-4 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                         >
                           <Calendar size={16} /> Thuê đồ ({formatPrice(product.rentPricePerDay || 0)}/ngày)
                         </button>
@@ -514,7 +514,7 @@ export const ProductDetail = () => {
                       <button
                         onClick={handleOpenRentalModal}
                         disabled={createOrderMutation.isPending}
-                        className="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
+                        className="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
                       >
                         <Calendar size={18} /> Thuê sản phẩm qua Tủ Locker ({formatPrice(product.rentPricePerDay || 0)}/ngày)
                       </button>
@@ -522,7 +522,7 @@ export const ProductDetail = () => {
                       <button
                         onClick={handlePurchaseClick}
                         disabled={createOrderMutation.isPending}
-                        className="w-full py-3.5 px-6 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 hover:scale-101"
+                        className="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
                       >
                         {createOrderMutation.isPending ? (
                           <span>Đang khởi tạo đơn hàng qua Locker...</span>
@@ -548,7 +548,7 @@ export const ProductDetail = () => {
                     </p>
                     <Link
                       to="/marketplace"
-                      className="inline-block text-purple-600 font-bold hover:underline"
+                      className="inline-block text-slate-900 font-medium hover:underline"
                     >
                       Tìm sản phẩm tương tự trên Chợ &rarr;
                     </Link>

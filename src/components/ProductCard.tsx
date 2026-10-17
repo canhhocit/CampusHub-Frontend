@@ -25,7 +25,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Link
       to={`/marketplace/${product.id}`}
-      className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-lg hover:-translate-y-0.5 hover:border-purple-300 transition-all flex flex-col h-full"
+      className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300 transition-all flex flex-col h-full"
     >
       {/* Product Image (1:1 Ratio) */}
       <div className="aspect-square bg-slate-100 relative overflow-hidden flex items-center justify-center">
@@ -33,7 +33,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <img
             src={product.imageUrl}
             alt={product.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
+            className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300 ease-out"
             loading="lazy"
           />
         ) : (
@@ -45,30 +45,30 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Top Badges */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 items-start">
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-700/90 backdrop-blur-xs text-white shadow-xs">
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-900/80 backdrop-blur-xs text-white">
             {product.category?.name || 'Khác'}
           </span>
         </div>
 
         {/* Smart Locker Delivery Pill */}
         <div className="absolute bottom-2.5 left-2.5">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-900/80 backdrop-blur-xs text-white">
-            <Lock size={10} className="text-amber-400" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-900/80 backdrop-blur-xs text-slate-100">
+            <Lock size={10} className="text-slate-300" />
             Nhận tại Locker
           </span>
         </div>
 
         {/* Status Overlay if not active */}
         {product.status === 'SOLD' && (
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center">
-            <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-600 text-white shadow-sm">
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center">
+            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-900 text-white border border-slate-700">
               ĐÃ BÁN
             </span>
           </div>
         )}
         {product.status === 'HIDDEN' && (
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center">
-            <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500 text-white shadow-sm">
+            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-800 text-white border border-slate-700">
               TẠM ẨN
             </span>
           </div>
@@ -79,13 +79,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       <div className="p-4 flex-1 flex flex-col justify-between gap-3">
         <div>
           {/* Title with line clamp */}
-          <h3 className="font-semibold text-slate-900 text-sm sm:text-base line-clamp-2 group-hover:text-purple-700 transition-colors leading-snug">
+          <h3 className="font-semibold text-slate-900 text-sm sm:text-base line-clamp-2 group-hover:text-slate-700 transition-colors leading-snug">
             {product.title}
           </h3>
 
           {/* Price */}
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-lg sm:text-xl font-extrabold text-purple-800 tracking-tight">
+            <span className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               {formatPrice(product.price)}
             </span>
           </div>

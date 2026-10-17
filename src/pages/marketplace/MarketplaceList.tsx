@@ -117,47 +117,48 @@ export const MarketplaceList = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-6 sm:py-10 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
-        {/* 1. Hero Showcase Banner (Oreka Pattern adapted for CampusHub) */}
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 text-white p-6 sm:p-10 shadow-lg shadow-indigo-950/10">
+        {/* 1. Hero Showcase Banner - Minimalist Studio Style */}
+        <div className="relative rounded-3xl overflow-hidden bg-white border border-slate-200/90 p-6 sm:p-10 shadow-2xs">
           <div className="relative z-10 max-w-2xl space-y-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-amber-300 text-slate-950 tracking-wide">
-              <Sparkles size={13} /> Sàn chuyển giao chủ mới cho những món đồ hữu ích
-            </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-              Mua Bán & Thanh Lý Đồ Cũ <br className="hidden sm:inline" />
-              Giao Nhận Qua <span className="text-purple-300">Tủ Smart Locker</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200/80">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Sàn trao đổi sinh viên CampusHub
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-[1.18]">
+              Mua bán & Thanh lý đồ cũ <br className="hidden sm:inline" />
+              Giao nhận qua <span className="underline decoration-slate-300 underline-offset-8">Smart Locker</span>
             </h1>
-            <p className="text-slate-200 text-sm sm:text-base leading-relaxed max-w-xl">
-              Tiết kiệm chi phí, mua bán đồ dùng trong trường và nhận hàng 24/7 tại các tủ đồ thông minh.
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-xl">
+              Tiết kiệm chi phí, trao đổi an tâm và chủ động nhận hàng 24/7 tại các điểm tủ thông minh trong khuôn viên trường.
             </p>
 
             {/* Quick feature tags */}
             <div className="pt-2 flex flex-wrap gap-2 text-xs">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 backdrop-blur-xs text-purple-200 border border-white/10">
-                <Lock size={12} className="text-amber-400" /> Nhận đồ bảo mật bằng mã PIN
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-700 border border-slate-200/80 font-medium">
+                <Lock size={12} className="text-slate-500" /> Nhận đồ bảo mật bằng mã PIN
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 backdrop-blur-xs text-purple-200 border border-white/10">
-                <ShieldCheck size={12} className="text-emerald-400" /> Xác minh CCCD người bán
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-700 border border-slate-200/80 font-medium">
+                <ShieldCheck size={12} className="text-slate-500" /> Xác minh danh tính người bán
               </span>
             </div>
           </div>
 
-          {/* Decorative graphic element */}
-          <div className="absolute right-0 bottom-0 opacity-10 sm:opacity-20 translate-x-10 translate-y-10 pointer-events-none">
-            <ShoppingBag size={280} />
+          {/* Subtle decorative graphic element */}
+          <div className="absolute right-4 bottom-2 opacity-[0.04] text-slate-900 pointer-events-none hidden md:block">
+            <ShoppingBag size={240} strokeWidth={1} />
           </div>
         </div>
 
-        {/* 2. Category Quick Chips / Carousel (Inspired by Oreka Categories) */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-slate-700 tracking-wide">
+        {/* 2. Category Quick Chips / Carousel */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs">
+          <div className="flex items-center justify-between mb-3.5">
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Khám phá theo danh mục
             </h2>
             {categoryId && (
               <button
                 onClick={() => handleCategorySelect('')}
-                className="text-xs text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-1"
+                className="text-xs text-slate-600 hover:text-slate-900 font-medium flex items-center gap-1 transition"
               >
                 <RotateCcw size={12} /> Xem tất cả danh mục
               </button>
@@ -167,10 +168,10 @@ export const MarketplaceList = () => {
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
             <button
               onClick={() => handleCategorySelect('')}
-              className={`shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 ${
+              className={`shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2 ${
                 !categoryId
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/70'
               }`}
             >
               <ShoppingBag size={14} />
@@ -184,10 +185,10 @@ export const MarketplaceList = () => {
                 <button
                   key={cat.id}
                   onClick={() => handleCategorySelect(cat.id.toString())}
-                  className={`shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 ${
+                  className={`shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2 ${
                     isSelected
-                      ? 'bg-purple-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/70'
                   }`}
                 >
                   <Icon size={14} />
@@ -199,7 +200,7 @@ export const MarketplaceList = () => {
         </div>
 
         {/* 3. Search & Filters Control Bar */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-4">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs space-y-4">
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <form onSubmit={handleSearchSubmit} className="flex-1 relative flex items-center">
@@ -208,12 +209,12 @@ export const MarketplaceList = () => {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Tìm tên hoặc mô tả sản phẩm..."
-                className="w-full pl-10 pr-28 py-3 border border-slate-300 rounded-xl text-sm sm:text-base focus:outline-hidden focus:ring-2 focus:ring-purple-500 bg-slate-50 focus:bg-white transition"
+                className="w-full pl-10 pr-28 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 bg-slate-50 focus:bg-white transition"
               />
               <Search className="absolute left-3 text-slate-400" size={16} />
               <button
                 type="submit"
-                className="absolute right-1 px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-sm font-bold transition"
+                className="absolute right-1 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition"
               >
                 Tìm kiếm
               </button>
@@ -222,7 +223,7 @@ export const MarketplaceList = () => {
             {/* Filter & Sort Controls */}
             <div className="flex flex-wrap items-center gap-2.5">
               {/* Category Select Dropdown */}
-              <div className="flex items-center gap-1 bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1 text-xs">
+              <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs">
                 <SlidersHorizontal size={13} className="text-slate-500" />
                 <select
                   value={categoryId}
@@ -239,7 +240,7 @@ export const MarketplaceList = () => {
               </div>
 
               {/* Sort Dropdown */}
-              <div className="flex items-center gap-1 bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1 text-xs">
+              <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs">
                 <ArrowUpDown size={13} className="text-slate-500" />
                 <select
                   value={`${sort}-${direction}`}
@@ -266,9 +267,10 @@ export const MarketplaceList = () => {
               )}
 
               {/* Post New Listing Action */}
+              {/* Post New Listing Action */}
               <Link
                 to="/marketplace/new"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition shadow-xs"
               >
                 <Plus size={15} />
                 Đăng tin bán
@@ -277,17 +279,17 @@ export const MarketplaceList = () => {
           </div>
 
           {/* Active Filter Indicators & Total Elements */}
-          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-sm text-slate-600 gap-2">
+          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs sm:text-sm text-slate-600 gap-2">
             <div className="flex items-center gap-2">
               <span>
                 Tìm thấy{' '}
-                <strong className="text-slate-900 font-bold">
+                <strong className="text-slate-900 font-semibold">
                   {productsPage?.totalElements || 0}
                 </strong>{' '}
                 sản phẩm
               </span>
               {search && (
-                <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-medium border border-purple-200">
+                <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium border border-slate-200">
                   Từ khóa: "{search}"
                 </span>
               )}
@@ -296,7 +298,7 @@ export const MarketplaceList = () => {
             {hasActiveFilters && (
               <button
                 onClick={handleResetFilters}
-                className="text-purple-600 hover:underline font-medium"
+                className="text-slate-600 hover:text-slate-950 underline font-medium"
               >
                 Xóa tất cả bộ lọc
               </button>
@@ -326,15 +328,15 @@ export const MarketplaceList = () => {
             </p>
             <button
               onClick={() => refetch()}
-              className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 transition"
+              className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition"
             >
               Thử lại
             </button>
           </div>
         ) : productsPage?.content.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4 shadow-xs">
-            <div className="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 mx-auto flex items-center justify-center">
-              <ShoppingBag size={32} />
+          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4 shadow-2xs">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-700 mx-auto flex items-center justify-center">
+              <ShoppingBag size={28} />
             </div>
             <div className="space-y-1">
               <h3 className="text-base font-bold text-slate-900">
@@ -348,14 +350,14 @@ export const MarketplaceList = () => {
               {hasActiveFilters && (
                 <button
                   onClick={handleResetFilters}
-                  className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50"
                 >
                   Xóa bộ lọc
                 </button>
               )}
               <Link
                 to="/marketplace/new"
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs"
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs"
               >
                 Đăng tin bán ngay
               </Link>
@@ -371,7 +373,7 @@ export const MarketplaceList = () => {
 
         {/* 5. Pagination */}
         {productsPage && productsPage.totalPages > 1 && (
-          <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
             <button
               disabled={page <= 0}
               onClick={() =>
@@ -380,7 +382,7 @@ export const MarketplaceList = () => {
                   return prev;
                 })
               }
-              className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition"
+              className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition"
             >
               Trang trước
             </button>
@@ -395,45 +397,45 @@ export const MarketplaceList = () => {
                   return prev;
                 })
               }
-              className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition"
+              className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition"
             >
               Trang sau
             </button>
           </div>
         )}
 
-        {/* 6. Marketplace Trust Factors (Inspired by Oreka Value Highlights) */}
+        {/* 6. Marketplace Trust Factors - Clean Minimalist */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-slate-200 text-slate-700">
-          <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-start gap-3.5">
-            <div className="p-2.5 rounded-xl bg-purple-50 text-purple-700 shrink-0">
-              <Lock size={20} />
+          <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-2xs flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-800 shrink-0">
+              <Lock size={18} />
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-slate-900">Mạng Lưới Smart Locker</h4>
+              <h4 className="text-sm font-semibold text-slate-900">Mạng Lưới Smart Locker</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Người bán gửi đồ vào ngăn tủ, người mua nhận đồ 24/7 bằng mã OTP 6 số bảo mật.
+                Người bán gửi đồ vào ngăn tủ, người mua nhận đồ 24/7 bằng mã PIN bảo mật.
               </p>
             </div>
           </div>
 
-          <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-start gap-3.5">
-            <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700 shrink-0">
-              <ShieldCheck size={20} />
+          <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-2xs flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-800 shrink-0">
+              <ShieldCheck size={18} />
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-slate-900">Xét duyệt danh tính thành viên</h4>
+              <h4 className="text-sm font-semibold text-slate-900">Xét duyệt danh tính thành viên</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Tất cả người bán đều được yêu cầu xác thực CCCD trước khi đăng bán, hỗ trợ đánh giá độ tin cậy của tài khoản.
+                Người bán được yêu cầu xác thực CCCD trước khi đăng bán, đảm bảo an tâm và minh bạch.
               </p>
             </div>
           </div>
 
-          <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-start gap-3.5">
-            <div className="p-2.5 rounded-xl bg-amber-50 text-amber-700 shrink-0">
-              <Sparkles size={20} />
+          <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-2xs flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-slate-100 text-slate-800 shrink-0">
+              <Sparkles size={18} />
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-slate-900">Tiết Kiệm & Bền Vững</h4>
+              <h4 className="text-sm font-semibold text-slate-900">Tiết Kiệm & Bền Vững</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Giúp giáo trình, tài liệu và đồ dùng học tập tìm được chủ nhân mới với mức giá tiết kiệm.
               </p>
