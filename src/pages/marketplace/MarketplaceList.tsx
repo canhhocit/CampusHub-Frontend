@@ -115,67 +115,142 @@ export const MarketplaceList = () => {
   const hasActiveFilters = Boolean(categoryId || search);
 
   return (
-    <div className="min-h-screen bg-slate-50 py-6 sm:py-10 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
-        {/* 1. Hero Showcase Banner - Minimalist Studio Style */}
-        <div className="relative rounded-3xl overflow-hidden bg-white border border-slate-200/90 p-6 sm:p-10 shadow-2xs">
-          <div className="relative z-10 max-w-2xl space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200/80">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              Sàn trao đổi sinh viên CampusHub
+    <div className="min-h-screen bg-[#f8f9fa] py-5 sm:py-8 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* 1. Oreka-inspired Hero Showcase Banner */}
+        <div className="bg-gradient-to-r from-orange-50/90 via-amber-50/40 to-white rounded-2xl border border-orange-100 p-6 sm:p-8 shadow-xs">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-orange-100/80 text-orange-800 border border-orange-200">
+                <Sparkles size={13} className="text-orange-600" /> Nền tảng mua bán đồ cũ sinh viên & Tủ Smart Locker
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                "Cũ người, mới ta" <br className="hidden sm:inline" />
+                Giao nhận an toàn qua <span className="text-[#eb6e34]">Smart Locker</span>
+              </h1>
+              <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                Tiết kiệm chi phí, trao gửi giáo trình & đồ dùng KTX không còn nhu cầu sử dụng. Hoàn toàn tự động, không lo bom hàng, nhận đồ 24/7 với mã PIN bảo mật.
+              </p>
+              <div className="pt-1 flex flex-wrap gap-3">
+                <Link
+                  to="/marketplace/new"
+                  className="px-5 py-2.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg text-sm font-semibold shadow-xs transition flex items-center gap-2"
+                >
+                  <Plus size={16} />
+                  Đăng bán ngay (Miễn phí)
+                </Link>
+                <a
+                  href="#how-it-works"
+                  className="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium transition"
+                >
+                  Quy trình Smart Locker
+                </a>
+              </div>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-[1.18]">
-              Mua bán & Thanh lý đồ cũ <br className="hidden sm:inline" />
-              Giao nhận qua <span className="underline decoration-slate-300 underline-offset-8">Smart Locker</span>
-            </h1>
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-xl">
-              Tiết kiệm chi phí, trao đổi an tâm và chủ động nhận hàng 24/7 tại các điểm tủ thông minh trong khuôn viên trường.
-            </p>
 
-            {/* Quick feature tags */}
-            <div className="pt-2 flex flex-wrap gap-2 text-xs">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-700 border border-slate-200/80 font-medium">
-                <Lock size={12} className="text-slate-500" /> Nhận đồ bảo mật bằng mã PIN
+            {/* Right: 3-Step Process Graphic (Oreka-style visual trust card) */}
+            <div id="how-it-works" className="lg:col-span-5 bg-white p-4 sm:p-5 rounded-xl border border-slate-200/90 shadow-2xs space-y-3">
+              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block border-b border-slate-100 pb-2">
+                3 Bước giao nhận an tâm
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-700 border border-slate-200/80 font-medium">
-                <ShieldCheck size={12} className="text-slate-500" /> Xác minh danh tính người bán
-              </span>
+              <div className="space-y-2.5 text-xs">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center shrink-0 text-xs">
+                    1
+                  </div>
+                  <div>
+                    <strong className="text-slate-900 block font-semibold">Đăng bán & Đặt đồ vào tủ</strong>
+                    <span className="text-slate-500">Người bán tạo đơn, mang đồ gửi vào tủ Locker tại sảnh trường/KTX.</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center shrink-0 text-xs">
+                    2
+                  </div>
+                  <div>
+                    <strong className="text-slate-900 block font-semibold">Thanh toán bảo đảm qua Escrow</strong>
+                    <span className="text-slate-500">Hệ thống tạm giữ tiền, cam kết hoàn 100% nếu sản phẩm sai mô tả.</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center shrink-0 text-xs">
+                    3
+                  </div>
+                  <div>
+                    <strong className="text-slate-900 block font-semibold">Nhận đồ 24/7 bằng mã PIN</strong>
+                    <span className="text-slate-500">Người mua nhập PIN mở tủ lấy đồ, người bán nhận tiền tự động.</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-
-          {/* Subtle decorative graphic element */}
-          <div className="absolute right-4 bottom-2 opacity-[0.04] text-slate-900 pointer-events-none hidden md:block">
-            <ShoppingBag size={240} strokeWidth={1} />
           </div>
         </div>
 
-        {/* 2. Category Quick Chips / Carousel */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs">
-          <div className="flex items-center justify-between mb-3.5">
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Khám phá theo danh mục
+        {/* 2. Oreka Value Trust Proposition Bar (3 Core Commitments) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-orange-50 text-[#eb6e34] flex items-center justify-center shrink-0">
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">Cam kết an toàn 100%</h4>
+              <p className="text-[11px] text-slate-500">Tiền được bảo lưu trong hệ thống cho tới khi nhận hàng</p>
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Lock size={20} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">Giao nhận tủ thông minh</h4>
+              <p className="text-[11px] text-slate-500">Không cần gặp mặt trực tiếp, chủ động 24/7 mọi lúc</p>
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">Tiết kiệm & Sống xanh</h4>
+              <p className="text-[11px] text-slate-500">Tái sinh vòng đời đồ dùng sinh viên, giảm thiểu rác thải</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Danh mục đa dạng (Oreka Category Grid Section) */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-2xs space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <ShoppingBag size={16} className="text-[#eb6e34]" />
+              Danh mục đa dạng
             </h2>
             {categoryId && (
               <button
                 onClick={() => handleCategorySelect('')}
-                className="text-xs text-slate-600 hover:text-slate-900 font-medium flex items-center gap-1 transition"
+                className="text-xs text-[#eb6e34] hover:text-[#d85e25] font-semibold flex items-center gap-1 transition"
               >
                 <RotateCcw size={12} /> Xem tất cả danh mục
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          {/* Oreka category icon buttons grid */}
+          <div className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-7 gap-2.5">
             <button
               onClick={() => handleCategorySelect('')}
-              className={`shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2 ${
+              className={`p-3 rounded-lg border text-center transition flex flex-col items-center justify-center gap-1.5 ${
                 !categoryId
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/70'
+                  ? 'border-[#eb6e34] bg-orange-50/50 text-[#eb6e34] font-bold shadow-2xs'
+                  : 'border-slate-200 hover:border-orange-300 hover:bg-slate-50 text-slate-700 font-medium'
               }`}
             >
-              <ShoppingBag size={14} />
-              Tất cả sản phẩm
+              <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700">
+                <ShoppingBag size={18} />
+              </div>
+              <span className="text-xs truncate w-full">Tất cả</span>
             </button>
 
             {categories?.map((cat) => {
@@ -185,22 +260,24 @@ export const MarketplaceList = () => {
                 <button
                   key={cat.id}
                   onClick={() => handleCategorySelect(cat.id.toString())}
-                  className={`shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2 ${
+                  className={`p-3 rounded-lg border text-center transition flex flex-col items-center justify-center gap-1.5 ${
                     isSelected
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/70'
+                      ? 'border-[#eb6e34] bg-orange-50/50 text-[#eb6e34] font-bold shadow-2xs'
+                      : 'border-slate-200 hover:border-orange-300 hover:bg-slate-50 text-slate-700 font-medium'
                   }`}
                 >
-                  <Icon size={14} />
-                  {cat.name}
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center ${isSelected ? 'bg-orange-100 text-[#eb6e34]' : 'bg-slate-100 text-slate-700'}`}>
+                    <Icon size={18} />
+                  </div>
+                  <span className="text-xs truncate w-full">{cat.name}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* 3. Search & Filters Control Bar */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs space-y-4">
+        {/* 4. Search & Filters Control Bar */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs space-y-3.5">
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <form onSubmit={handleSearchSubmit} className="flex-1 relative flex items-center">
@@ -208,13 +285,13 @@ export const MarketplaceList = () => {
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Tìm tên hoặc mô tả sản phẩm..."
-                className="w-full pl-10 pr-28 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 bg-slate-50 focus:bg-white transition"
+                placeholder="Tìm kiếm sản phẩm, giáo trình, laptop, đồ KTX..."
+                className="w-full pl-9 pr-24 py-2 border border-slate-300 rounded-lg text-sm focus:outline-hidden focus:border-[#eb6e34] focus:ring-1 focus:ring-[#eb6e34] bg-white transition"
               />
               <Search className="absolute left-3 text-slate-400" size={16} />
               <button
                 type="submit"
-                className="absolute right-1 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition"
+                className="absolute right-1 px-3.5 py-1.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-md text-xs font-semibold transition"
               >
                 Tìm kiếm
               </button>
@@ -223,7 +300,7 @@ export const MarketplaceList = () => {
             {/* Filter & Sort Controls */}
             <div className="flex flex-wrap items-center gap-2.5">
               {/* Category Select Dropdown */}
-              <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs">
+              <div className="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs">
                 <SlidersHorizontal size={13} className="text-slate-500" />
                 <select
                   value={categoryId}
@@ -240,7 +317,7 @@ export const MarketplaceList = () => {
               </div>
 
               {/* Sort Dropdown */}
-              <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs">
+              <div className="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs">
                 <ArrowUpDown size={13} className="text-slate-500" />
                 <select
                   value={`${sort}-${direction}`}
@@ -258,19 +335,18 @@ export const MarketplaceList = () => {
               {hasActiveFilters && (
                 <button
                   onClick={handleResetFilters}
-                  className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition text-xs flex items-center gap-1"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition text-xs flex items-center gap-1"
                   title="Xóa bộ lọc"
                 >
-                  <RotateCcw size={14} />
+                  <RotateCcw size={13} />
                   <span className="hidden sm:inline">Đặt lại</span>
                 </button>
               )}
 
               {/* Post New Listing Action */}
-              {/* Post New Listing Action */}
               <Link
                 to="/marketplace/new"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg text-xs font-semibold transition shadow-xs"
               >
                 <Plus size={15} />
                 Đăng tin bán
@@ -306,70 +382,82 @@ export const MarketplaceList = () => {
           </div>
         </div>
 
-        {/* 4. Products Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {Array.from({ length: 8 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3 animate-pulse"
-              >
-                <div className="aspect-square bg-slate-200 rounded-xl" />
-                <div className="h-4 bg-slate-200 rounded w-3/4" />
-                <div className="h-4 bg-slate-200 rounded w-1/2" />
-                <div className="h-3 bg-slate-100 rounded w-full pt-2" />
-              </div>
-            ))}
+        {/* 4. Products Grid Section (Oreka 'Gợi ý cho bạn hôm nay') */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#eb6e34]"></span>
+              Gợi ý cho bạn hôm nay
+            </h2>
+            <span className="text-xs text-slate-500">
+              Đồ dùng sinh viên thanh lý giá tốt
+            </span>
           </div>
-        ) : isError ? (
-          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center space-y-3">
-            <p className="text-rose-700 font-semibold text-sm">
-              Không thể tải danh sách sản phẩm lúc này.
-            </p>
-            <button
-              onClick={() => refetch()}
-              className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition"
-            >
-              Thử lại
-            </button>
-          </div>
-        ) : productsPage?.content.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4 shadow-2xs">
-            <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-700 mx-auto flex items-center justify-center">
-              <ShoppingBag size={28} />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900">
-                Không tìm thấy sản phẩm nào
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-                Hiện chưa có món đồ nào phù hợp với bộ lọc hiện tại. Bạn có thể thử tìm từ khóa khác hoặc là người đầu tiên đăng bán món đồ này!
-              </p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-3 pt-2">
-              {hasActiveFilters && (
-                <button
-                  onClick={handleResetFilters}
-                  className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50"
+
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+              {Array.from({ length: 8 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-xl border border-slate-200 p-3 space-y-3 animate-pulse"
                 >
-                  Xóa bộ lọc
-                </button>
-              )}
-              <Link
-                to="/marketplace/new"
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs"
-              >
-                Đăng tin bán ngay
-              </Link>
+                  <div className="aspect-square bg-slate-200 rounded-lg" />
+                  <div className="h-4 bg-slate-200 rounded w-3/4" />
+                  <div className="h-4 bg-slate-200 rounded w-1/2" />
+                  <div className="h-3 bg-slate-100 rounded w-full pt-2" />
+                </div>
+              ))}
             </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {productsPage?.content.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
+          ) : isError ? (
+            <div className="bg-rose-50 border border-rose-200 rounded-xl p-8 text-center space-y-3">
+              <p className="text-rose-700 font-semibold text-sm">
+                Không thể tải danh sách sản phẩm lúc này.
+              </p>
+              <button
+                onClick={() => refetch()}
+                className="px-4 py-2 bg-[#eb6e34] text-white rounded-lg text-xs font-semibold hover:bg-[#d85e25] transition"
+              >
+                Thử lại
+              </button>
+            </div>
+          ) : productsPage?.content.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-4 shadow-2xs">
+              <div className="w-14 h-14 rounded-2xl bg-orange-50 text-[#eb6e34] mx-auto flex items-center justify-center">
+                <ShoppingBag size={28} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-slate-900">
+                  Không tìm thấy sản phẩm nào
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
+                  Hiện chưa có món đồ nào phù hợp với bộ lọc hiện tại. Bạn có thể thử tìm từ khóa khác hoặc là người đầu tiên đăng bán món đồ này!
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3 pt-2">
+                {hasActiveFilters && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Xóa bộ lọc
+                  </button>
+                )}
+                <Link
+                  to="/marketplace/new"
+                  className="px-4 py-2 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg text-xs font-semibold shadow-xs"
+                >
+                  Đăng tin bán ngay
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+              {productsPage?.content.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* 5. Pagination */}
         {productsPage && productsPage.totalPages > 1 && (

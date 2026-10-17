@@ -379,7 +379,7 @@ export const ProductDetail = () => {
                 </div>
 
                 {/* Price Display */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="p-4 rounded-xl bg-orange-50/50 border border-orange-100 space-y-3">
                   {/* Purchase Price if applicable */}
                   {isForSale && (
                     <div className="flex items-baseline justify-between">
@@ -387,11 +387,11 @@ export const ProductDetail = () => {
                         <span className="text-xs text-slate-500 block">
                           {product.listingType === 'BOTH' ? 'Giá mua đứt:' : 'Giá chuyển nhượng:'}
                         </span>
-                        <span className="text-3xl font-bold text-slate-900 tracking-tight">
+                        <span className="text-3xl font-extrabold text-[#eb6e34] tracking-tight">
                           {formatPrice(product.price)}
                         </span>
                       </div>
-                      <span className="text-xs font-medium px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg border border-slate-200">
+                      <span className="text-xs font-semibold px-2.5 py-1 bg-white text-orange-700 rounded-md border border-orange-200">
                         Thanh lý sinh viên
                       </span>
                     </div>
@@ -498,14 +498,14 @@ export const ProductDetail = () => {
                         <button
                           onClick={handlePurchaseClick}
                           disabled={createOrderMutation.isPending}
-                          className="py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                          className="py-3 px-4 bg-[#eb6e34] hover:bg-[#d85e25] text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                         >
                           <ShoppingBag size={16} /> Mua đứt ({formatPrice(product.price)})
                         </button>
                         <button
                           onClick={handleOpenRentalModal}
                           disabled={createOrderMutation.isPending}
-                          className="py-3 px-4 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                          className="py-3 px-4 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                         >
                           <Calendar size={16} /> Thuê đồ ({formatPrice(product.rentPricePerDay || 0)}/ngày)
                         </button>
@@ -514,7 +514,7 @@ export const ProductDetail = () => {
                       <button
                         onClick={handleOpenRentalModal}
                         disabled={createOrderMutation.isPending}
-                        className="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
+                        className="w-full py-3 px-6 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
                       >
                         <Calendar size={18} /> Thuê sản phẩm qua Tủ Locker ({formatPrice(product.rentPricePerDay || 0)}/ngày)
                       </button>
@@ -522,7 +522,7 @@ export const ProductDetail = () => {
                       <button
                         onClick={handlePurchaseClick}
                         disabled={createOrderMutation.isPending}
-                        className="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
+                        className="w-full py-3.5 px-6 bg-[#eb6e34] hover:bg-[#d85e25] text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
                       >
                         {createOrderMutation.isPending ? (
                           <span>Đang khởi tạo đơn hàng qua Locker...</span>
