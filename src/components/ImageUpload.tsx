@@ -7,9 +7,18 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   error?: string;
   onFileSelected?: (file: File) => void;
+  label?: string;
+  hideLabel?: boolean;
 }
 
-export const ImageUpload = ({ value, onChange, error, onFileSelected }: ImageUploadProps) => {
+export const ImageUpload = ({
+  value,
+  onChange,
+  error,
+  onFileSelected,
+  label = 'Hình ảnh',
+  hideLabel = false,
+}: ImageUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -31,7 +40,7 @@ export const ImageUpload = ({ value, onChange, error, onFileSelected }: ImageUpl
       const url = await uploadImageToCloudinary(file);
       onChange(url);
     } catch (err: any) {
-      setUploadError(err.message || 'Không thể tải ảnh lên Cloudinary.');
+      setUploadError(err.message || 'Không thể tải ảnh lên.');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -76,69 +85,68 @@ export const ImageUpload = ({ value, onChange, error, onFileSelected }: ImageUpl
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <label className="block text-sm font-semibold text-gray-700">
-          Hình ảnh sản phẩm
-        </label>
-        <button
-          type="button"
-          onClick={() => setShowUrlInput(!showUrlInput)}
-          className="text-xs text-purple-600 hover:text-purple-700 font-medium inline-flex items-center gap-1 transition"
-        >
-          <Link2 size={13} />
-          {showUrlInput ? 'Ẩn nhập URL' : 'Hoặc dán URL ảnh'}
-        </button>
-      </div>
+    <div className="space-y-2">
+      {!hideLabel && (
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-semibold text-slate-700">
+            {label}
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowUrlInput(!showUrlInput)}
+            className="text-xs text-slate-500 hover:text-slate-800 font-medium inline-flex items-center gap-1 transition"
+          >
+            <Link2 size={13} />
+            {showUrlInput ? 'Ẩn nhập URL' : 'Dán URL ảnh'}
+          </button>
+        </div>
+      )}
 
       {/* Manual URL Input (Collapsible) */}
       {showUrlInput && (
-        <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 animate-in fade-in duration-200">
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Dán liên kết ảnh trực tiếp:
-          </label>
+        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 animate-in fade-in duration-150">
           <input
             type="text"
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="https://res.cloudinary.com/... hoặc link ảnh online"
-            className="w-full text-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-hidden"
+            placeholder="Dán link ảnh (https://...)"
+            className="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg focus:border-[#eb6e34] focus:ring-1 focus:ring-[#eb6e34] focus:outline-hidden bg-white"
           />
         </div>
       )}
 
       {/* Image Preview if available */}
       {value ? (
-        <div className="relative rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden group">
-          <div className="relative h-64 sm:h-72 w-full flex items-center justify-center bg-gray-900/5">
+        <div className="relative rounded-xl border border-slate-200 bg-slate-50 overflow-hidden group">
+          <div className="relative h-56 sm:h-64 w-full flex items-center justify-center bg-slate-900/5">
             <img
               src={value}
-              alt="Ảnh sản phẩm"
+              alt="Ảnh đính kèm"
               className="w-full h-full object-contain"
             />
-            <div className="absolute top-3 left-3 bg-emerald-600/90 text-white text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5 shadow-xs backdrop-blur-xs">
-              <CheckCircle2 size={13} />
-              Ảnh đã sẵn sàng
+            <div className="absolute top-2.5 left-2.5 bg-slate-900/80 text-white text-[11px] px-2 py-0.5 rounded-md font-medium flex items-center gap-1 backdrop-blur-xs">
+              <CheckCircle2 size={12} className="text-emerald-400" />
+              Đã tải ảnh
             </div>
             <button
               type="button"
               onClick={handleRemove}
-              className="absolute top-3 right-3 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition shadow-md"
+              className="absolute top-2.5 right-2.5 p-1.5 bg-slate-900/70 hover:bg-rose-600 text-white rounded-md transition"
               title="Xóa ảnh này"
             >
-              <X size={16} />
+              <X size={14} />
             </button>
           </div>
 
-          <div className="p-3 bg-white border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-            <span className="truncate max-w-xs">{value}</span>
+          <div className="p-2.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+            <span className="truncate max-w-xs text-[11px] font-mono">{value}</span>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="text-purple-600 hover:text-purple-700 font-semibold ml-2 shrink-0 hover:underline"
+              className="text-slate-700 hover:text-[#eb6e34] font-medium ml-2 shrink-0 transition"
             >
-              Đổi ảnh khác
+              Đổi ảnh
             </button>
           </div>
         </div>
@@ -149,33 +157,29 @@ export const ImageUpload = ({ value, onChange, error, onFileSelected }: ImageUpl
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center ${
+          className={`border border-dashed rounded-xl p-5 text-center cursor-pointer transition flex flex-col items-center justify-center ${
             isDragging
-              ? 'border-purple-500 bg-purple-50/60'
-              : 'border-gray-300 hover:border-purple-400 bg-white hover:bg-gray-50/50'
+              ? 'border-[#eb6e34] bg-orange-50/40'
+              : 'border-slate-300 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50'
           } ${isUploading ? 'opacity-70 pointer-events-none' : ''}`}
         >
           {isUploading ? (
-            <div className="py-6 flex flex-col items-center">
-              <Loader2 className="animate-spin text-purple-600 mb-3" size={36} />
-              <p className="text-sm font-semibold text-gray-800">
-                Đang tải ảnh lên Cloudinary...
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Quá trình này chỉ mất 1-2 giây
+            <div className="py-4 flex flex-col items-center">
+              <Loader2 className="animate-spin text-[#eb6e34] mb-2" size={28} />
+              <p className="text-xs font-semibold text-slate-700">
+                Đang tải ảnh lên...
               </p>
             </div>
           ) : (
-            <div className="py-4 flex flex-col items-center">
-              <div className="p-3 bg-purple-100 text-purple-600 rounded-full mb-3">
-                <UploadCloud size={28} />
+            <div className="py-2 flex flex-col items-center">
+              <div className="p-2 bg-slate-100 text-slate-500 rounded-xl mb-2">
+                <UploadCloud size={22} />
               </div>
-              <p className="text-sm font-semibold text-gray-800">
-                Kéo thả ảnh vào đây hoặc{' '}
-                <span className="text-purple-600 hover:underline">chọn từ máy tính</span>
+              <p className="text-xs font-medium text-slate-700">
+                Kéo thả ảnh vào đây hoặc <span className="text-[#eb6e34] font-semibold hover:underline">tải từ máy tính</span>
               </p>
-              <p className="text-xs text-gray-500 mt-1.5 max-w-sm">
-                Hỗ trợ định dạng JPG, PNG, WEBP, GIF (Dung lượng tối đa 5MB). Ảnh được tải trực tiếp lên Cloudinary.
+              <p className="text-[11px] text-slate-400 mt-1">
+                Hỗ trợ JPG, PNG, WEBP (Tối đa 5MB)
               </p>
             </div>
           )}
@@ -193,26 +197,25 @@ export const ImageUpload = ({ value, onChange, error, onFileSelected }: ImageUpl
 
       {/* Upload Error Banner */}
       {uploadError && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700 animate-in fade-in">
-          <AlertCircle size={16} className="shrink-0 mt-0.5 text-red-600" />
+        <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2 text-xs text-rose-700">
+          <AlertCircle size={15} className="shrink-0 mt-0.5 text-rose-600" />
           <div className="flex-1">
-            <strong className="font-semibold">Lỗi tải ảnh: </strong>
             <span>{uploadError}</span>
           </div>
           <button
             type="button"
             onClick={() => setUploadError(null)}
-            className="text-red-500 hover:text-red-700"
+            className="text-rose-500 hover:text-rose-700"
           >
-            <X size={14} />
+            <X size={13} />
           </button>
         </div>
       )}
 
       {/* Validation Form Error */}
       {error && !uploadError && (
-        <p className="text-xs text-red-600 flex items-center gap-1">
-          <AlertCircle size={13} /> {error}
+        <p className="text-xs text-rose-600 flex items-center gap-1">
+          <AlertCircle size={12} /> {error}
         </p>
       )}
     </div>
