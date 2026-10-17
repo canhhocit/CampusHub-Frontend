@@ -64,23 +64,23 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 gap-4">
           {/* Logo & Brand */}
-          <div className="flex items-center gap-6 shrink-0">
-            <Link to={isAdmin ? '/admin/dashboard' : '/'} className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-[#eb6e34] flex items-center justify-center text-white shadow-xs group-hover:bg-[#d85e25] transition">
-                <Package size={20} />
+          <div className="flex items-center gap-3 xl:gap-5 shrink-0">
+            <Link to={isAdmin ? '/admin/dashboard' : '/'} className="flex items-center gap-2 group shrink-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#eb6e34] flex items-center justify-center text-white shadow-xs group-hover:bg-[#d85e25] transition shrink-0">
+                <Package size={18} />
               </div>
               <div>
-                <span className="font-extrabold text-slate-900 text-lg tracking-tight flex items-center gap-1.5">
+                <span className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight flex items-center gap-1.5 leading-none">
                   CampusHub
                 </span>
-                <span className="hidden sm:block text-[11px] text-slate-500 font-medium">
+                <span className="hidden xl:block text-[10px] text-slate-500 font-medium mt-0.5">
                   Mua bán đồ cũ & Smart Locker
                 </span>
               </div>
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1">
               {navLinks.map((link) => {
                 if (link.authOnly && !isAuthenticated) return null;
                 const Icon = link.icon;
@@ -89,13 +89,13 @@ export const Navbar = () => {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                    className={`inline-flex items-center gap-1 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition ${
                       isActive
                         ? 'bg-orange-50 text-orange-700 font-semibold border border-orange-200'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
-                    <Icon size={15} />
+                    <Icon size={14} />
                     {link.label}
                   </Link>
                 );
@@ -103,79 +103,84 @@ export const Navbar = () => {
             </nav>
           </div>
 
-          {/* Center Global Search (Oreka Pattern) */}
+          {/* Center Global Search (Oreka Pattern - Flexbox Input Group) */}
           <form
             onSubmit={handleGlobalSearch}
-            className="hidden md:flex flex-1 max-w-md relative items-center"
+            className="hidden md:flex flex-1 min-w-[160px] max-w-md items-center"
           >
-            <input
-              type="text"
-              value={navSearch}
-              onChange={(e) => setNavSearch(e.target.value)}
-              placeholder="Tìm giáo trình, laptop, đồ KTX, tài liệu..."
-              className="w-full pl-9 pr-20 py-2 border border-slate-300 rounded-lg text-sm focus:outline-hidden focus:border-[#eb6e34] focus:ring-1 focus:ring-[#eb6e34] bg-white transition"
-            />
-            <Search className="absolute left-3 text-slate-400" size={16} />
-            <button
-              type="submit"
-              className="absolute right-1 px-3.5 py-1.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-md text-xs font-semibold transition"
-            >
-              Tìm kiếm
-            </button>
+            <div className="flex w-full items-center bg-slate-50 hover:bg-white focus-within:bg-white border border-slate-300 focus-within:border-[#eb6e34] focus-within:ring-1 focus-within:ring-[#eb6e34] rounded-lg overflow-hidden transition shadow-2xs">
+              <div className="pl-2.5 text-slate-400 shrink-0">
+                <Search size={15} />
+              </div>
+              <input
+                type="text"
+                value={navSearch}
+                onChange={(e) => setNavSearch(e.target.value)}
+                placeholder="Tìm giáo trình, laptop, đồ KTX..."
+                className="w-full px-2.5 py-1.5 text-xs sm:text-sm bg-transparent border-none focus:outline-hidden placeholder:text-slate-400 min-w-0"
+              />
+              <button
+                type="submit"
+                className="px-3 py-1.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white text-xs font-semibold shrink-0 transition"
+              >
+                Tìm
+              </button>
+            </div>
           </form>
 
           {/* Right Action Icons & Account */}
-          <div className="hidden md:flex items-center gap-2.5 shrink-0">
+          <div className="hidden md:flex items-center gap-2 xl:gap-2.5 shrink-0">
             {/* Admin Portal Jump Badge */}
             {isAdmin && (
               <Link
                 to="/admin/dashboard"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-900 transition"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-900 transition shrink-0"
               >
                 <LayoutDashboard size={14} />
-                Quản trị Admin
+                <span className="hidden xl:inline">Quản trị</span> Admin
               </Link>
             )}
 
             {/* Post Listing Action (Oreka's signature orange Đăng bán button) */}
             <Link
               to={isAuthenticated ? "/marketplace/new" : "/login"}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-[#eb6e34] hover:bg-[#d85e25] text-white shadow-xs transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold bg-[#eb6e34] hover:bg-[#d85e25] text-white shadow-xs shrink-0 transition"
             >
-              <Plus size={16} />
-              Đăng bán
+              <Plus size={15} />
+              <span>Đăng bán</span>
             </Link>
 
             {/* CCCD Badge */}
             {isAuthenticated && !isAdmin && (
               user?.identityVerified ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <CheckCircle2 size={13} className="text-emerald-600" />
-                  Đã duyệt CCCD
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                  <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                  <span className="hidden xl:inline">Đã duyệt</span> CCCD
                 </span>
               ) : (
                 <Link
                   to="/verify-identity"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 shrink-0 transition"
                   title="Xác minh CCCD để được đăng bán và đặt mua qua Locker"
                 >
-                  <ShieldAlert size={13} className="text-amber-600" />
-                  Xác minh CCCD
+                  <ShieldAlert size={13} className="text-amber-600 shrink-0" />
+                  <span>Xác minh CCCD</span>
                 </Link>
               )
             )}
 
             {/* User Profile & Logout */}
             {isAuthenticated ? (
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+              <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200 shrink-0">
                 <Link
                   to="/dashboard"
-                  className="flex items-center gap-2 hover:bg-slate-50 p-1.5 rounded-xl transition"
+                  className="flex items-center gap-1.5 hover:bg-slate-50 p-1 rounded-lg transition"
+                  title={user?.fullName || user?.username}
                 >
-                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs">
+                  <div className="w-7 h-7 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shrink-0">
                     {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'U'}
                   </div>
-                  <span className="text-xs font-semibold text-slate-700 max-w-[100px] truncate">
+                  <span className="text-xs font-semibold text-slate-700 max-w-[70px] xl:max-w-[110px] truncate">
                     {user?.fullName || user?.username}
                   </span>
                 </Link>
@@ -184,7 +189,7 @@ export const Navbar = () => {
                   title="Đăng xuất"
                   className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={15} />
                 </button>
               </div>
             ) : (
@@ -228,21 +233,25 @@ export const Navbar = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-3">
           {/* Mobile Search */}
-          <form onSubmit={handleGlobalSearch} className="relative flex items-center">
-            <input
-              type="text"
-              value={navSearch}
-              onChange={(e) => setNavSearch(e.target.value)}
-              placeholder="Tìm sản phẩm, sách giáo trình..."
-              className="w-full pl-9 pr-20 py-2 border border-slate-300 rounded-lg text-xs focus:ring-1 focus:ring-[#eb6e34] focus:border-[#eb6e34] bg-white"
-            />
-            <Search className="absolute left-3 text-slate-400" size={16} />
-            <button
-              type="submit"
-              className="absolute right-1 px-3 py-1 bg-[#eb6e34] text-white rounded-md text-xs font-semibold"
-            >
-              Tìm
-            </button>
+          <form onSubmit={handleGlobalSearch} className="flex items-center">
+            <div className="flex w-full items-center bg-slate-50 border border-slate-300 focus-within:border-[#eb6e34] focus-within:ring-1 focus-within:ring-[#eb6e34] rounded-lg overflow-hidden transition">
+              <div className="pl-3 text-slate-400 shrink-0">
+                <Search size={15} />
+              </div>
+              <input
+                type="text"
+                value={navSearch}
+                onChange={(e) => setNavSearch(e.target.value)}
+                placeholder="Tìm sản phẩm, sách giáo trình..."
+                className="w-full px-2.5 py-2 text-xs bg-transparent border-none focus:outline-hidden placeholder:text-slate-400 min-w-0"
+              />
+              <button
+                type="submit"
+                className="px-3.5 py-2 bg-[#eb6e34] hover:bg-[#d85e25] text-white text-xs font-semibold shrink-0 transition"
+              >
+                Tìm
+              </button>
+            </div>
           </form>
 
           <nav className="space-y-1">
