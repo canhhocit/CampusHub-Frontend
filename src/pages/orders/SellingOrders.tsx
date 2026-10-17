@@ -75,6 +75,27 @@ const statusConfig: Record<
     border: 'border-orange-200',
     icon: AlertTriangle,
   },
+  RENTING: {
+    label: 'Khách đang thuê đồ',
+    bg: 'bg-purple-50',
+    text: 'text-purple-800',
+    border: 'border-purple-200 font-bold',
+    icon: Clock,
+  },
+  AWAITING_RETURN_DEPOSIT: {
+    label: 'Khách đang gửi trả đồ',
+    bg: 'bg-indigo-50',
+    text: 'text-indigo-800',
+    border: 'border-indigo-200',
+    icon: Package,
+  },
+  READY_FOR_RETURN_PICKUP: {
+    label: 'Cần ra tủ lấy lại đồ',
+    bg: 'bg-teal-50',
+    text: 'text-teal-800',
+    border: 'border-teal-300 font-bold',
+    icon: Lock,
+  },
 };
 
 export const SellingOrders = () => {

@@ -145,3 +145,17 @@ export interface AuditLogItem {
   errorMessage?: string | null;
   createdAt: string;
 }
+
+export type FeeMode = 'PERCENT' | 'PER_DAY';
+
+export interface FeeConfigResponse {
+  saleCommissionPercent: number;
+  rentalFeeMode: FeeMode;
+  rentalFeeValue: number;
+}
+
+export interface UpdateFeeConfigRequest {
+  saleCommissionPercent: number;
+  rentalFeeMode: FeeMode;
+  rentalFeeValue: number;
+}

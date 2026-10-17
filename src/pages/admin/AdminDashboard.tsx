@@ -1,7 +1,13 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
-import type { DashboardStatsResponse, AuditLogItem, AuditAction } from '../../types/admin';
+import type {
+  DashboardStatsResponse,
+  AuditLogItem,
+  AuditAction,
+  FeeConfigResponse,
+  UpdateFeeConfigRequest,
+} from '../../types/admin';
 import type { PageResponse } from '../../types/marketplace';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -25,6 +31,8 @@ import {
   ExternalLink,
   X,
   Layers,
+  Coins,
+  Sliders,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -66,9 +74,51 @@ export const AdminDashboard = () => {
     refetchInterval: 15000, // Tự động làm mới log mỗi 15 giây
   });
 
+  // 3. Platform Fee Configuration
+  const queryClient = useQueryClient();
+  const [isFeeModalOpen, setIsFeeModalOpen] = useState(false);
+  const [feeFormData, setFeeFormData] = useState<UpdateFeeConfigRequest>({
+    saleCommissionPercent: 5.0,
+    rentalFeeMode: 'PERCENT',
+    rentalFeeValue: 10.0,
+  });
+
+  const {
+    data: feeConfig,
+    refetch: refetchFees,
+  } = useQuery<FeeConfigResponse>({
+    queryKey: ['admin-fee-config'],
+    queryFn: () => axiosInstance.get('/api/v1/admin/settings/fees').then((res) => res.data),
+  });
+
+  const updateFeesMutation = useMutation({
+    mutationFn: (data: UpdateFeeConfigRequest) =>
+      axiosInstance.put('/api/v1/admin/settings/fees', data).then((res) => res.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-fee-config'] });
+      setIsFeeModalOpen(false);
+      alert('Cập nhật biểu phí nền tảng thành công!');
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.message || 'Không thể cập nhật biểu phí');
+    },
+  });
+
+  const handleOpenFeeModal = () => {
+    if (feeConfig) {
+      setFeeFormData({
+        saleCommissionPercent: feeConfig.saleCommissionPercent,
+        rentalFeeMode: feeConfig.rentalFeeMode,
+        rentalFeeValue: feeConfig.rentalFeeValue,
+      });
+    }
+    setIsFeeModalOpen(true);
+  };
+
   const handleRefreshAll = () => {
     refetchStats();
     refetchLogs();
+    refetchFees();
   };
 
   const isRefreshing = isFetchingStats || isFetchingLogs;
@@ -514,6 +564,77 @@ export const AdminDashboard = () => {
             </div>
           </div>
 
+          {/* PLATFORM FEE CONFIGURATION CARD */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-amber-100 text-amber-700 rounded-xl">
+                  <Coins size={22} />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">
+                    Cấu hình Biểu phí Dịch vụ Nền tảng (Platform Fees)
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Quản lý tỷ lệ hoa hồng trích từ đơn bán và phí dịch vụ đối với lượt cho thuê đồ qua Smart Locker
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleOpenFeeModal}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
+              >
+                <Sliders size={14} /> Điều chỉnh biểu phí
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+              {/* Sale Commission */}
+              <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-purple-700 uppercase tracking-wider block">
+                    Hoa hồng Đơn Bán Đứt
+                  </span>
+                  <div className="text-2xl font-black text-purple-950">
+                    {feeConfig ? `${feeConfig.saleCommissionPercent}%` : '5%'}
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Khấu trừ tự động từ doanh thu người bán khi người mua hoàn tất nhận hàng tại Locker
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-purple-200/60 text-purple-800 flex items-center justify-center shrink-0 font-bold text-lg">
+                  %
+                </div>
+              </div>
+
+              {/* Rental Commission */}
+              <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block">
+                    Phí Dịch vụ Đơn Cho Thuê
+                  </span>
+                  <div className="text-2xl font-black text-blue-950">
+                    {feeConfig?.rentalFeeMode === 'PER_DAY'
+                      ? `${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(feeConfig.rentalFeeValue)}/ngày`
+                      : `${feeConfig?.rentalFeeValue ?? 10}%`}
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Cách tính:{' '}
+                    <strong className="text-blue-900 font-semibold">
+                      {feeConfig?.rentalFeeMode === 'PER_DAY'
+                        ? 'Cố định theo số ngày thuê thực tế'
+                        : 'Phần trăm (%) tổng doanh thu thuê'}
+                    </strong>
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-blue-200/60 text-blue-800 flex items-center justify-center shrink-0">
+                  <Clock size={22} />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* 4. LIVE AUDIT LOGS REPORT (Nhật ký Hệ thống thời gian thực) */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
@@ -760,6 +881,156 @@ export const AdminDashboard = () => {
                 Đóng chi tiết
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fee Settings Edit Modal */}
+      {isFeeModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-amber-100 text-amber-700 rounded-xl">
+                  <Sliders size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Cấu hình Biểu phí Nền tảng</h3>
+                  <p className="text-xs text-slate-500">Thiết lập hoa hồng bán đứt và phí cho thuê đồ</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsFeeModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                updateFeesMutation.mutate(feeFormData);
+              }}
+              className="space-y-4"
+            >
+              {/* Sale Commission Input */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  Tỷ lệ hoa hồng đơn bán đứt (%):
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="50"
+                    required
+                    value={feeFormData.saleCommissionPercent}
+                    onChange={(e) =>
+                      setFeeFormData((prev) => ({
+                        ...prev,
+                        saleCommissionPercent: Number(e.target.value),
+                      }))
+                    }
+                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="5.0"
+                  />
+                  <span className="absolute right-3.5 top-2.5 text-sm text-slate-400 font-bold">%</span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Ví dụ: 5% - Nếu sản phẩm 100.000đ, phí nền tảng là 5.000đ, người bán nhận 95.000đ.
+                </p>
+              </div>
+
+              {/* Rental Fee Mode Select */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  Phương thức tính phí cho thuê:
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFeeFormData((prev) => ({ ...prev, rentalFeeMode: 'PERCENT' }))}
+                    className={`p-3 rounded-xl border text-left text-xs font-bold transition ${
+                      feeFormData.rentalFeeMode === 'PERCENT'
+                        ? 'border-purple-600 bg-purple-50 text-purple-900 shadow-xs'
+                        : 'border-slate-200 text-slate-600 hover:border-purple-300'
+                    }`}
+                  >
+                    Theo phần trăm (%)
+                    <span className="block text-[11px] font-normal text-slate-500 mt-0.5">
+                      Trích % theo tổng tiền thuê
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFeeFormData((prev) => ({ ...prev, rentalFeeMode: 'PER_DAY' }))}
+                    className={`p-3 rounded-xl border text-left text-xs font-bold transition ${
+                      feeFormData.rentalFeeMode === 'PER_DAY'
+                        ? 'border-purple-600 bg-purple-50 text-purple-900 shadow-xs'
+                        : 'border-slate-200 text-slate-600 hover:border-purple-300'
+                    }`}
+                  >
+                    Cố định theo ngày (VNĐ/ngày)
+                    <span className="block text-[11px] font-normal text-slate-500 mt-0.5">
+                      Thu phí cố định mỗi ngày thuê
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Rental Fee Value Input */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  {feeFormData.rentalFeeMode === 'PERCENT'
+                    ? 'Tỷ lệ phí thuê (%):'
+                    : 'Mức phí thuê mỗi ngày (VNĐ/ngày):'}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step={feeFormData.rentalFeeMode === 'PERCENT' ? '0.1' : '1000'}
+                    min="0"
+                    required
+                    value={feeFormData.rentalFeeValue}
+                    onChange={(e) =>
+                      setFeeFormData((prev) => ({
+                        ...prev,
+                        rentalFeeValue: Number(e.target.value),
+                      }))
+                    }
+                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder={feeFormData.rentalFeeMode === 'PERCENT' ? '10.0' : '5000'}
+                  />
+                  <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-bold">
+                    {feeFormData.rentalFeeMode === 'PERCENT' ? '%' : 'VNĐ/ngày'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  {feeFormData.rentalFeeMode === 'PERCENT'
+                    ? 'Ví dụ: 10% - Tổng tiền thuê 100.000đ thì phí là 10.000đ.'
+                    : 'Ví dụ: 5.000đ/ngày - Thuê 3 ngày thì phí là 15.000đ.'}
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setIsFeeModalOpen(false)}
+                  className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateFeesMutation.isPending}
+                  className="flex-1 py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/20"
+                >
+                  {updateFeesMutation.isPending ? 'Đang lưu...' : 'Lưu biểu phí'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

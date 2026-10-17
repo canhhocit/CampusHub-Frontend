@@ -31,9 +31,12 @@ const productSchema = z.object({
     .string()
     .max(2000, 'Mô tả quá dài (tối đa 2000 ký tự)')
     .optional(),
+  listingType: z.enum(['SALE', 'RENT', 'BOTH']),
   price: z
     .number()
     .min(0, 'Giá bán phải là số không âm'),
+  rentPricePerDay: z.number().min(0, 'Giá thuê phải >= 0').optional().nullable(),
+  depositAmount: z.number().min(0, 'Tiền cọc phải >= 0').optional().nullable(),
   categoryId: z
     .number()
     .min(1, 'Vui lòng chọn danh mục sản phẩm'),
@@ -80,7 +83,10 @@ export const ProductForm = () => {
     defaultValues: {
       title: '',
       description: '',
+      listingType: 'SALE',
       price: 0,
+      rentPricePerDay: 0,
+      depositAmount: 0,
       categoryId: 0,
       imageUrl: '',
     },
@@ -90,13 +96,19 @@ export const ProductForm = () => {
   const descValue = watch('description') || '';
   const currentImageUrl = watch('imageUrl');
   const currentPrice = watch('price') || 0;
+  const currentListingType = watch('listingType') || 'SALE';
+  const currentRentPrice = watch('rentPricePerDay') || 0;
+  const currentDeposit = watch('depositAmount') || 0;
 
   useEffect(() => {
     if (isEditing && existingProduct) {
       reset({
         title: existingProduct.title,
         description: existingProduct.description || '',
+        listingType: existingProduct.listingType || 'SALE',
         price: existingProduct.price,
+        rentPricePerDay: existingProduct.rentPricePerDay || 0,
+        depositAmount: existingProduct.depositAmount || 0,
         categoryId: existingProduct.category.id,
         imageUrl: existingProduct.imageUrl || '',
       });
@@ -107,6 +119,9 @@ export const ProductForm = () => {
     mutationFn: (data: ProductFormData) => {
       const payload = {
         ...data,
+        listingType: data.listingType,
+        rentPricePerDay: (data.listingType === 'RENT' || data.listingType === 'BOTH') ? data.rentPricePerDay : null,
+        depositAmount: (data.listingType === 'RENT' || data.listingType === 'BOTH') ? data.depositAmount : null,
         imageUrl: data.imageUrl || null,
         version: existingProduct?.version,
       };
@@ -273,38 +288,122 @@ export const ProductForm = () => {
             </div>
           </div>
 
-          {/* Section 2: Giá bán & Phương thức giao dịch */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+          {/* Section 2: Hình thức & Giá cả */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-5">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <DollarSign size={14} className="text-purple-600" />
-              2. Giá bán & Phương thức giao nhận
+              2. Hình thức giao dịch & Giá
             </h2>
 
+            {/* Listing Type Selector */}
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Giá bán (VNĐ) <span className="text-rose-500">*</span>
+              <label className="text-xs font-bold text-slate-700 block mb-2">
+                Hình thức giao dịch <span className="text-rose-500">*</span>
               </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  {...register('price', { valueAsNumber: true })}
-                  placeholder="0"
-                  step="1000"
-                  min="0"
-                  className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-hidden"
-                />
-                <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
-                <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">
-                  VNĐ
-                </span>
+              <div className="grid grid-cols-3 gap-2.5">
+                {[
+                  { value: 'SALE', label: 'Bán đứt', desc: 'Chuyển nhượng vĩnh viễn' },
+                  { value: 'RENT', label: 'Cho thuê', desc: 'Tính theo ngày & có cọc' },
+                  { value: 'BOTH', label: 'Cả bán & thuê', desc: 'Người mua tự chọn' },
+                ].map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setValue('listingType', item.value as any)}
+                    className={`p-3 rounded-2xl border text-left transition-all ${
+                      currentListingType === item.value
+                        ? 'border-purple-600 bg-purple-50/70 ring-2 ring-purple-600/20'
+                        : 'border-slate-200 bg-white hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className={`block text-xs font-bold ${
+                      currentListingType === item.value ? 'text-purple-700' : 'text-slate-800'
+                    }`}>
+                      {item.label}
+                    </span>
+                    <span className="block text-[10px] text-slate-500 mt-0.5">
+                      {item.desc}
+                    </span>
+                  </button>
+                ))}
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Định dạng hiển thị: <strong>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentPrice)}</strong>
-              </p>
-              {errors.price && (
-                <p className="text-rose-600 text-[11px] mt-1 font-medium">{errors.price.message}</p>
-              )}
             </div>
+
+            {/* Sale Price Input */}
+            {(currentListingType === 'SALE' || currentListingType === 'BOTH') && (
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">
+                  Giá bán (VNĐ) <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    {...register('price', { valueAsNumber: true })}
+                    placeholder="0"
+                    step="1000"
+                    min="0"
+                    className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-hidden"
+                  />
+                  <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
+                  <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">
+                    VNĐ
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Định dạng: <strong>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentPrice)}</strong>
+                </p>
+                {errors.price && (
+                  <p className="text-rose-600 text-[11px] mt-1 font-medium">{errors.price.message}</p>
+                )}
+              </div>
+            )}
+
+            {/* Rental Inputs */}
+            {(currentListingType === 'RENT' || currentListingType === 'BOTH') && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-purple-50/50 border border-purple-100">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    Giá thuê / ngày (VNĐ) <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      {...register('rentPricePerDay', { valueAsNumber: true })}
+                      placeholder="0"
+                      step="1000"
+                      min="0"
+                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-hidden bg-white"
+                    />
+                    <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
+                    <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">/ngày</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentRentPrice)} / ngày
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    Tiền đặt cọc bảo đảm (VNĐ) <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      {...register('depositAmount', { valueAsNumber: true })}
+                      placeholder="0"
+                      step="1000"
+                      min="0"
+                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-hidden bg-white"
+                    />
+                    <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
+                    <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">VNĐ</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    Hoàn trả: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(currentDeposit)} khi trả đồ
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Smart Locker Delivery Notice */}
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3 text-xs text-slate-600">

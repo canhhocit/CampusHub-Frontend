@@ -4,13 +4,18 @@ export interface Category {
     slug: string;
 }
 
-export type ProductStatus = 'ACTIVE' | 'HIDDEN' | 'SOLD';
+export type ListingType = 'SALE' | 'RENT' | 'BOTH';
+
+export type ProductStatus = 'ACTIVE' | 'HIDDEN' | 'SOLD' | 'RENTED';
 
 export interface Product {
     id: number;
     title: string;
     description: string;
     price: number;
+    listingType?: ListingType;
+    rentPricePerDay?: number | null;
+    depositAmount?: number | null;
     imageUrl: string;
     status: ProductStatus;
     category: Category;

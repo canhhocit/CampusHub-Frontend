@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
 import type { Product } from '../../types/marketplace';
@@ -13,6 +14,8 @@ import {
   Clock,
   Tag,
   AlertCircle,
+  Calendar,
+  X,
 } from 'lucide-react';
 
 export const ProductDetail = () => {
@@ -20,6 +23,11 @@ export const ProductDetail = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, isAuthenticated } = useAuth();
+
+  // Rental Modal State
+  const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
+  const [selectedRentalDays, setSelectedRentalDays] = useState<number>(3);
+  const [customDays, setCustomDays] = useState<string>('');
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ['product', id],
@@ -32,7 +40,14 @@ export const ProductDetail = () => {
   );
 
   const createOrderMutation = useMutation({
-    mutationFn: () => axiosInstance.post('/api/v1/orders', { productId: Number(id) }).then((res) => res.data),
+    mutationFn: (variables?: { orderType?: 'PURCHASE' | 'RENTAL'; rentalDurationDays?: number }) =>
+      axiosInstance
+        .post('/api/v1/orders', {
+          productId: Number(id),
+          orderType: variables?.orderType || 'PURCHASE',
+          rentalDurationDays: variables?.rentalDurationDays,
+        })
+        .then((res) => res.data),
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
       queryClient.invalidateQueries({ queryKey: ['selling-orders'] });
@@ -42,7 +57,7 @@ export const ProductDetail = () => {
       if (err.response?.status === 403) {
         if (
           window.confirm(
-            'Yêu cầu xác minh danh tính: Bạn cần hoàn tất xác minh CCCD để đặt mua hàng qua hệ thống Smart Locker. Đi tới trang xác minh ngay?'
+            'Yêu cầu xác minh danh tính: Bạn cần hoàn tất xác minh CCCD để thực hiện giao dịch qua hệ thống Smart Locker. Đi tới trang xác minh ngay?'
           )
         ) {
           navigate('/verify-identity');
@@ -53,25 +68,54 @@ export const ProductDetail = () => {
     },
   });
 
-  const handleOrderClick = () => {
-    if (createOrderMutation.isPending) return;
+  const checkIdentityAndAuth = () => {
     if (!isAuthenticated) {
       navigate('/login');
-      return;
+      return false;
     }
     if (user && user.role !== 'ROLE_ADMIN' && user.role !== 'ADMIN' && !user.identityVerified) {
       if (
         window.confirm(
-          'Yêu cầu xác minh danh tính: Bạn cần hoàn tất xác minh CCCD trước khi đặt mua hàng qua hệ thống Smart Locker. Đi tới trang xác minh ngay?'
+          'Yêu cầu xác minh danh tính: Bạn cần hoàn tất xác minh CCCD trước khi đặt mua hoặc thuê đồ qua hệ thống Smart Locker. Đi tới trang xác minh ngay?'
         )
       ) {
         navigate('/verify-identity');
       }
+      return false;
+    }
+    return true;
+  };
+
+  const handlePurchaseClick = () => {
+    if (createOrderMutation.isPending) return;
+    if (!checkIdentityAndAuth()) return;
+
+    if (
+      window.confirm(
+        `Xác nhận đặt mua sản phẩm "${product?.title}"? Hệ thống sẽ tạo phiên giao dịch mua qua Tủ Locker.`
+      )
+    ) {
+      createOrderMutation.mutate({ orderType: 'PURCHASE' });
+    }
+  };
+
+  const handleOpenRentalModal = () => {
+    if (createOrderMutation.isPending) return;
+    if (!checkIdentityAndAuth()) return;
+    setIsRentalModalOpen(true);
+  };
+
+  const effectiveRentalDays = customDays && Number(customDays) > 0 ? Number(customDays) : selectedRentalDays;
+
+  const handleConfirmRental = () => {
+    if (effectiveRentalDays < 1 || effectiveRentalDays > 90) {
+      alert('Thời hạn thuê phải từ 1 đến 90 ngày.');
       return;
     }
-    if (window.confirm(`Xác nhận đặt mua sản phẩm "${product?.title}"? Hệ thống sẽ tạo phiên giao dịch qua Tủ Locker.`)) {
-      createOrderMutation.mutate();
-    }
+    createOrderMutation.mutate({
+      orderType: 'RENTAL',
+      rentalDurationDays: effectiveRentalDays,
+    });
   };
 
   const formatPrice = (price: number) => {
@@ -98,14 +142,14 @@ export const ProductDetail = () => {
   if (error || !product) {
     return (
       <div className="max-w-md mx-auto my-20 p-8 bg-white rounded-3xl border border-slate-200 text-center shadow-xs">
-        <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-500 mx-auto flex items-center justify-center mb-4">
           <AlertCircle size={32} />
         </div>
-        <h2 className="text-xl font-bold text-slate-900">Không tìm thấy sản phẩm</h2>
-        <p className="mt-2 text-xs sm:text-sm text-slate-500 leading-relaxed">
-          Sản phẩm này có thể đã được giao dịch thành công, đã bị người bán ẩn hoặc đã bị gỡ khỏi hệ thống.
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Không tìm thấy sản phẩm</h2>
+        <p className="text-sm text-slate-500 mb-6">
+          Sản phẩm có thể đã bị gỡ bỏ hoặc không tồn tại trên hệ thống.
         </p>
-        <div className="mt-6">
+        <div className="flex gap-3 justify-center">
           <Link
             to="/marketplace"
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-700 transition"
@@ -116,6 +160,9 @@ export const ProductDetail = () => {
       </div>
     );
   }
+
+  const isForSale = product.listingType === 'SALE' || product.listingType === 'BOTH' || !product.listingType;
+  const isForRent = product.listingType === 'RENT' || product.listingType === 'BOTH';
 
   return (
     <div className="min-h-screen bg-slate-50 py-6 sm:py-8 font-sans">
@@ -166,6 +213,16 @@ export const ProductDetail = () => {
                   <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-purple-700 text-white shadow-xs">
                     {product.category?.name}
                   </span>
+                  {product.listingType === 'RENT' && (
+                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-600 text-white shadow-xs">
+                      Cho thuê
+                    </span>
+                  )}
+                  {product.listingType === 'BOTH' && (
+                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white shadow-xs">
+                      Bán & Cho thuê
+                    </span>
+                  )}
                 </div>
 
                 {product.status === 'SOLD' && (
@@ -176,26 +233,21 @@ export const ProductDetail = () => {
                   </div>
                 )}
 
-                {product.status === 'HIDDEN' && (
-                  <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center">
-                    <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-amber-500 text-white shadow-md">
-                      TIN ĐANG TẠM ẨN
+                {product.status === 'RENTED' && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center">
+                    <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-purple-600 text-white shadow-md">
+                      SẢN PHẨM ĐANG ĐƯỢC THUÊ
                     </span>
                   </div>
                 )}
-              </div>
 
-              {/* Trust Box (Inspired by Oreka Guarantee) */}
-              <div className="mt-6 p-4 rounded-2xl bg-purple-50/60 border border-purple-100 text-xs text-purple-950 space-y-2">
-                <div className="font-bold flex items-center gap-1.5 text-purple-900">
-                  <Lock size={14} className="text-purple-700" />
-                  Quy trình Smart Locker CampusHub:
-                </div>
-                <ul className="space-y-1 text-slate-600 list-disc list-inside">
-                  <li>Người bán đem đồ đặt vào tủ locker thông minh trong trường.</li>
-                  <li>Hệ thống gửi mã PIN bảo mật 6 số trực tiếp cho người mua.</li>
-                  <li>Người mua chủ động đến trạm mở tủ nhận đồ 24/7, không sợ bị trễ hẹn.</li>
-                </ul>
+                {product.status === 'HIDDEN' && (
+                  <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center">
+                    <span className="px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider bg-slate-700 text-white shadow-md">
+                      TIN ĐÃ ẨN
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -227,16 +279,44 @@ export const ProductDetail = () => {
                 </div>
 
                 {/* Price Display */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-baseline justify-between">
-                  <div>
-                    <span className="text-xs text-slate-500 block">Giá chuyển nhượng:</span>
-                    <span className="text-3xl font-black text-purple-700 tracking-tight">
-                      {formatPrice(product.price)}
-                    </span>
-                  </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg">
-                    Thanh lý sinh viên
-                  </span>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  {/* Purchase Price if applicable */}
+                  {isForSale && (
+                    <div className="flex items-baseline justify-between">
+                      <div>
+                        <span className="text-xs text-slate-500 block">
+                          {product.listingType === 'BOTH' ? 'Giá mua đứt:' : 'Giá chuyển nhượng:'}
+                        </span>
+                        <span className="text-3xl font-black text-purple-700 tracking-tight">
+                          {formatPrice(product.price)}
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg">
+                        Thanh lý sinh viên
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Rental Price if applicable */}
+                  {isForRent && (
+                    <div className={`flex items-baseline justify-between ${isForSale ? 'pt-3 border-t border-slate-200' : ''}`}>
+                      <div>
+                        <span className="text-xs text-slate-500 block">Đơn giá cho thuê:</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-black text-blue-700 tracking-tight">
+                            {formatPrice(product.rentPricePerDay || 0)}
+                          </span>
+                          <span className="text-xs text-slate-500 font-medium">/ ngày</span>
+                        </div>
+                        <span className="text-[11px] text-slate-400 block mt-0.5">
+                          Tiền cọc bảo đảm: {formatPrice(product.depositAmount || 0)} (hoàn lại 100% khi trả)
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg">
+                        Dịch vụ cho thuê
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Seller Profile Card (Oreka Seller Card Pattern) */}
@@ -289,7 +369,7 @@ export const ProductDetail = () => {
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-amber-800">
-                        Bạn là người đăng bán sản phẩm này
+                        Bạn là người đăng sản phẩm này
                       </span>
                       <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-200 text-amber-900">
                         Chủ sở hữu
@@ -312,19 +392,47 @@ export const ProductDetail = () => {
                   </div>
                 ) : product.status === 'ACTIVE' ? (
                   <div className="space-y-2">
-                    <button
-                      onClick={handleOrderClick}
-                      disabled={createOrderMutation.isPending}
-                      className="w-full py-3.5 px-6 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 hover:scale-101"
-                    >
-                      {createOrderMutation.isPending ? (
-                        <span>Đang khởi tạo đơn hàng qua Locker...</span>
-                      ) : (
-                        <>
-                          <ShoppingBag size={18} /> Đặt mua qua Tủ Locker Thông Minh
-                        </>
-                      )}
-                    </button>
+                    {/* If both selling & renting supported */}
+                    {product.listingType === 'BOTH' ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          onClick={handlePurchaseClick}
+                          disabled={createOrderMutation.isPending}
+                          className="py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                        >
+                          <ShoppingBag size={16} /> Mua đứt ({formatPrice(product.price)})
+                        </button>
+                        <button
+                          onClick={handleOpenRentalModal}
+                          disabled={createOrderMutation.isPending}
+                          className="py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                        >
+                          <Calendar size={16} /> Thuê đồ ({formatPrice(product.rentPricePerDay || 0)}/ngày)
+                        </button>
+                      </div>
+                    ) : product.listingType === 'RENT' ? (
+                      <button
+                        onClick={handleOpenRentalModal}
+                        disabled={createOrderMutation.isPending}
+                        className="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
+                      >
+                        <Calendar size={18} /> Thuê sản phẩm qua Tủ Locker ({formatPrice(product.rentPricePerDay || 0)}/ngày)
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handlePurchaseClick}
+                        disabled={createOrderMutation.isPending}
+                        className="w-full py-3.5 px-6 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50 hover:scale-101"
+                      >
+                        {createOrderMutation.isPending ? (
+                          <span>Đang khởi tạo đơn hàng qua Locker...</span>
+                        ) : (
+                          <>
+                            <ShoppingBag size={18} /> Đặt mua qua Tủ Locker Thông Minh
+                          </>
+                        )}
+                      </button>
+                    )}
                     <p className="text-xs text-slate-500 text-center">
                       Miễn phí giao dịch • Hàng hóa được bảo quản an toàn tại ngăn tủ thông minh
                     </p>
@@ -334,6 +442,8 @@ export const ProductDetail = () => {
                     <p className="font-semibold">
                       {product.status === 'SOLD'
                         ? 'Sản phẩm này đã được bán thành công cho thành viên khác.'
+                        : product.status === 'RENTED'
+                        ? 'Sản phẩm hiện đang được người khác thuê và sẽ có sẵn trở lại sau khi hoàn trả vào tủ.'
                         : 'Sản phẩm hiện đang tạm ẩn bởi người bán.'}
                     </p>
                     <Link
@@ -349,6 +459,130 @@ export const ProductDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Rental Duration Picker Modal */}
+      {isRentalModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-100 text-blue-700 rounded-xl">
+                  <Calendar size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Chọn thời gian thuê</h3>
+                  <p className="text-xs text-slate-500">Tính từ khi bạn nhập PIN lấy đồ tại tủ</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsRentalModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Duration Presets */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                Chọn gói số ngày thuê:
+              </label>
+
+              <div className="grid grid-cols-4 gap-2">
+                {[1, 3, 7, 14].map((days) => (
+                  <button
+                    key={days}
+                    type="button"
+                    onClick={() => {
+                      setSelectedRentalDays(days);
+                      setCustomDays('');
+                    }}
+                    className={`py-2 px-1 text-xs font-bold rounded-xl border transition ${
+                      !customDays && selectedRentalDays === days
+                        ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
+                        : 'border-slate-200 text-slate-700 hover:border-blue-300'
+                    }`}
+                  >
+                    {days} ngày
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom days input */}
+              <div className="pt-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 shrink-0">Hoặc tùy chọn:</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="90"
+                    placeholder="Ví dụ: 5"
+                    value={customDays}
+                    onChange={(e) => setCustomDays(e.target.value)}
+                    className="w-24 px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-xs text-slate-500">ngày</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Cost Breakdown */}
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
+              <div className="flex justify-between text-slate-600">
+                <span>Đơn giá theo ngày:</span>
+                <span className="font-semibold text-slate-900">
+                  {formatPrice(product.rentPricePerDay || 0)}/ngày
+                </span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Số ngày thuê:</span>
+                <span className="font-semibold text-slate-900">{effectiveRentalDays} ngày</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Tiền thuê dự tính:</span>
+                <span className="font-bold text-blue-700">
+                  {formatPrice((product.rentPricePerDay || 0) * effectiveRentalDays)}
+                </span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Tiền cọc bảo đảm:</span>
+                <span className="font-bold text-emerald-700">
+                  {formatPrice(product.depositAmount || 0)}
+                </span>
+              </div>
+              <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
+                <span className="font-bold text-slate-900">Tổng tạm giữ:</span>
+                <span className="text-base font-black text-purple-700">
+                  {formatPrice(
+                    (product.rentPricePerDay || 0) * effectiveRentalDays + (product.depositAmount || 0)
+                  )}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 pt-1 leading-relaxed">
+                * Tiền cọc sẽ được hoàn lại 100% khi người cho thuê nhận lại đồ tại trạm tủ Smart Locker.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setIsRentalModalOpen(false)}
+                className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={createOrderMutation.isPending}
+                onClick={handleConfirmRental}
+                className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20"
+              >
+                {createOrderMutation.isPending ? 'Đang tạo đơn...' : 'Xác nhận thuê qua Locker'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

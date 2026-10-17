@@ -2,10 +2,15 @@ export type OrderStatus =
   | 'PENDING_SELLER'
   | 'AWAITING_DEPOSIT'
   | 'READY_FOR_PICKUP'
+  | 'RENTING'
+  | 'AWAITING_RETURN_DEPOSIT'
+  | 'READY_FOR_RETURN_PICKUP'
   | 'COMPLETED'
   | 'CANCELLED'
   | 'REJECTED'
   | 'EXPIRED';
+
+export type OrderType = 'PURCHASE' | 'RENTAL';
 
 export interface Order {
   id: number;
@@ -15,6 +20,13 @@ export interface Order {
   productImageUrl?: string | null;
   priceSnapshot: number;
   status: OrderStatus;
+  orderType?: OrderType;
+  rentalDurationDays?: number | null;
+  dueReturnAt?: string | null;
+  depositAmount?: number | null;
+  platformFee?: number | null;
+  sellerPayout?: number | null;
+  totalAmount?: number | null;
   buyerId: number;
   buyerUsername: string;
   buyerFullName: string;
@@ -27,6 +39,10 @@ export interface Order {
   lockerLocation?: string | null;
   compartmentId?: number | null;
   compartmentCode?: string | null;
+  returnLockerId?: number | null;
+  returnLockerName?: string | null;
+  returnCompartmentId?: number | null;
+  returnCompartmentCode?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,16 +52,27 @@ export interface OrderDetail extends Order {
   pickupAttempts?: number;
   depositAt?: string | null;
   pickedUpAt?: string | null;
+  returnDepositAt?: string | null;
+  returnPickedUpAt?: string | null;
   cancelledAt?: string | null;
   clearedAt?: string | null;
   rejectionReason?: string | null;
   version?: number;
   pickupCode?: string | null;
+  returnPickupCode?: string | null;
+  rentPricePerDaySnapshot?: number | null;
+  rentalDepositSnapshot?: number | null;
+  sellerEarnings?: number | null;
+  rentalStartDate?: string | null;
+  rentalEndDate?: string | null;
+  returnLockerLocation?: string | null;
 }
 
 export interface OrderCreatePayload {
   productId: number;
   preferredLockerId?: number | null;
+  orderType?: OrderType;
+  rentalDurationDays?: number | null;
 }
 
 export interface OrderAcceptPayload {
@@ -58,4 +85,9 @@ export interface OrderRejectPayload {
 
 export interface OrderPickupPayload {
   pickupCode: string;
+}
+
+export interface OrderReturnPayload {
+  lockerId: number;
+  compartmentId?: number | null;
 }

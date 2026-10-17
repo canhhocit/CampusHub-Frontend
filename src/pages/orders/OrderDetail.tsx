@@ -16,14 +16,24 @@ import {
   Package,
   MapPin,
   ImageOff,
+  X,
   Radio,
+  RotateCcw,
 } from 'lucide-react';
 
-const stepConfig: { key: OrderStatus; label: string; desc: string }[] = [
-  { key: 'PENDING_SELLER', label: '1. Đặt hàng', desc: 'Chờ người bán xác nhận' },
-  { key: 'AWAITING_DEPOSIT', label: '2. Cấp tủ đồ', desc: 'Chờ gửi hàng vào locker' },
-  { key: 'READY_FOR_PICKUP', label: '3. Sẵn sàng lấy', desc: 'Nhập mã nhận đồ tại tủ' },
+const purchaseStepConfig: { key: OrderStatus; label: string; desc: string }[] = [
+  { key: 'PENDING_SELLER', label: '1. Đặt mua', desc: 'Chờ người bán duyệt' },
+  { key: 'AWAITING_DEPOSIT', label: '2. Cấp tủ đồ', desc: 'Chờ gửi vào tủ' },
+  { key: 'READY_FOR_PICKUP', label: '3. Nhận đồ', desc: 'Nhập PIN tại tủ' },
   { key: 'COMPLETED', label: '4. Hoàn tất', desc: 'Giao dịch thành công' },
+];
+
+const rentalStepConfig: { key: OrderStatus; label: string; desc: string }[] = [
+  { key: 'PENDING_SELLER', label: '1. Đặt thuê', desc: 'Chờ duyệt' },
+  { key: 'READY_FOR_PICKUP', label: '2. Nhận đồ', desc: 'Nhập PIN tại tủ' },
+  { key: 'RENTING', label: '3. Đang thuê', desc: 'Tính từ lúc lấy đồ' },
+  { key: 'AWAITING_RETURN_DEPOSIT', label: '4. Trả đồ', desc: 'Gửi lại vào tủ' },
+  { key: 'COMPLETED', label: '5. Hoàn tất', desc: 'Hoàn cọc & tất toán' },
 ];
 
 export const OrderDetail = () => {
@@ -92,6 +102,71 @@ export const OrderDetail = () => {
     },
   });
 
+  // Rental Return Modal State
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [selectedReturnLockerId, setSelectedReturnLockerId] = useState('');
+
+  // Fetch active lockers for return dropdown
+  const { data: activeLockers } = useQuery<{ id: number; name: string; location: string }[]>({
+    queryKey: ['active-lockers-dropdown'],
+    queryFn: () =>
+      axiosInstance
+        .get('/api/v1/lockers', { params: { status: 'ACTIVE', size: 50 } })
+        .then((res) => res.data.content || []),
+    enabled: isReturnModalOpen,
+  });
+
+  // Initiate Return Mutation (Buyer reserves return locker)
+  const initiateReturnMutation = useMutation({
+    mutationFn: (lockerId: number) =>
+      axiosInstance.post(`/api/v1/orders/${id}/initiate-return`, { lockerId }),
+    onSuccess: () => {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
+      setIsReturnModalOpen(false);
+      setSelectedReturnLockerId('');
+      queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
+      queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.message || 'Không thể chọn tủ để trả đồ');
+    },
+  });
+
+  // Deposit Return Mutation (Buyer deposits item back into locker)
+  const depositReturnMutation = useMutation({
+    mutationFn: () => axiosInstance.post(`/api/v1/orders/${id}/deposit-return`),
+    onSuccess: () => {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
+      queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.message || 'Không thể xác nhận gửi trả đồ');
+    },
+  });
+
+  // Pickup Return Mutation (Seller retrieves item and completes order)
+  const pickupReturnMutation = useMutation({
+    mutationFn: (code: string) =>
+      axiosInstance.post(`/api/v1/orders/${id}/pickup-return`, { pickupCode: code }),
+    onSuccess: () => {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
+      setPickupErrorMessage('');
+      queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
+      queryClient.invalidateQueries({ queryKey: ['selling-orders'] });
+    },
+    onError: (err: any) => {
+      queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
+      setPickupErrorMessage(err.response?.data?.message || 'Mã nhận lại đồ không chính xác');
+    },
+  });
+
   const isBuyer = Boolean(order && user && order.buyerUsername === user.username);
   const isSeller = Boolean(order && user && order.sellerUsername === user.username);
 
@@ -116,12 +191,12 @@ export const OrderDetail = () => {
       return 'cancelled';
     }
 
-    const orderSteps: OrderStatus[] = [
-      'PENDING_SELLER',
-      'AWAITING_DEPOSIT',
-      'READY_FOR_PICKUP',
-      'COMPLETED',
-    ];
+    if (order.status === 'COMPLETED') return 'completed';
+
+    const orderSteps: OrderStatus[] = order.orderType === 'RENTAL'
+      ? ['PENDING_SELLER', 'READY_FOR_PICKUP', 'RENTING', 'AWAITING_RETURN_DEPOSIT', 'COMPLETED']
+      : ['PENDING_SELLER', 'AWAITING_DEPOSIT', 'READY_FOR_PICKUP', 'COMPLETED'];
+
     const currentIndex = orderSteps.indexOf(order.status);
     const stepIndex = orderSteps.indexOf(stepKey);
 
@@ -224,7 +299,15 @@ export const OrderDetail = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`px-2.5 py-1 rounded-xl text-xs font-bold border ${
+                order.orderType === 'RENTAL'
+                  ? 'bg-purple-100 text-purple-900 border-purple-200'
+                  : 'bg-slate-100 text-slate-800 border-slate-200'
+              }`}>
+                {order.orderType === 'RENTAL' ? `ĐƠN THUÊ (${order.rentalDurationDays} NGÀY)` : 'ĐƠN MUA ĐỨT'}
+              </span>
+
               {order.status === 'EXPIRED' && (
                 <span className="px-3 py-1 rounded-xl text-xs font-bold bg-orange-50 text-orange-800 border border-orange-200 flex items-center gap-1">
                   <AlertTriangle size={13} /> Quá hạn nhận đồ
@@ -242,7 +325,7 @@ export const OrderDetail = () => {
               )}
               {order.status === 'COMPLETED' && (
                 <span className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1">
-                  <CheckCircle2 size={13} /> Hoàn tất nhận đồ
+                  <CheckCircle2 size={13} /> Hoàn tất giao dịch
                 </span>
               )}
               {order.status === 'READY_FOR_PICKUP' && (
@@ -260,14 +343,29 @@ export const OrderDetail = () => {
                   <Clock size={13} /> Chờ xác nhận
                 </span>
               )}
+              {order.status === 'RENTING' && (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-purple-50 text-purple-800 border border-purple-300 animate-pulse flex items-center gap-1">
+                  <Clock size={13} /> Đang trong hạn thuê
+                </span>
+              )}
+              {order.status === 'AWAITING_RETURN_DEPOSIT' && (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-300 flex items-center gap-1">
+                  <Package size={13} /> Chờ gửi trả vào tủ
+                </span>
+              )}
+              {order.status === 'READY_FOR_RETURN_PICKUP' && (
+                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-teal-50 text-teal-800 border border-teal-300 animate-pulse flex items-center gap-1">
+                  <Lock size={13} /> Đồ đã trả về tủ
+                </span>
+              )}
             </div>
           </div>
 
           {/* Stepper / Timeline */}
           {order.status !== 'CANCELLED' && order.status !== 'REJECTED' && order.status !== 'EXPIRED' ? (
             <div className="pt-6 border-t border-slate-100">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stepConfig.map((s, idx) => {
+              <div className={`grid grid-cols-2 sm:grid-cols-${order.orderType === 'RENTAL' ? '5' : '4'} gap-4`}>
+                {(order.orderType === 'RENTAL' ? rentalStepConfig : purchaseStepConfig).map((s, idx) => {
                   const status = getStepStatus(s.key);
                   return (
                     <div key={s.key} className="flex flex-col items-center text-center relative">
@@ -362,6 +460,84 @@ export const OrderDetail = () => {
                   </span>
                 </div>
               </div>
+
+              {/* Rental Breakdown Card */}
+              {order.orderType === 'RENTAL' && (
+                <div className="pt-4 border-t border-slate-100 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-purple-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <Clock size={14} /> Gói thuê qua Smart Locker
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800">
+                      {order.rentalDurationDays} ngày thuê
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-100 space-y-1">
+                      <span className="text-slate-500 block">Đơn giá thuê theo ngày</span>
+                      <strong className="text-purple-900 font-bold block text-sm">
+                        {order.rentalDurationDays && order.rentalDurationDays > 0
+                          ? formatPrice(Math.round((order.priceSnapshot || 0) / order.rentalDurationDays))
+                          : formatPrice(order.priceSnapshot || 0)}
+                        /ngày
+                      </strong>
+                    </div>
+                    <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-100 space-y-1">
+                      <span className="text-slate-500 block">Tiền cọc bảo đảm (hoàn lại)</span>
+                      <strong className="text-purple-900 font-bold block text-sm">
+                        {formatPrice(order.depositAmount || 0)}
+                      </strong>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                      <span className="text-slate-500 block">Phí dịch vụ nền tảng</span>
+                      <strong className="text-slate-700 font-bold block">
+                        {formatPrice(order.platformFee || 0)}
+                      </strong>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                      <span className="text-slate-500 block">Thực nhận người cho thuê</span>
+                      <strong className="text-emerald-700 font-bold block">
+                        {formatPrice(order.sellerPayout || 0)}
+                      </strong>
+                    </div>
+                  </div>
+
+                  {(order.pickedUpAt || order.dueReturnAt) && (
+                    <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs space-y-1 text-amber-900">
+                      {order.pickedUpAt && (
+                        <div>
+                          Thời điểm nhận đồ & kích hoạt:{' '}
+                          <strong className="font-bold">{formatDate(order.pickedUpAt)}</strong>
+                        </div>
+                      )}
+                      {order.dueReturnAt && (
+                        <div>
+                          Hạn chót hoàn trả vào tủ:{' '}
+                          <strong className="font-bold text-amber-950">{formatDate(order.dueReturnAt)}</strong>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {order.returnLockerName && (
+                    <div className="p-3 bg-purple-50 rounded-xl border border-purple-200 text-xs text-purple-900 flex justify-between items-center">
+                      <div>
+                        <span className="text-[11px] font-bold uppercase tracking-wider block text-purple-700">
+                          Tủ Locker hoàn trả
+                        </span>
+                        <strong className="block text-sm">{order.returnLockerName}</strong>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[11px] text-purple-600 block">Ngăn tủ</span>
+                        <span className="text-base font-black font-mono text-purple-900">
+                          {order.returnCompartmentCode || 'Đang cấp'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Counterparties */}
               <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-4 text-xs">
@@ -527,6 +703,237 @@ export const OrderDetail = () => {
               </div>
             )}
 
+            {/* Rental Active: Renting Period State */}
+            {order.status === 'RENTING' && (
+              <div className="bg-white rounded-3xl border border-purple-200 p-6 shadow-xs space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+                    <Clock size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Đang trong thời gian thuê</h3>
+                    <p className="text-xs text-slate-500">
+                      Gói thuê {order.rentalDurationDays} ngày • Hạn trả:{' '}
+                      <strong className="text-purple-700">{formatDate(order.dueReturnAt)}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-purple-50/60 rounded-2xl border border-purple-100 text-xs space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Bắt đầu tính thời hạn:</span>
+                    <strong className="text-slate-800">{formatDate(order.pickedUpAt)}</strong>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Hạn chót hoàn trả:</span>
+                    <strong className="text-amber-700 font-bold">{formatDate(order.dueReturnAt)}</strong>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Tiền cọc bảo đảm:</span>
+                    <strong className="text-emerald-700 font-bold">{formatPrice(order.depositAmount || 0)}</strong>
+                  </div>
+                </div>
+
+                {isBuyer ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-500">
+                      Bạn có thể hoàn trả sản phẩm bất kỳ lúc nào trước hạn chót bằng cách gửi vào một trạm tủ Smart Locker.
+                    </p>
+                    <button
+                      onClick={() => setIsReturnModalOpen(true)}
+                      className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      <RotateCcw size={16} /> Chọn tủ Locker để hoàn trả đồ
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-slate-50 rounded-xl text-xs text-slate-600 text-center">
+                    Người thuê đang sử dụng sản phẩm. Hệ thống sẽ thông báo ngay khi người thuê gửi trả vào tủ Smart Locker.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Buyer Deposit Return Item Into Locker */}
+            {order.status === 'AWAITING_RETURN_DEPOSIT' && (
+              <div className="bg-white rounded-3xl border border-purple-200 p-6 shadow-xs space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+                    <RotateCcw size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Gửi trả đồ vào Smart Locker</h3>
+                    <p className="text-xs text-slate-500">
+                      Vui lòng mang đồ tới trạm tủ đã chỉ định để trả
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Trạm tủ trả đồ:</span>
+                    <strong className="text-slate-900">{order.returnLockerName}</strong>
+                  </div>
+                  {order.returnLockerLocation && (
+                    <div className="text-slate-500 text-[11px]">{order.returnLockerLocation}</div>
+                  )}
+                  <div className="flex justify-between items-center pt-1 border-t border-slate-200">
+                    <span className="text-purple-700 font-bold">Ngăn tủ chỉ định:</span>
+                    <strong className="text-purple-900 font-mono text-base font-black">
+                      {order.returnCompartmentCode}
+                    </strong>
+                  </div>
+                </div>
+
+                {isBuyer ? (
+                  <button
+                    disabled={depositReturnMutation.isPending}
+                    onClick={() => depositReturnMutation.mutate()}
+                    className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs sm:text-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {depositReturnMutation.isPending ? (
+                      <span>Đang mở tủ và xác nhận trả đồ...</span>
+                    ) : (
+                      <>
+                        <Lock size={15} /> Xác nhận đã đặt đồ vào ngăn {order.returnCompartmentCode}
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div className="p-3 bg-purple-50 rounded-xl text-xs text-purple-700 text-center">
+                    Người thuê đã chỉ định trạm tủ và đang thực hiện gửi đồ trả lại ngăn tủ.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Seller Return Pickup Terminal Flow */}
+            {order.status === 'READY_FOR_RETURN_PICKUP' && (
+              <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-xl border border-slate-800 space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Radio size={16} className="text-purple-400" />
+                    <span className="text-xs uppercase font-extrabold tracking-wider text-purple-300">
+                      Locker Return Terminal
+                    </span>
+                  </div>
+                  <span className="px-2.5 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full">
+                    SẴN SÀNG NHẬN LẠI ĐỒ
+                  </span>
+                </div>
+
+                {/* Secret Return Pickup PIN for Seller */}
+                {isSeller && (order.pickupCode || order.returnPickupCode) && (
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 text-center space-y-2">
+                    <span className="text-[11px] font-bold text-purple-200 uppercase tracking-wider block">
+                      Mã PIN lấy lại đồ (6 chữ số)
+                    </span>
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="font-mono text-3xl font-black text-amber-300 tracking-widest">
+                        {order.pickupCode || order.returnPickupCode}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const code = order.pickupCode || order.returnPickupCode;
+                          if (code) {
+                            navigator.clipboard.writeText(code);
+                            setIsCopied(true);
+                            setTimeout(() => setIsCopied(false), 2000);
+                          }
+                        }}
+                        className="p-2 bg-white/20 hover:bg-white/30 rounded-xl text-xs transition flex items-center gap-1"
+                        title="Sao chép mã"
+                      >
+                        {isCopied ? <Check size={14} /> : <Copy size={14} />}
+                      </button>
+                    </div>
+                    <span className="text-[11px] text-purple-200/80 block">
+                      Tủ: {order.returnLockerName} • Ngăn: {order.returnCompartmentCode}
+                    </span>
+                  </div>
+                )}
+
+                {/* Buyer waiting notice */}
+                {isBuyer && (
+                  <div className="p-4 bg-white/10 rounded-2xl border border-white/20 text-center space-y-2 text-xs">
+                    <p className="text-emerald-300 font-bold">
+                      Bạn đã hoàn trả đồ vào ngăn {order.returnCompartmentCode} tại tủ {order.returnLockerName}!
+                    </p>
+                    <p className="text-slate-300">
+                      Đang đợi chủ sở hữu tới trạm tủ mở ngăn lấy lại đồ để hoàn tất tất toán và hoàn tiền cọc cho bạn.
+                    </p>
+                  </div>
+                )}
+
+                {/* Keypad Touch Screen Simulator for Seller */}
+                {isSeller && (
+                  <div className="bg-black/50 rounded-2xl p-4 border border-white/10 space-y-4">
+                    <div className="text-center space-y-1.5">
+                      <span className="text-[11px] text-slate-400">
+                        Màn hình cảm ứng tại trạm {order.returnLockerName}
+                      </span>
+                      <div className="bg-slate-950 border border-purple-500/40 rounded-xl p-3 font-mono text-center">
+                        <span className="text-2xl font-black tracking-widest text-emerald-400">
+                          {pickupCodeInput || '------'}
+                        </span>
+                      </div>
+                      {pickupErrorMessage && (
+                        <div className="text-xs text-rose-400 font-bold flex items-center justify-center gap-1 pt-1">
+                          <AlertTriangle size={13} /> {pickupErrorMessage}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Keypad Buttons */}
+                    <div className="grid grid-cols-3 gap-2 max-w-[220px] mx-auto">
+                      {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
+                        <button
+                          key={digit}
+                          onClick={() => handleKeypadPress(digit)}
+                          className="py-2.5 bg-white/10 hover:bg-white/20 active:bg-white/30 rounded-xl font-mono text-base font-bold transition text-white"
+                        >
+                          {digit}
+                        </button>
+                      ))}
+                      <button
+                        onClick={handleKeypadClear}
+                        className="py-2.5 bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 rounded-xl text-xs font-bold"
+                      >
+                        Xóa
+                      </button>
+                      <button
+                        onClick={() => handleKeypadPress('0')}
+                        className="py-2.5 bg-white/10 hover:bg-white/20 rounded-xl font-mono text-base font-bold text-white"
+                      >
+                        0
+                      </button>
+                      <button
+                        disabled={pickupCodeInput.length !== 6 || pickupReturnMutation.isPending}
+                        onClick={() => pickupReturnMutation.mutate(pickupCodeInput)}
+                        className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold disabled:opacity-30"
+                      >
+                        {pickupReturnMutation.isPending ? '...' : 'OK'}
+                      </button>
+                    </div>
+
+                    <button
+                      disabled={pickupCodeInput.length !== 6 || pickupReturnMutation.isPending}
+                      onClick={() => pickupReturnMutation.mutate(pickupCodeInput)}
+                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition text-xs sm:text-sm disabled:opacity-40 flex items-center justify-center gap-2"
+                    >
+                      {pickupReturnMutation.isPending ? (
+                        <span>Đang kích hoạt chốt khóa mở ngăn...</span>
+                      ) : (
+                        <>
+                          <KeyRound size={16} /> Mở ngăn nhận lại đồ & hoàn tất đơn
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Seller Deposit Item Action */}
             {order.status === 'AWAITING_DEPOSIT' && isSeller && (
               <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
@@ -619,6 +1026,87 @@ export const OrderDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Return Locker Selection Modal */}
+      {isReturnModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-purple-100 text-purple-700 rounded-xl">
+                  <RotateCcw size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Chọn tủ Smart Locker để trả đồ</h3>
+                  <p className="text-xs text-slate-500">Hệ thống sẽ cấp một ngăn trống tại trạm bạn chọn</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsReturnModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                Chọn trạm Smart Locker tiện lợi cho bạn:
+              </label>
+
+              {activeLockers && activeLockers.length > 0 ? (
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {activeLockers.map((locker) => (
+                    <label
+                      key={locker.id}
+                      className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition ${
+                        selectedReturnLockerId === String(locker.id)
+                          ? 'border-purple-600 bg-purple-50/60 shadow-xs'
+                          : 'border-slate-200 hover:border-purple-300 bg-white'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="returnLocker"
+                        value={locker.id}
+                        checked={selectedReturnLockerId === String(locker.id)}
+                        onChange={(e) => setSelectedReturnLockerId(e.target.value)}
+                        className="mt-1 text-purple-600 focus:ring-purple-500"
+                      />
+                      <div className="flex-1 text-xs">
+                        <strong className="text-slate-900 font-bold block">{locker.name}</strong>
+                        <span className="text-slate-500 mt-0.5 block">{locker.location}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-6 text-center text-xs text-slate-400 bg-slate-50 rounded-2xl">
+                  Đang tìm các trạm tủ Smart Locker khả dụng...
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsReturnModalOpen(false)}
+                className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={!selectedReturnLockerId || initiateReturnMutation.isPending}
+                onClick={() => initiateReturnMutation.mutate(Number(selectedReturnLockerId))}
+                className="flex-1 py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/20"
+              >
+                {initiateReturnMutation.isPending ? 'Đang cấp ngăn tủ...' : 'Xác nhận giữ ngăn trả'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
