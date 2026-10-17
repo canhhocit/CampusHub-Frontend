@@ -115,20 +115,20 @@ export const MarketplaceList = () => {
   const hasActiveFilters = Boolean(categoryId || search);
 
   return (
-    <div className="min-h-screen bg-slate-50 py-6 sm:py-8 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <div className="min-h-screen bg-slate-50 py-6 sm:py-10 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         {/* 1. Hero Showcase Banner (Oreka Pattern adapted for CampusHub) */}
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white p-6 sm:p-10 shadow-lg">
-          <div className="relative z-10 max-w-2xl space-y-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 uppercase tracking-wider">
+        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 text-white p-6 sm:p-10 shadow-lg shadow-indigo-950/10">
+          <div className="relative z-10 max-w-2xl space-y-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-amber-300 text-slate-950 tracking-wide">
               <Sparkles size={13} /> Sàn chuyển giao chủ mới cho những món đồ hữu ích
             </span>
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
               Mua Bán & Thanh Lý Đồ Cũ <br className="hidden sm:inline" />
               Giao Nhận Qua <span className="text-purple-300">Tủ Smart Locker</span>
             </h1>
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xl">
-              Tiết kiệm chi phí, đặt mua và nhận hàng 24/7 tại các trạm tủ đồ thông minh trong thời đại số bận rộn !
+            <p className="text-slate-200 text-sm sm:text-base leading-relaxed max-w-xl">
+              Tiết kiệm chi phí, mua bán đồ dùng trong trường và nhận hàng 24/7 tại các tủ đồ thông minh.
             </p>
 
             {/* Quick feature tags */}
@@ -150,8 +150,8 @@ export const MarketplaceList = () => {
 
         {/* 2. Category Quick Chips / Carousel (Inspired by Oreka Categories) */}
         <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-slate-700 tracking-wide">
               Khám phá theo danh mục
             </h2>
             {categoryId && (
@@ -167,7 +167,7 @@ export const MarketplaceList = () => {
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
             <button
               onClick={() => handleCategorySelect('')}
-              className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 ${
                 !categoryId
                   ? 'bg-purple-600 text-white shadow-xs'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -184,7 +184,7 @@ export const MarketplaceList = () => {
                 <button
                   key={cat.id}
                   onClick={() => handleCategorySelect(cat.id.toString())}
-                  className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  className={`shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 ${
                     isSelected
                       ? 'bg-purple-600 text-white shadow-xs'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -199,7 +199,7 @@ export const MarketplaceList = () => {
         </div>
 
         {/* 3. Search & Filters Control Bar */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-4">
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <form onSubmit={handleSearchSubmit} className="flex-1 relative flex items-center">
@@ -208,12 +208,12 @@ export const MarketplaceList = () => {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Tìm tên hoặc mô tả sản phẩm..."
-                className="w-full pl-9 pr-24 py-2 border border-slate-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 bg-slate-50 focus:bg-white transition"
+                className="w-full pl-10 pr-28 py-3 border border-slate-300 rounded-xl text-sm sm:text-base focus:outline-hidden focus:ring-2 focus:ring-purple-500 bg-slate-50 focus:bg-white transition"
               />
               <Search className="absolute left-3 text-slate-400" size={16} />
               <button
                 type="submit"
-                className="absolute right-1 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition"
+                className="absolute right-1 px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-sm font-bold transition"
               >
                 Tìm kiếm
               </button>
@@ -277,7 +277,7 @@ export const MarketplaceList = () => {
           </div>
 
           {/* Active Filter Indicators & Total Elements */}
-          <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-sm text-slate-600 gap-2">
             <div className="flex items-center gap-2">
               <span>
                 Tìm thấy{' '}

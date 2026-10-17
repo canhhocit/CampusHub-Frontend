@@ -50,7 +50,7 @@ export const Navbar = () => {
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-40 font-sans shadow-xs">
       {/* Top Value Proposition Banner (Inspired by Oreka) */}
-      <div className="bg-purple-900 text-purple-100 text-[11px] sm:text-xs py-1.5 px-4 text-center font-medium flex items-center justify-center gap-2">
+      <div className="bg-indigo-950 text-indigo-100 text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
         <span className="inline-flex items-center gap-1 font-bold text-amber-300">
           <Lock size={12} /> Smart Locker Campus:
         </span>
@@ -83,12 +83,12 @@ export const Navbar = () => {
               {navLinks.map((link) => {
                 if (link.authOnly && !isAuthenticated) return null;
                 const Icon = link.icon;
-                const isActive = location.pathname === link.to;
+                const isActive = location.pathname === link.to || location.pathname.startsWith(`${link.to}/`);
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition ${
                       isActive
                         ? 'bg-purple-50 text-purple-700 font-bold border border-purple-200'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -112,12 +112,12 @@ export const Navbar = () => {
               value={navSearch}
               onChange={(e) => setNavSearch(e.target.value)}
               placeholder="Tìm giáo trình, laptop, đồ KTX, tài liệu..."
-              className="w-full pl-9 pr-20 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-slate-50 hover:bg-white transition"
+              className="w-full pl-9 pr-20 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-slate-50 hover:bg-white transition"
             />
             <Search className="absolute left-3 text-slate-400" size={16} />
             <button
               type="submit"
-              className="absolute right-1 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition"
+              className="absolute right-1 px-3 py-1.5 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-sm font-bold transition"
             >
               Tìm
             </button>
@@ -139,7 +139,7 @@ export const Navbar = () => {
             {/* Post Listing Action (Prominent CTA inspired by Oreka's "Đăng bán") */}
             <Link
               to={isAuthenticated ? "/marketplace/new" : "/login"}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-sm shadow-purple-600/20 transition hover:scale-102"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold bg-purple-700 hover:bg-purple-800 text-white shadow-sm shadow-purple-600/20 transition hover:scale-102"
             >
               <Plus size={16} />
               Đăng tin bán
