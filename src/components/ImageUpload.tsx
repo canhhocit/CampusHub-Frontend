@@ -9,6 +9,7 @@ interface ImageUploadProps {
   onFileSelected?: (file: File) => void;
   label?: string;
   hideLabel?: boolean;
+  allowUrl?: boolean;
 }
 
 export const ImageUpload = ({
@@ -18,6 +19,7 @@ export const ImageUpload = ({
   onFileSelected,
   label = 'Hình ảnh',
   hideLabel = false,
+  allowUrl = false,
 }: ImageUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -91,19 +93,21 @@ export const ImageUpload = ({
           <label className="block text-xs font-semibold text-slate-700">
             {label}
           </label>
-          <button
-            type="button"
-            onClick={() => setShowUrlInput(!showUrlInput)}
-            className="text-xs text-slate-500 hover:text-slate-800 font-medium inline-flex items-center gap-1 transition"
-          >
-            <Link2 size={13} />
-            {showUrlInput ? 'Ẩn nhập URL' : 'Dán URL ảnh'}
-          </button>
+          {allowUrl && (
+            <button
+              type="button"
+              onClick={() => setShowUrlInput(!showUrlInput)}
+              className="text-xs text-slate-500 hover:text-slate-800 font-medium inline-flex items-center gap-1 transition"
+            >
+              <Link2 size={13} />
+              {showUrlInput ? 'Ẩn nhập URL' : 'Dán URL ảnh'}
+            </button>
+          )}
         </div>
       )}
 
       {/* Manual URL Input (Collapsible) */}
-      {showUrlInput && (
+      {allowUrl && showUrlInput && (
         <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 animate-in fade-in duration-150">
           <input
             type="text"
@@ -138,15 +142,18 @@ export const ImageUpload = ({
             </button>
           </div>
 
-          <div className="p-2.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-            <span className="truncate max-w-xs text-[11px] font-mono">{value}</span>
+          <div className="p-2.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5 text-slate-600">
+              <CheckCircle2 size={13} className="text-emerald-600" />
+              <span className="font-medium text-[11px]">Tệp hình ảnh đã nạp thành công</span>
+            </div>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="text-slate-700 hover:text-[#eb6e34] font-medium ml-2 shrink-0 transition"
+              className="text-slate-600 hover:text-slate-900 font-medium text-xs transition"
             >
-              Đổi ảnh
+              Thay ảnh khác
             </button>
           </div>
         </div>

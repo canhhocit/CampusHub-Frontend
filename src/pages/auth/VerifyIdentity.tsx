@@ -14,6 +14,7 @@ import {
   PlusCircle,
   Loader2,
   QrCode,
+  ShieldCheck,
   RefreshCw,
 } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export const VerifyIdentity = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [confirmedCommitment, setConfirmedCommitment] = useState(true);
 
   // Trạng thái quét mã QR trên CCCD
   const [isScanningQr, setIsScanningQr] = useState(false);
@@ -37,7 +39,7 @@ export const VerifyIdentity = () => {
 
   const isVerified = user?.identityVerified;
 
-  // Xử lý quét mã QR tự động từ File ảnh vừa chọn
+  // Xử lý quét mã QR tự động từ File ảnh mặt trước
   const handleFrontFileSelected = async (file: File) => {
     setIsScanningQr(true);
     setQrScanNotice(null);
@@ -49,11 +51,11 @@ export const VerifyIdentity = () => {
         processQrText(rawText);
       } else {
         setQrScanNotice(
-          'Không tìm thấy mã QR trên ảnh. Bạn có thể tự nhập 12 số CCCD bên dưới hoặc chụp rõ nét góc trên bên phải của thẻ.'
+          'Chưa nhận diện được mã QR trên ảnh. Vui lòng kiểm tra lại góc chụp hoặc tự nhập 12 số CCCD.'
         );
       }
     } catch {
-      setQrScanNotice('Không thể quét mã QR từ ảnh. Bạn vui lòng tự nhập 12 số CCCD bên dưới.');
+      setQrScanNotice('Không thể đọc mã QR từ ảnh. Bạn vui lòng tự nhập 12 số CCCD bên dưới.');
     } finally {
       setIsScanningQr(false);
     }
@@ -71,11 +73,11 @@ export const VerifyIdentity = () => {
         processQrText(rawText);
       } else {
         setQrScanNotice(
-          'Không tìm thấy mã QR trên ảnh này. Vui lòng kiểm tra lại ảnh hoặc tự nhập 12 số CCCD.'
+          'Chưa nhận diện được mã QR trên ảnh. Vui lòng kiểm tra ảnh hoặc tự nhập 12 số CCCD.'
         );
       }
     } catch {
-      setQrScanNotice('Không thể đọc mã QR từ ảnh.');
+      setQrScanNotice('Không thể quét mã QR từ ảnh này.');
     } finally {
       setIsScanningQr(false);
     }
@@ -102,7 +104,7 @@ export const VerifyIdentity = () => {
           rawText: trimmed,
         });
       } else {
-        setQrScanNotice('Đã quét mã QR nhưng định dạng không phải thẻ CCCD chuẩn.');
+        setQrScanNotice('Đã đọc mã QR nhưng định dạng dữ liệu không khớp chuẩn CCCD.');
       }
     }
   };
@@ -120,12 +122,17 @@ export const VerifyIdentity = () => {
     const cleanCitizenId = citizenId.trim();
 
     if (!/^[0-9]{12}$/.test(cleanCitizenId)) {
-      setErrorMessage('Số CCCD không hợp lệ. Vui lòng nhập đúng 12 chữ số căn cước công dân.');
+      setErrorMessage('Số Căn cước công dân không hợp lệ. Vui lòng nhập đúng 12 chữ số.');
       return;
     }
 
     if (!idCardFrontUrl) {
-      setErrorMessage('Vui lòng tải lên ảnh mặt trước CCCD của bạn.');
+      setErrorMessage('Vui lòng tải lên ảnh mặt trước thẻ CCCD.');
+      return;
+    }
+
+    if (!confirmedCommitment) {
+      setErrorMessage('Vui lòng xác nhận cam kết tính chính xác của hồ sơ giấy tờ tùy thân.');
       return;
     }
 
@@ -142,7 +149,7 @@ export const VerifyIdentity = () => {
       setIsSuccess(true);
     } catch (err: any) {
       setErrorMessage(
-        err.response?.data?.message || 'Xác minh danh tính thất bại. Vui lòng kiểm tra lại thông tin.'
+        err.response?.data?.message || 'Gửi hồ sơ xác minh thất bại. Vui lòng thử lại.'
       );
     } finally {
       setLoading(false);
@@ -150,279 +157,345 @@ export const VerifyIdentity = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/60 py-10 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-xl mx-auto">
+    <div className="min-h-screen bg-slate-100/70 py-8 px-4 sm:px-6 lg:px-8 font-sans text-slate-800">
+      <div className="max-w-2xl mx-auto">
         {/* Navigation Breadcrumb */}
         <div className="mb-4 flex items-center justify-between text-xs text-slate-500">
           <Link
             to="/marketplace"
-            className="text-slate-600 hover:text-slate-900 transition flex items-center gap-1"
+            className="text-slate-600 hover:text-slate-900 transition flex items-center gap-1 font-medium"
           >
-            &larr; Quay lại Chợ
+            &larr; Quay lại Chợ sinh viên
           </Link>
-          <span className="flex items-center gap-1">
-            <Lock size={12} className="text-slate-400" /> Xác thực tài khoản
+          <span className="flex items-center gap-1 text-slate-500">
+            <Lock size={12} className="text-slate-400" /> Xác thực định danh điện tử
           </span>
         </div>
 
-        {/* Card Container */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-6 sm:p-8">
-          {/* Header Title */}
-          <div className="mb-6 pb-5 border-b border-slate-100">
+        {/* Official Portal Card Container */}
+        <div className="bg-white rounded-xl border border-slate-300/80 shadow-xs p-6 sm:p-8">
+          {/* Official Document Header */}
+          <div className="border-b border-slate-200 pb-5 mb-6">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              Hệ thống Định danh Điện tử • Smart Locker Campus
+            </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Xác minh Căn cước công dân
+              Hồ Sơ Xác Minh Căn Cước Công Dân
             </h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Hệ thống tự động đọc mã QR trên ảnh thẻ để điền nhanh thông tin.
+            <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+              Thông tin phục vụ đối chiếu định danh công dân sinh viên, bảo đảm tính xác thực và an toàn pháp lý khi giao nhận hàng hóa qua hệ thống tủ Smart Locker.
             </p>
           </div>
 
           {/* Pending State */}
           {(isSuccess || user?.identityReviewStatus === 'PENDING') && !isVerified && (
-            <div className="mb-6 p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 flex items-start gap-2.5">
-              <CheckCircle2 size={16} className="text-[#eb6e34] shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-slate-900 font-semibold block">Hồ sơ đã được gửi thành công</strong>
-                <span className="text-slate-600 mt-0.5 block">
-                  Quản trị viên đang xem xét hồ sơ của bạn. Bạn sẽ nhận được thông báo khi được phê duyệt.
-                </span>
+            <div className="mb-6 p-4 bg-slate-50 border border-slate-300 rounded-lg text-xs space-y-1">
+              <div className="flex items-center gap-2 text-slate-900 font-bold">
+                <CheckCircle2 size={16} className="text-emerald-600" />
+                <span>Hồ sơ đã được tiếp nhận thành công</span>
               </div>
+              <p className="text-slate-600 pl-6 leading-relaxed">
+                Hồ sơ định danh của bạn đang được cán bộ kiểm duyệt đối chiếu. Sau khi được phê duyệt, tài khoản sẽ tự động kích hoạt quyền đăng bán và giao nhận đồ qua Smart Locker.
+              </p>
             </div>
           )}
 
           {/* Rejected State */}
           {user?.identityReviewStatus === 'REJECTED' && !isSuccess && (
-            <div className="mb-6 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-center gap-2">
-              <AlertCircle size={15} className="text-rose-600 shrink-0" />
-              <span>Hồ sơ chưa được phê duyệt. Vui lòng tải lại ảnh CCCD rõ nét hơn để gửi lại.</span>
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-start gap-2.5">
+              <AlertCircle size={16} className="text-rose-600 shrink-0 mt-0.5" />
+              <div>
+                <strong className="block font-semibold">Hồ sơ chưa được phê duyệt hoặc bị từ chối</strong>
+                <span className="text-rose-700 leading-relaxed block mt-0.5">
+                  Vui lòng kiểm tra lại chất lượng ảnh chụp giấy tờ (rõ nét 4 góc, đủ ánh sáng, hiển thị rõ mã QR) và cập nhật lại hồ sơ.
+                </span>
+              </div>
             </div>
           )}
 
           {/* Verified State */}
           {isVerified ? (
-            <div className="text-center py-6">
-              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 border border-emerald-200">
-                <CheckCircle2 size={30} />
+            <div className="py-6 text-center space-y-4">
+              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-200">
+                <ShieldCheck size={26} />
               </div>
-              <h2 className="text-lg font-bold text-slate-900">
-                Đã xác minh danh tính thành công
-              </h2>
-              <p className="text-xs text-slate-600 mt-1.5 max-w-sm mx-auto">
-                Tài khoản của bạn đã được gắn huy hiệu xác thực. Bạn có thể đăng bán và giao nhận qua Smart Locker.
-              </p>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">
+                  Tài khoản đã được định danh và xác thực
+                </h2>
+                <p className="text-xs text-slate-600 mt-1 max-w-md mx-auto leading-relaxed">
+                  Hồ sơ căn cước công dân đã được phê duyệt hợp lệ. Bạn có quyền thực hiện mọi giao dịch mua bán và gửi nhận đồ trên toàn hệ thống.
+                </p>
+              </div>
 
               {user?.citizenId && (
-                <div className="mt-4 p-2.5 bg-slate-50 rounded-lg border border-slate-200 inline-flex items-center gap-2 text-xs text-slate-600">
-                  <CreditCard size={14} className="text-slate-400" />
-                  <span>
-                    Số CCCD: <strong className="font-mono text-slate-900">{user.citizenId.substring(0, 4)}****{user.citizenId.substring(8)}</strong>
-                  </span>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 inline-block text-xs text-slate-700">
+                  <span className="text-slate-500">Số định danh cá nhân: </span>
+                  <strong className="font-mono text-slate-900 text-sm ml-1">
+                    {user.citizenId.substring(0, 4)}****{user.citizenId.substring(8)}
+                  </strong>
                 </div>
               )}
 
-              <div className="mt-6 flex justify-center gap-2.5">
+              <div className="pt-3 flex justify-center gap-3">
                 <button
                   onClick={() => navigate('/marketplace/new')}
                   className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg text-xs font-semibold transition"
                 >
-                  <PlusCircle size={14} /> Đăng bán sản phẩm
+                  <PlusCircle size={14} /> Đăng tin bán hàng
                 </button>
                 <button
                   onClick={() => navigate('/marketplace')}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold transition"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold transition border border-slate-200"
                 >
-                  <ShoppingBag size={14} /> Vào Chợ đồ cũ
+                  <ShoppingBag size={14} /> Vào Chợ sinh viên
                 </button>
               </div>
             </div>
           ) : (
             /* Main Form */
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {errorMessage && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
-                  <AlertCircle size={14} className="shrink-0 text-rose-600" />
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-center gap-2">
+                  <AlertCircle size={15} className="shrink-0 text-rose-600" />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
-              {/* Step 1: Front Image */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-slate-800">
-                    Ảnh mặt trước CCCD <span className="text-rose-500">*</span>
-                  </label>
-                  <span className="text-[11px] text-slate-400">
-                    Chụp rõ mã QR góc trên bên phải
-                  </span>
+              {/* PHẦN 1: TẢI ẢNH GIẤY TỜ TÙY THÂN */}
+              <div className="space-y-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-900 border-l-2 border-[#eb6e34] pl-2">
+                  1. Tệp hình ảnh Căn cước công dân gắn chip
                 </div>
 
-                <ImageUpload
-                  value={idCardFrontUrl}
-                  onChange={(url) => setIdCardFrontUrl(url)}
-                  onFileSelected={handleFrontFileSelected}
-                  hideLabel={true}
-                />
-
-                {/* QR Scanning Indicator */}
-                {isScanningQr && (
-                  <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
-                    <Loader2 size={13} className="animate-spin text-[#eb6e34]" />
-                    <span>Đang quét mã QR trên ảnh thẻ...</span>
+                {/* Mặt trước */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-slate-900">
+                      Ảnh mặt trước thẻ CCCD <span className="text-rose-600">*</span>
+                    </label>
+                    <span className="text-[11px] text-slate-500">
+                      (Chụp rõ nét góc trên bên phải chứa mã QR)
+                    </span>
                   </div>
-                )}
 
-                {/* Rescan Button if URL exists */}
-                {idCardFrontUrl && !qrScanResult && !isScanningQr && (
-                  <div className="mt-1.5 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={handleRescanFromUrl}
-                      className="text-[11px] text-slate-500 hover:text-slate-800 inline-flex items-center gap-1 transition"
-                    >
-                      <RefreshCw size={11} /> Quét lại mã QR
-                    </button>
+                  <ImageUpload
+                    value={idCardFrontUrl}
+                    onChange={(url) => setIdCardFrontUrl(url)}
+                    onFileSelected={handleFrontFileSelected}
+                    hideLabel={true}
+                    allowUrl={false}
+                  />
+
+                  {/* QR Scanning Indicator */}
+                  {isScanningQr && (
+                    <div className="mt-2 text-xs text-slate-600 flex items-center gap-2 bg-slate-50 p-2 rounded border border-slate-200">
+                      <Loader2 size={13} className="animate-spin text-[#eb6e34]" />
+                      <span>Đang tự động đối soát mã QR trên ảnh thẻ CCCD...</span>
+                    </div>
+                  )}
+
+                  {/* Rescan Button if URL exists */}
+                  {idCardFrontUrl && !qrScanResult && !isScanningQr && (
+                    <div className="mt-1.5 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={handleRescanFromUrl}
+                        className="text-xs text-slate-600 hover:text-slate-900 inline-flex items-center gap-1 font-medium transition"
+                      >
+                        <RefreshCw size={11} /> Đối soát lại mã QR
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Notice if failed */}
+                  {qrScanNotice && !isScanningQr && !qrScanResult && (
+                    <p className="mt-1.5 text-[11px] text-slate-500 leading-relaxed">
+                      {qrScanNotice}
+                    </p>
+                  )}
+                </div>
+
+                {/* Mặt sau */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-slate-900">
+                      Ảnh mặt sau thẻ CCCD
+                    </label>
+                    <span className="text-[11px] text-slate-500">Không bắt buộc</span>
                   </div>
-                )}
-
-                {/* Notice if failed */}
-                {qrScanNotice && !isScanningQr && !qrScanResult && (
-                  <p className="mt-1.5 text-[11px] text-slate-500">
-                    {qrScanNotice}
-                  </p>
-                )}
+                  <ImageUpload
+                    value={idCardBackUrl}
+                    onChange={(url) => setIdCardBackUrl(url)}
+                    hideLabel={true}
+                    allowUrl={false}
+                  />
+                </div>
               </div>
 
-              {/* Extracted QR Information Card (Subtle, Clean) */}
+              {/* PHẦN 2: THÔNG TIN TRÍCH XUẤT TỪ MÃ QR (BẢNG ĐỐI SOÁT CHUẨN DỊCH VỤ CÔNG) */}
               {qrScanResult && (
-                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
-                  <div className="flex items-center justify-between text-slate-700">
-                    <span className="font-semibold text-slate-900 flex items-center gap-1.5">
-                      <CheckCircle2 size={14} className="text-emerald-600" />
-                      Thông tin nhận diện từ thẻ CCCD
-                    </span>
-                    <span className="text-[11px] text-slate-400">Đã tự động điền form</span>
+                <div className="space-y-2 pt-2">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-900 border-l-2 border-[#eb6e34] pl-2">
+                    2. Dữ liệu trích xuất từ thẻ Căn cước công dân
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-slate-600 border-t border-slate-200/60 text-[11px]">
-                    <div>
-                      <span className="text-slate-400 block">Họ và tên</span>
-                      <strong className="text-slate-800 text-xs font-semibold">{qrScanResult.fullName || '—'}</strong>
+                  <div className="border border-slate-300 rounded-lg overflow-hidden bg-white text-xs">
+                    <div className="bg-slate-100/90 px-3.5 py-2 border-b border-slate-200 flex items-center justify-between">
+                      <span className="font-semibold text-slate-800 flex items-center gap-1.5 text-[11px] uppercase tracking-wide">
+                        <CheckCircle2 size={13} className="text-emerald-600" />
+                        Kết quả đối soát mã QR hợp lệ
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        Đã tự động điền form
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-slate-400 block">Số CCCD</span>
-                      <strong className="text-slate-800 text-xs font-mono">{qrScanResult.citizenId || '—'}</strong>
+
+                    <div className="divide-y divide-slate-200 text-xs">
+                      <div className="grid grid-cols-3 px-3.5 py-2.5">
+                        <span className="text-slate-500 font-medium">Số CCCD / Định danh:</span>
+                        <span className="col-span-2 font-mono font-bold text-slate-900 text-sm">
+                          {qrScanResult.citizenId || '—'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 px-3.5 py-2.5">
+                        <span className="text-slate-500 font-medium">Họ và tên khai sinh:</span>
+                        <span className="col-span-2 font-bold text-slate-900 uppercase">
+                          {qrScanResult.fullName || '—'}
+                        </span>
+                      </div>
+                      {qrScanResult.dateOfBirthFormatted && (
+                        <div className="grid grid-cols-3 px-3.5 py-2.5">
+                          <span className="text-slate-500 font-medium">Ngày, tháng, năm sinh:</span>
+                          <span className="col-span-2 text-slate-800 font-medium">
+                            {qrScanResult.dateOfBirthFormatted}
+                          </span>
+                        </div>
+                      )}
+                      {qrScanResult.gender && (
+                        <div className="grid grid-cols-3 px-3.5 py-2.5">
+                          <span className="text-slate-500 font-medium">Giới tính:</span>
+                          <span className="col-span-2 text-slate-800">
+                            {qrScanResult.gender}
+                          </span>
+                        </div>
+                      )}
+                      {qrScanResult.address && (
+                        <div className="grid grid-cols-3 px-3.5 py-2.5">
+                          <span className="text-slate-500 font-medium">Nơi thường trú:</span>
+                          <span className="col-span-2 text-slate-800 leading-relaxed">
+                            {qrScanResult.address}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    {qrScanResult.dateOfBirthFormatted && (
-                      <div>
-                        <span className="text-slate-400 block">Ngày sinh</span>
-                        <span className="text-slate-700">{qrScanResult.dateOfBirthFormatted}</span>
-                      </div>
-                    )}
-                    {qrScanResult.gender && (
-                      <div>
-                        <span className="text-slate-400 block">Giới tính</span>
-                        <span className="text-slate-700">{qrScanResult.gender}</span>
-                      </div>
-                    )}
-                    {qrScanResult.address && (
-                      <div className="col-span-2">
-                        <span className="text-slate-400 block">Nơi thường trú</span>
-                        <span className="text-slate-700 truncate block">{qrScanResult.address}</span>
-                      </div>
-                    )}
                   </div>
 
                   {user?.fullName && qrScanResult.fullName && user.fullName.trim().toLowerCase() !== qrScanResult.fullName.trim().toLowerCase() && (
-                    <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
-                      * Tên tài khoản ({user.fullName}) khác với tên trên thẻ ({qrScanResult.fullName}). Vui lòng đảm bảo bạn sử dụng thẻ CCCD chính chủ.
+                    <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 p-2.5 rounded border border-slate-200">
+                      * <strong>Lưu ý:</strong> Họ tên trên giấy tờ định danh ({qrScanResult.fullName}) khác với họ tên tài khoản đăng ký ({user.fullName}). Cán bộ kiểm duyệt sẽ đối chiếu và yêu cầu xác thực bổ sung nếu phát hiện thông tin không chính chủ.
                     </p>
                   )}
                 </div>
               )}
 
-              {/* Step 2: Citizen ID Input */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-800 mb-1">
-                  Số Căn cước công dân (12 chữ số) <span className="text-rose-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    maxLength={12}
-                    value={citizenId}
-                    onChange={(e) => setCitizenId(e.target.value.replace(/[^0-9]/g, ''))}
-                    placeholder="Nhập hoặc quét tự động từ ảnh"
-                    required
-                    className="block w-full rounded-xl border border-slate-300 pl-9 pr-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:border-[#eb6e34] focus:ring-1 focus:ring-[#eb6e34] focus:outline-hidden font-mono"
-                  />
-                  <CreditCard size={15} className="absolute left-3 top-2.5 text-slate-400" />
+              {/* PHẦN 3: XÁC NHẬN SỐ ĐỊNH DANH */}
+              <div className="space-y-2 pt-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-900 border-l-2 border-[#eb6e34] pl-2">
+                  {qrScanResult ? '3. Xác nhận số Căn cước công dân' : '2. Nhập số Căn cước công dân'}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-900 mb-1">
+                    Số Căn cước công dân (12 chữ số) <span className="text-rose-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      maxLength={12}
+                      value={citizenId}
+                      onChange={(e) => setCitizenId(e.target.value.replace(/[^0-9]/g, ''))}
+                      placeholder="12 chữ số trên thẻ Căn cước công dân"
+                      required
+                      className="block w-full rounded-lg border border-slate-300 pl-9 pr-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#eb6e34] focus:ring-1 focus:ring-[#eb6e34] focus:outline-hidden font-mono"
+                    />
+                    <CreditCard size={15} className="absolute left-3 top-2.5 text-slate-400" />
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    Số CCCD sẽ được tự động trích xuất khi hệ thống đọc được mã QR trên ảnh mặt trước.
+                  </p>
                 </div>
               </div>
 
-              {/* Step 3: Back Image (Optional) */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-semibold text-slate-800">
-                    Ảnh mặt sau CCCD
-                  </label>
-                  <span className="text-[11px] text-slate-400">Không bắt buộc</span>
-                </div>
-                <ImageUpload
-                  value={idCardBackUrl}
-                  onChange={(url) => setIdCardBackUrl(url)}
-                  hideLabel={true}
-                />
+              {/* Cam kết tính chính xác */}
+              <div className="pt-1">
+                <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={confirmedCommitment}
+                    onChange={(e) => setConfirmedCommitment(e.target.checked)}
+                    className="mt-0.5 rounded border-slate-300 text-[#eb6e34] focus:ring-[#eb6e34]"
+                  />
+                  <span className="leading-relaxed text-[11px] text-slate-600">
+                    Tôi cam đoan toàn bộ thông tin và tệp ảnh giấy tờ tùy thân cung cấp trên đây là chính chủ, chính xác và chịu hoàn toàn trách nhiệm theo quy định của nền tảng.
+                  </span>
+                </label>
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading || isScanningQr}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#eb6e34] hover:bg-[#d85e25] text-white font-semibold text-xs sm:text-sm rounded-xl transition shadow-2xs disabled:opacity-50"
+                disabled={loading || isScanningQr || !confirmedCommitment}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#eb6e34] hover:bg-[#d85e25] text-white font-semibold text-xs sm:text-sm rounded-lg transition shadow-2xs disabled:opacity-50"
               >
                 {loading ? (
                   <>
                     <Loader2 size={15} className="animate-spin" />
-                    Đang gửi hồ sơ...
+                    Đang gửi hồ sơ xác minh...
                   </>
                 ) : (
                   <>
-                    Gửi hồ sơ xác minh
+                    Gửi hồ sơ định danh
                     <ArrowRight size={15} />
                   </>
                 )}
               </button>
 
-              {/* Demo Helper Tool (Discreet text link at bottom) */}
-              <div className="pt-2 text-center">
+              {/* Bảo mật thông tin chân trang */}
+              <div className="pt-2 text-center text-[11px] text-slate-400">
+                <p>Dữ liệu được lưu trữ bảo mật và tuân thủ chính sách quyền riêng tư của Smart Locker Campus.</p>
+              </div>
+
+              {/* Demo Helper Tool (Kín đáo ở đáy trang để giảng viên / nhóm test nhanh) */}
+              <div className="pt-2 text-center border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowDemoQr(!showDemoQr)}
                   className="text-[11px] text-slate-400 hover:text-slate-600 transition inline-flex items-center gap-1"
                 >
                   <QrCode size={12} />
-                  {showDemoQr ? 'Đóng dữ liệu mẫu test' : 'Thử nghiệm nhanh bằng dữ liệu mẫu'}
+                  {showDemoQr ? 'Ẩn bộ dữ liệu kiểm thử' : 'Chế độ thử nghiệm đồ án (Demo Data)'}
                 </button>
 
                 {showDemoQr && (
-                  <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-2 animate-in fade-in duration-150">
-                    <p className="text-[11px] text-slate-500">
-                      Chọn dữ liệu mẫu để thử nghiệm tính năng tự động điền form:
+                  <div className="mt-2.5 p-3 bg-slate-50 border border-slate-200 rounded-lg text-left space-y-2 animate-in fade-in duration-150">
+                    <p className="text-[11px] text-slate-600 font-medium">
+                      Chọn dữ liệu mẫu để thử nghiệm trích xuất mã QR:
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       <button
                         type="button"
                         onClick={() => applySampleQr('001201000001||Nguyễn Văn An (K64)|15052003|Nam|Cầu Giấy, Hà Nội|25122021')}
-                        className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] transition"
+                        className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded text-[11px] transition"
                       >
-                        user01 (An)
+                        user01 (Nguyễn Văn An)
                       </button>
                       <button
                         type="button"
                         onClick={() => applySampleQr('001205000004||Phạm Đức Huy (K66)|24032005|Nam|Hai Bà Trưng, Hà Nội|15082023')}
-                        className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-[11px] transition"
+                        className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded text-[11px] transition"
                       >
-                        user04 (Huy)
+                        user04 (Phạm Đức Huy)
                       </button>
                     </div>
                     <div className="flex gap-1.5 mt-1">
@@ -430,13 +503,13 @@ export const VerifyIdentity = () => {
                         type="text"
                         value={demoQrInput}
                         onChange={(e) => setDemoQrInput(e.target.value)}
-                        placeholder="Hoặc dán chuỗi QR..."
-                        className="flex-1 text-xs px-2.5 py-1 border border-slate-300 rounded-lg focus:outline-hidden bg-white"
+                        placeholder="Dán chuỗi QR..."
+                        className="flex-1 text-xs px-2.5 py-1 border border-slate-300 rounded focus:outline-hidden bg-white font-mono"
                       />
                       <button
                         type="button"
                         onClick={() => processQrText(demoQrInput)}
-                        className="px-2.5 py-1 bg-slate-800 text-white rounded-lg text-xs font-semibold"
+                        className="px-2.5 py-1 bg-slate-800 text-white rounded text-xs font-semibold"
                       >
                         Thử
                       </button>
