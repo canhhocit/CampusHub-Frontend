@@ -6,9 +6,10 @@ interface ImageUploadProps {
   value?: string;
   onChange: (url: string) => void;
   error?: string;
+  onFileSelected?: (file: File) => void;
 }
 
-export const ImageUpload = ({ value, onChange, error }: ImageUploadProps) => {
+export const ImageUpload = ({ value, onChange, error, onFileSelected }: ImageUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -17,6 +18,13 @@ export const ImageUpload = ({ value, onChange, error }: ImageUploadProps) => {
 
   const handleFileProcess = async (file: File) => {
     setUploadError(null);
+    if (onFileSelected) {
+      try {
+        onFileSelected(file);
+      } catch (e) {
+        console.error('Error in onFileSelected callback:', e);
+      }
+    }
     setIsUploading(true);
 
     try {

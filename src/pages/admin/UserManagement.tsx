@@ -18,7 +18,9 @@ import {
   CheckCircle2,
   CreditCard,
   ExternalLink,
+  QrCode,
 } from 'lucide-react';
+import { parseCccdQr, scanQrFromImageSource, type CccdQrData } from '../../utils/cccdQrParser';
 
 export const UserManagement = () => {
   const [page, setPage] = useState<number>(0);
@@ -30,6 +32,9 @@ export const UserManagement = () => {
   const [reason, setReason] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isCccdModalOpen, setIsCccdModalOpen] = useState<boolean>(false);
+  const [adminScanningQr, setAdminScanningQr] = useState<boolean>(false);
+  const [adminQrResult, setAdminQrResult] = useState<CccdQrData | null>(null);
+  const [adminQrError, setAdminQrError] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -95,6 +100,31 @@ export const UserManagement = () => {
       status: actionStatus,
       reason: reason.trim(),
     });
+  };
+
+  const handleAdminScanQr = async () => {
+    if (!selectedCccdUser?.idCardFrontUrl || adminScanningQr) return;
+    setAdminScanningQr(true);
+    setAdminQrError(null);
+    setAdminQrResult(null);
+
+    try {
+      const raw = await scanQrFromImageSource(selectedCccdUser.idCardFrontUrl);
+      if (raw) {
+        const parsed = parseCccdQr(raw);
+        if (parsed) {
+          setAdminQrResult(parsed);
+        } else {
+          setAdminQrError(`Mã QR không đúng định dạng CCCD chuẩn: ${raw}`);
+        }
+      } else {
+        setAdminQrError('Không quét được mã QR từ ảnh mặt trước này.');
+      }
+    } catch {
+      setAdminQrError('Lỗi trong quá trình quét ảnh.');
+    } finally {
+      setAdminScanningQr(false);
+    }
   };
 
   return (
@@ -443,9 +473,73 @@ export const UserManagement = () => {
               </div>
 
               <div>
-                <span className="text-xs font-semibold text-gray-700 block mb-1.5">
-                  Ảnh mặt trước CCCD
-                </span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold text-gray-700">
+                    Ảnh mặt trước CCCD
+                  </span>
+                  {selectedCccdUser.idCardFrontUrl && (
+                    <button
+                      type="button"
+                      onClick={handleAdminScanQr}
+                      disabled={adminScanningQr}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold transition disabled:opacity-50"
+                    >
+                      <QrCode size={13} />
+                      {adminScanningQr ? 'Đang quét...' : 'Quét mã QR từ ảnh'}
+                    </button>
+                  )}
+                </div>
+
+                {/* Admin QR Scan Result Box */}
+                {adminQrResult && (
+                  <div className="mb-2.5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1.5 text-xs animate-in fade-in">
+                    <div className="font-bold text-emerald-800 flex items-center gap-1.5">
+                      <CheckCircle2 size={15} className="text-emerald-600" />
+                      Kết quả bóc tách mã QR trên CCCD:
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-slate-700 bg-white p-2.5 rounded-lg border border-emerald-100">
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Họ tên trên QR</span>
+                        <strong className="text-slate-900">{adminQrResult.fullName}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Số CCCD trên QR</span>
+                        <strong className="text-emerald-700 font-mono">{adminQrResult.citizenId}</strong>
+                      </div>
+                      {adminQrResult.dateOfBirthFormatted && (
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Ngày sinh</span>
+                          <span>{adminQrResult.dateOfBirthFormatted}</span>
+                        </div>
+                      )}
+                      {adminQrResult.address && (
+                        <div className="col-span-2">
+                          <span className="text-slate-400 block text-[10px]">Địa chỉ thường trú</span>
+                          <span>{adminQrResult.address}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-[11px] pt-1">
+                      {adminQrResult.citizenId === selectedCccdUser.citizenId ? (
+                        <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                          <CheckCircle2 size={12} /> Số CCCD trùng khớp 100% với dữ liệu người dùng gửi
+                        </span>
+                      ) : (
+                        <span className="text-red-700 font-semibold flex items-center gap-1">
+                          <AlertCircle size={12} /> Cảnh báo: Số CCCD từ QR ({adminQrResult.citizenId}) KHÁC với số khai báo ({selectedCccdUser.citizenId})!
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {adminQrError && (
+                  <div className="mb-2.5 p-2.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-xs flex items-center gap-1.5 animate-in fade-in">
+                    <AlertCircle size={14} className="text-amber-600 shrink-0" />
+                    <span>{adminQrError}</span>
+                  </div>
+                )}
+
                 {selectedCccdUser.idCardFrontUrl ? (
                   <div className="relative rounded-xl border border-gray-200 overflow-hidden bg-gray-100 group">
                     <img
