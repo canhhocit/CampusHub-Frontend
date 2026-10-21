@@ -34,7 +34,7 @@ export const UserNavTabs = () => {
               to={tab.to}
               className={`shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 isActive
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-[#eb6e34] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
@@ -47,7 +47,7 @@ export const UserNavTabs = () => {
 
       <Link
         to="/marketplace/new"
-        className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 transition shadow-xs"
+        className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 transition shadow-xs"
       >
         <Plus size={16} />
         Đăng tin bán mới

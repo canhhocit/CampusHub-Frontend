@@ -41,7 +41,7 @@ export const ResetPassword = () => {
           <p className="mt-2 text-gray-600 text-sm">Đường dẫn đặt lại mật khẩu thiếu token hoặc đã bị sửa đổi.</p>
           <Link
             to="/login"
-            className="mt-6 inline-flex justify-center rounded-xl bg-purple-600 py-2.5 px-4 text-sm font-semibold text-white hover:bg-purple-700 transition"
+            className="mt-6 inline-flex justify-center rounded-xl bg-[#eb6e34] py-2.5 px-4 text-sm font-semibold text-white hover:bg-[#d85d26] transition"
           >
             Quay lại Đăng nhập
           </Link>
@@ -54,7 +54,7 @@ export const ResetPassword = () => {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
         <div className="text-center mb-6">
-          <div className="w-12 h-12 bg-purple-100 text-purple-700 rounded-xl mx-auto flex items-center justify-center font-bold text-xl mb-3">
+          <div className="w-12 h-12 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl mx-auto flex items-center justify-center font-bold text-xl mb-3">
             CH
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
@@ -89,7 +89,7 @@ export const ResetPassword = () => {
                   name="password"
                   type="password"
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
                   placeholder="Tối thiểu 6 ký tự..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -101,7 +101,7 @@ export const ResetPassword = () => {
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="w-full flex justify-center items-center gap-2 rounded-xl bg-purple-600 py-3 px-4 text-sm font-semibold text-white hover:bg-purple-700 focus:outline-hidden focus:ring-2 focus:ring-purple-500 disabled:opacity-70 transition shadow-sm"
+                className="w-full flex justify-center items-center gap-2 rounded-xl bg-[#eb6e34] py-3 px-4 text-sm font-semibold text-white hover:bg-[#d85d26] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] disabled:opacity-70 transition shadow-sm"
               >
                 {status === 'loading' ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
                 <ArrowRight size={16} />

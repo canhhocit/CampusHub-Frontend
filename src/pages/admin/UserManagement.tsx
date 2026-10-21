@@ -21,6 +21,7 @@ import {
   QrCode,
 } from 'lucide-react';
 import { parseCccdQr, scanQrFromImageSource, type CccdQrData } from '../../utils/cccdQrParser';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 
 export const UserManagement = () => {
   const [page, setPage] = useState<number>(0);
@@ -35,6 +36,21 @@ export const UserManagement = () => {
   const [adminScanningQr, setAdminScanningQr] = useState<boolean>(false);
   const [adminQrResult, setAdminQrResult] = useState<CccdQrData | null>(null);
   const [adminQrError, setAdminQrError] = useState<string | null>(null);
+
+  // Accessible confirmation dialog states
+  const [confirmApproveOpen, setConfirmApproveOpen] = useState(false);
+  const [confirmRejectOpen, setConfirmRejectOpen] = useState(false);
+  const [actionNotice, setActionNotice] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'primary' | 'warning' | 'danger';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'primary',
+  });
 
   const queryClient = useQueryClient();
 
@@ -64,7 +80,12 @@ export const UserManagement = () => {
       setReason('');
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật trạng thái người dùng');
+      setActionNotice({
+        isOpen: true,
+        title: 'Cập nhật trạng thái thất bại',
+        message: err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật trạng thái người dùng',
+        variant: 'danger',
+      });
     },
   });
 
@@ -76,7 +97,14 @@ export const UserManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
     },
-    onError: (err: any) => alert(err.response?.data?.message || 'Không thể duyệt hồ sơ'),
+    onError: (err: any) => {
+      setActionNotice({
+        isOpen: true,
+        title: 'Thao tác hồ sơ thất bại',
+        message: err.response?.data?.message || 'Không thể cập nhật trạng thái hồ sơ danh tính',
+        variant: 'danger',
+      });
+    },
   });
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -132,7 +160,7 @@ export const UserManagement = () => {
       {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+            <div className="p-2.5 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl">
               <Users size={24} />
             </div>
             <div>
@@ -147,7 +175,7 @@ export const UserManagement = () => {
             disabled={isFetching}
             className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-xs transition"
           >
-            <RefreshCw size={16} className={isFetching ? 'animate-spin text-purple-600' : ''} />
+            <RefreshCw size={16} className={isFetching ? 'animate-spin text-[#eb6e34]' : ''} />
             Làm mới
           </button>
         </div>
@@ -160,12 +188,12 @@ export const UserManagement = () => {
               name="search"
               defaultValue={searchTerm}
               placeholder="Tìm theo tên đăng nhập, họ tên, email..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] focus:border-transparent"
             />
             <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
             <button
               type="submit"
-              className="ml-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition"
+              className="ml-2 px-4 py-2 bg-[#eb6e34] text-white rounded-lg text-sm font-medium hover:bg-[#d85d26] transition"
             >
               Tìm kiếm
             </button>
@@ -179,7 +207,7 @@ export const UserManagement = () => {
                 setStatusFilter(e.target.value);
                 setPage(0);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]"
             >
               <option value="">Tất cả trạng thái</option>
               <option value="ACTIVE">Đang hoạt động</option>
@@ -234,8 +262,8 @@ export const UserManagement = () => {
                       </td>
                       <td className="px-6 py-4">
                         {u.role === 'ADMIN' || u.role === 'ROLE_ADMIN' ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
-                            <Shield size={13} className="text-purple-600" /> Quản trị viên
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-900 text-white border border-slate-900">
+                            <Shield size={13} className="text-amber-400" /> Quản trị viên
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
@@ -393,7 +421,7 @@ export const UserManagement = () => {
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Ví dụ: Vi phạm quy định đăng tin rác, lừa đảo hoặc mở khóa theo yêu cầu hỗ trợ..."
-                className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:outline-hidden"
+                className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden"
                 rows={3}
               />
             </div>
@@ -447,12 +475,20 @@ export const UserManagement = () => {
             <div className="space-y-4 text-sm">
               {selectedCccdUser.citizenId && selectedCccdUser.idCardFrontUrl && (
                 <div className="flex gap-3">
-                  <button disabled={reviewIdentityMutation.isPending || !!selectedCccdUser.identityVerified}
-                    onClick={() => { if (window.confirm('Xác nhận đã kiểm tra hồ sơ và phê duyệt danh tính?')) reviewIdentityMutation.mutate({ id: selectedCccdUser.id, approved: true }); }}
-                    className="rounded-xl bg-emerald-600 px-4 py-2 text-white disabled:opacity-50">Phê duyệt danh tính</button>
-                  <button disabled={reviewIdentityMutation.isPending}
-                    onClick={() => { if (window.confirm('Từ chối hoặc thu hồi xác minh danh tính?')) reviewIdentityMutation.mutate({ id: selectedCccdUser.id, approved: false }); }}
-                    className="rounded-xl bg-red-600 px-4 py-2 text-white disabled:opacity-50">Từ chối / Thu hồi</button>
+                  <button
+                    disabled={reviewIdentityMutation.isPending || !!selectedCccdUser.identityVerified}
+                    onClick={() => setConfirmApproveOpen(true)}
+                    className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 transition"
+                  >
+                    Phê duyệt danh tính
+                  </button>
+                  <button
+                    disabled={reviewIdentityMutation.isPending}
+                    onClick={() => setConfirmRejectOpen(true)}
+                    className="rounded-xl bg-red-600 hover:bg-red-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 transition"
+                  >
+                    Từ chối / Thu hồi
+                  </button>
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3 p-3.5 bg-gray-50 rounded-xl border border-gray-200">
@@ -482,7 +518,7 @@ export const UserManagement = () => {
                       type="button"
                       onClick={handleAdminScanQr}
                       disabled={adminScanningQr}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold transition disabled:opacity-50"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#eb6e34]/10 hover:bg-[#eb6e34]/20 text-[#eb6e34] rounded-lg text-xs font-semibold transition disabled:opacity-50"
                     >
                       <QrCode size={13} />
                       {adminScanningQr ? 'Đang quét...' : 'Quét mã QR từ ảnh'}
@@ -598,6 +634,54 @@ export const UserManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Confirm Approve Identity Dialog */}
+      <ConfirmDialog
+        isOpen={confirmApproveOpen}
+        onClose={() => setConfirmApproveOpen(false)}
+        onConfirm={() => {
+          setConfirmApproveOpen(false);
+          if (selectedCccdUser) {
+            reviewIdentityMutation.mutate({ id: selectedCccdUser.id, approved: true });
+          }
+        }}
+        title="Xác nhận phê duyệt danh tính"
+        message="Bạn đã kiểm tra thông tin số CCCD và ảnh mặt trước/sau trùng khớp với tài khoản sinh viên này?"
+        confirmText="Xác nhận duyệt"
+        cancelText="Đóng"
+        variant="primary"
+        isLoading={reviewIdentityMutation.isPending}
+      />
+
+      {/* Confirm Reject/Revoke Identity Dialog */}
+      <ConfirmDialog
+        isOpen={confirmRejectOpen}
+        onClose={() => setConfirmRejectOpen(false)}
+        onConfirm={() => {
+          setConfirmRejectOpen(false);
+          if (selectedCccdUser) {
+            reviewIdentityMutation.mutate({ id: selectedCccdUser.id, approved: false });
+          }
+        }}
+        title="Từ chối / Thu hồi xác minh"
+        message="Hành động này sẽ hủy trạng thái xác minh CCCD của người dùng và yêu cầu họ tải lại giấy tờ hợp lệ."
+        confirmText="Xác nhận từ chối"
+        cancelText="Hủy bỏ"
+        variant="danger"
+        isLoading={reviewIdentityMutation.isPending}
+      />
+
+      {/* Notice Modal */}
+      <ConfirmDialog
+        isOpen={actionNotice.isOpen}
+        onClose={() => setActionNotice((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setActionNotice((prev) => ({ ...prev, isOpen: false }))}
+        title={actionNotice.title}
+        message={actionNotice.message}
+        confirmText="Đã hiểu"
+        cancelText="Đóng"
+        variant={actionNotice.variant}
+      />
     </div>
   );
 };

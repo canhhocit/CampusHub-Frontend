@@ -33,7 +33,7 @@ export const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
         <div className="text-center">
-          <div className="w-12 h-12 bg-purple-100 text-purple-700 rounded-xl mx-auto flex items-center justify-center font-bold text-xl mb-3">
+          <div className="w-12 h-12 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl mx-auto flex items-center justify-center font-bold text-xl mb-3">
             CH
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
@@ -63,7 +63,7 @@ export const Login = () => {
                   name="username"
                   type="text"
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
                   placeholder="Nhập username hoặc email của bạn..."
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
@@ -82,7 +82,7 @@ export const Login = () => {
                   name="password"
                   type="password"
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
                   placeholder="Nhập mật khẩu..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -93,7 +93,7 @@ export const Login = () => {
           </div>
 
           <div className="flex items-center justify-end">
-            <Link to="/forgot-password" className="text-xs font-medium text-purple-600 hover:text-purple-700">
+            <Link to="/forgot-password" className="text-xs font-medium text-[#eb6e34] hover:text-[#d85d26]">
               Quên mật khẩu?
             </Link>
           </div>
@@ -101,7 +101,7 @@ export const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center gap-2 rounded-xl bg-purple-600 py-3 px-4 text-sm font-semibold text-white hover:bg-purple-700 focus:outline-hidden focus:ring-2 focus:ring-purple-500 disabled:opacity-70 transition shadow-sm"
+            className="w-full flex justify-center items-center gap-2 rounded-xl bg-[#eb6e34] py-3 px-4 text-sm font-semibold text-white hover:bg-[#d85d26] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] disabled:opacity-70 transition shadow-sm"
           >
             {loading ? 'Đang xác thực...' : 'Đăng nhập ngay'}
             <ArrowRight size={16} />
@@ -110,7 +110,7 @@ export const Login = () => {
 
         <div className="text-center text-sm text-gray-600 pt-2 border-t border-gray-100">
           Chưa có tài khoản?{' '}
-          <Link to="/register" className="font-semibold text-purple-600 hover:text-purple-700">
+          <Link to="/register" className="font-semibold text-[#eb6e34] hover:text-[#d85d26]">
             Đăng ký tài khoản (từ 13 tuổi)
           </Link>
         </div>

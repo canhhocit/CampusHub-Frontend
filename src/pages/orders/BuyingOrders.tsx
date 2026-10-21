@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
 import type { Order, OrderStatus } from '../../types/order';
@@ -18,6 +18,7 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import { UserNavTabs } from '../../components/UserNavTabs';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const statusConfig: Record<
   OrderStatus,
@@ -95,11 +96,16 @@ const statusConfig: Record<
   },
 };
 
+
 export const BuyingOrders = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get('page') || '0', 10);
   const [filterGroup, setFilterGroup] = useState<'ALL' | 'ACTIVE' | 'READY' | 'DONE'>('ALL');
   const queryClient = useQueryClient();
+
+  // Cancel Confirmation State
+  const [cancelTarget, setCancelTarget] = useState<{ id: number; title: string } | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const { data: pageData, isLoading, isError, refetch } = useQuery<PageResponse<Order>>({
     queryKey: ['buying-orders', page],
@@ -116,34 +122,32 @@ export const BuyingOrders = () => {
         queryClient.invalidateQueries({ queryKey: [key] });
       }
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
+      setCancelTarget(null);
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể hủy đơn hàng');
+      setCancelTarget(null);
+      setActionError(err.response?.data?.message || 'Không thể hủy đơn hàng');
     },
   });
 
-  const handleCancelOrder = (orderId: number, productTitle: string) => {
-    if (window.confirm(`Bạn có chắc chắn muốn hủy đơn đặt mua "${productTitle}"?`)) {
-      cancelMutation.mutate(orderId);
-    }
+  const handleConfirmCancel = () => {
+    if (!cancelTarget) return;
+    cancelMutation.mutate(cancelTarget.id);
   };
 
-  const filteredOrders = useMemo(() => {
-    if (!pageData?.content) return [];
-    if (filterGroup === 'ALL') return pageData.content;
+  const rawOrders = pageData?.content || [];
+  const filteredOrders = rawOrders.filter((o) => {
     if (filterGroup === 'ACTIVE') {
-      return pageData.content.filter((o) => o.status === 'PENDING_SELLER' || o.status === 'AWAITING_DEPOSIT');
+      return o.status === 'PENDING_SELLER' || o.status === 'AWAITING_DEPOSIT';
     }
     if (filterGroup === 'READY') {
-      return pageData.content.filter((o) => o.status === 'READY_FOR_PICKUP');
+      return o.status === 'READY_FOR_PICKUP';
     }
     if (filterGroup === 'DONE') {
-      return pageData.content.filter(
-        (o) => o.status === 'COMPLETED' || o.status === 'CANCELLED' || o.status === 'REJECTED' || o.status === 'EXPIRED'
-      );
+      return o.status === 'COMPLETED' || o.status === 'CANCELLED' || o.status === 'REJECTED' || o.status === 'EXPIRED';
     }
-    return pageData.content;
-  }, [pageData?.content, filterGroup]);
+    return true;
+  });
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -367,7 +371,7 @@ export const BuyingOrders = () => {
 
                       {order.status === 'PENDING_SELLER' && (
                         <button
-                          onClick={() => handleCancelOrder(order.id, order.productTitle)}
+                          onClick={() => setCancelTarget({ id: order.id, title: order.productTitle })}
                           disabled={cancelMutation.isPending}
                           className="px-3 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-medium rounded-xl transition disabled:opacity-50"
                         >
@@ -410,6 +414,33 @@ export const BuyingOrders = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* Cancel Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={!!cancelTarget}
+          onClose={() => setCancelTarget(null)}
+          onConfirm={handleConfirmCancel}
+          title="Xác nhận hủy đơn đặt mua"
+          message={`Bạn có chắc chắn muốn hủy đơn mua món đồ "${cancelTarget?.title}"? Thao tác này sẽ hủy giao dịch hiện tại.`}
+          confirmText="Xác nhận hủy đơn"
+          cancelText="Giữ lại"
+          variant="danger"
+          isLoading={cancelMutation.isPending}
+        />
+
+        {/* Error Dialog */}
+        {actionError && (
+          <ConfirmDialog
+            isOpen={!!actionError}
+            onClose={() => setActionError(null)}
+            onConfirm={() => setActionError(null)}
+            title="Lỗi thao tác"
+            message={actionError}
+            confirmText="Đóng"
+            cancelText=""
+            variant="danger"
+          />
         )}
       </div>
     </div>

@@ -76,7 +76,7 @@ export const Register = () => {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
         <div className="text-center">
-          <div className="w-12 h-12 bg-purple-100 text-purple-700 rounded-xl mx-auto flex items-center justify-center font-bold text-xl mb-3">
+          <div className="w-12 h-12 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl mx-auto flex items-center justify-center font-bold text-xl mb-3">
             CH
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
@@ -96,7 +96,7 @@ export const Register = () => {
             </p>
             <Link
               to="/login"
-              className="mt-3 px-5 py-2.5 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition"
+              className="mt-3 px-5 py-2.5 bg-[#eb6e34] text-white rounded-xl text-sm font-semibold hover:bg-[#d85d26] transition"
             >
               Đến trang Đăng nhập
             </Link>
@@ -117,7 +117,7 @@ export const Register = () => {
                   name="username"
                   type="text"
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
                   placeholder="VD: nguyenvanan"
                   value={formData.username}
                   onChange={handleChange}
@@ -133,7 +133,7 @@ export const Register = () => {
                   name="email"
                   type="email"
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
                   placeholder="VD: an.nguyen@example.com"
                   value={formData.email}
                   onChange={handleChange}
@@ -149,7 +149,7 @@ export const Register = () => {
                   name="fullName"
                   type="text"
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
                   placeholder="VD: Nguyễn Văn An"
                   value={formData.fullName}
                   onChange={handleChange}
@@ -160,7 +160,7 @@ export const Register = () => {
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1">
-                Ngày sinh <span className="text-purple-600 font-normal">(Yêu cầu từ đủ 13 tuổi trở lên)</span>
+                Ngày sinh <span className="text-[#eb6e34] font-normal">(Yêu cầu từ đủ 13 tuổi trở lên)</span>
               </label>
               <div className="relative">
                 <input
@@ -168,7 +168,7 @@ export const Register = () => {
                   type="date"
                   max={maxBirthDate}
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
                   value={formData.dateOfBirth}
                   onChange={handleChange}
                 />
@@ -186,7 +186,7 @@ export const Register = () => {
                   name="password"
                   type="password"
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-purple-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 text-sm"
+                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
                   placeholder="Tối thiểu 6 ký tự..."
                   value={formData.password}
                   onChange={handleChange}
@@ -198,7 +198,7 @@ export const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center gap-2 rounded-xl bg-purple-600 py-3 px-4 text-sm font-semibold text-white hover:bg-purple-700 focus:outline-hidden focus:ring-2 focus:ring-purple-500 disabled:opacity-70 transition shadow-sm mt-2"
+              className="w-full flex justify-center items-center gap-2 rounded-xl bg-[#eb6e34] py-3 px-4 text-sm font-semibold text-white hover:bg-[#d85d26] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] disabled:opacity-70 transition shadow-sm mt-2"
             >
               {loading ? 'Đang đăng ký...' : 'Đăng ký tài khoản'}
               <ArrowRight size={16} />
@@ -208,7 +208,7 @@ export const Register = () => {
 
         <div className="text-center text-sm text-gray-600 pt-2 border-t border-gray-100">
           Đã có tài khoản?{' '}
-          <Link to="/login" className="font-semibold text-purple-600 hover:text-purple-700">
+          <Link to="/login" className="font-semibold text-[#eb6e34] hover:text-[#d85d26]">
             Đăng nhập ngay
           </Link>
         </div>

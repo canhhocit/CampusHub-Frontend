@@ -159,13 +159,13 @@ export const AdminLayout = () => {
         <div>
           <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800 bg-slate-950/60">
             <Link to="/admin/dashboard" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-purple-600/20 ring-1 ring-purple-400/30">
+              <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-md shadow-orange-600/20 ring-1 ring-orange-400/30">
                 <ShieldCheck size={22} className="group-hover:scale-110 transition-transform" />
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-white text-base tracking-tight flex items-center gap-1.5">
                   CampusHub
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-orange-500/20 text-orange-300 border border-orange-500/30">
                     Admin
                   </span>
                 </span>
@@ -211,7 +211,7 @@ export const AdminLayout = () => {
                       to={item.to}
                       className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                         item.active
-                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/25 ring-1 ring-purple-400/40 font-semibold'
+                          ? 'bg-[#eb6e34] text-white shadow-md shadow-orange-600/25 ring-1 ring-orange-400/40 font-semibold'
                           : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                       }`}
                     >
@@ -244,14 +244,14 @@ export const AdminLayout = () => {
         <div className="p-4 border-t border-slate-800 bg-slate-950/80">
           <div className="flex items-center justify-between gap-3 p-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-inner">
+              <div className="w-9 h-9 rounded-full bg-orange-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-inner">
                 {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'A'}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold text-white truncate">
                   {user?.fullName || user?.username || 'Quản trị viên'}
                 </div>
-                <div className="text-[11px] text-purple-300 flex items-center gap-1">
+                <div className="text-[11px] text-orange-300 flex items-center gap-1">
                   <Shield size={11} /> Quản trị viên tối cao
                 </div>
               </div>
@@ -293,14 +293,14 @@ export const AdminLayout = () => {
           <div className="flex items-center gap-3 sm:gap-4">
             {currentTime && (
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600">
-                <Clock size={14} className="text-purple-600" />
+                <Clock size={14} className="text-[#eb6e34]" />
                 <span className="font-mono">{currentTime}</span>
               </div>
             )}
 
             <Link
               to="/"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition"
             >
               <Home size={14} />
               Cổng dịch vụ
@@ -309,7 +309,7 @@ export const AdminLayout = () => {
             <div className="h-6 w-px bg-slate-200 hidden sm:block" />
 
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">
+              <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shadow-xs">
                 {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'A'}
               </div>
               <span className="text-xs font-semibold text-slate-700 hidden lg:inline">

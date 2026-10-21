@@ -79,12 +79,12 @@ export const LockerForm = () => {
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-8">
-            <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-purple-600 hover:underline mb-6 font-medium">
+            <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-[#eb6e34] hover:underline mb-6 font-medium">
                     <ArrowLeft size={16} /> Quay lại danh sách tủ
                 </Link>
 
                 <div className="flex items-center gap-3 mb-8">
-                    <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+                    <div className="p-2.5 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl">
                         <Lock size={24} />
                     </div>
                     <div>
@@ -111,7 +111,7 @@ export const LockerForm = () => {
                             {...register('code')}
                             disabled={isEditing}
                             placeholder="VD: LK-A1"
-                            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 uppercase disabled:bg-gray-100 disabled:text-gray-500 text-sm"
+                            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-xs py-2 px-3 focus:ring-2 focus:ring-[#eb6e34] uppercase disabled:bg-gray-100 disabled:text-gray-500 text-sm"
                         />
                         {errors.code && <p className="mt-1 text-sm text-red-600">{errors.code.message}</p>}
                         {isEditing && <p className="mt-1 text-xs text-gray-400">Mã định danh của tủ không thể thay đổi sau khi tạo.</p>}
@@ -123,7 +123,7 @@ export const LockerForm = () => {
                             type="text"
                             {...register('name')}
                             placeholder="VD: Tủ Khu A - Tầng 1"
-                            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
+                            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-xs py-2 px-3 focus:ring-2 focus:ring-[#eb6e34] text-sm"
                         />
                         {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
                     </div>
@@ -134,7 +134,7 @@ export const LockerForm = () => {
                             type="text"
                             {...register('location')}
                             placeholder="VD: Sảnh chính Tòa nhà A, Tầng 1 (cạnh thang máy)"
-                            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-xs py-2 px-3 focus:ring-2 focus:ring-purple-500 text-sm"
+                            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-xs py-2 px-3 focus:ring-2 focus:ring-[#eb6e34] text-sm"
                         />
                         {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
                     </div>
@@ -150,7 +150,7 @@ export const LockerForm = () => {
                         <button
                             type="submit"
                             disabled={mutation.isPending}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#eb6e34] hover:bg-[#d85d26] disabled:opacity-50 transition"
                         >
                             <Save size={16} />
                             {mutation.isPending ? 'Đang lưu...' : 'Lưu tủ đồ'}

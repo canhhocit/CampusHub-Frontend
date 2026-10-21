@@ -43,6 +43,8 @@ const rentalStepConfig: { key: OrderStatus; label: string; desc: string }[] = [
   { key: 'COMPLETED', label: '5. Hoàn tất', desc: 'Hoàn cọc & tất toán' },
 ];
 
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+
 export const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -58,6 +60,20 @@ export const OrderDetail = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'PAYOS' | 'MOCK'>('PAYOS');
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [paymentNotice, setPaymentNotice] = useState<string | null>(null);
+
+  // Accessible Modal & Confirm Dialog states
+  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
+  const [dialogNotice, setDialogNotice] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'primary' | 'warning' | 'danger';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'primary',
+  });
 
   // Fetch Order Details with dynamic polling when waiting for PayOS Webhook
   const { data: order, isLoading, isError, error } = useQuery<OrderDetailType>({
@@ -103,7 +119,12 @@ export const OrderDetail = () => {
       queryClient.invalidateQueries({ queryKey: ['selling-orders'] });
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể thực hiện gửi hàng');
+      setDialogNotice({
+        isOpen: true,
+        title: 'Lỗi gửi hàng',
+        message: err.response?.data?.message || 'Không thể thực hiện gửi hàng',
+        variant: 'danger',
+      });
     },
   });
 
@@ -116,9 +137,16 @@ export const OrderDetail = () => {
       }
       queryClient.invalidateQueries({ queryKey: ['order-detail', id] });
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
+      setConfirmCancelOpen(false);
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể hủy đơn');
+      setConfirmCancelOpen(false);
+      setDialogNotice({
+        isOpen: true,
+        title: 'Lỗi hủy đơn',
+        message: err.response?.data?.message || 'Không thể hủy đơn',
+        variant: 'danger',
+      });
     },
   });
 
@@ -150,7 +178,12 @@ export const OrderDetail = () => {
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể chọn tủ để trả đồ');
+      setDialogNotice({
+        isOpen: true,
+        title: 'Lỗi chọn tủ trả đồ',
+        message: err.response?.data?.message || 'Không thể chọn tủ để trả đồ',
+        variant: 'danger',
+      });
     },
   });
 
@@ -165,7 +198,12 @@ export const OrderDetail = () => {
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể xác nhận gửi trả đồ');
+      setDialogNotice({
+        isOpen: true,
+        title: 'Lỗi xác nhận gửi trả',
+        message: err.response?.data?.message || 'Không thể xác nhận gửi trả đồ',
+        variant: 'danger',
+      });
     },
   });
 
@@ -199,7 +237,12 @@ export const OrderDetail = () => {
       }
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể khởi tạo thanh toán');
+      setDialogNotice({
+        isOpen: true,
+        title: 'Lỗi thanh toán',
+        message: err.response?.data?.message || 'Không thể khởi tạo thanh toán',
+        variant: 'danger',
+      });
     },
   });
 
@@ -213,7 +256,12 @@ export const OrderDetail = () => {
       setPaymentNotice('Đã giả lập quét mã PayOS thành công! Đơn hàng đã chuyển sang trạng thái ĐÃ KÝ QUỸ.');
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Lỗi khi kích hoạt giả lập PayOS');
+      setDialogNotice({
+        isOpen: true,
+        title: 'Lỗi giả lập',
+        message: err.response?.data?.message || 'Lỗi khi kích hoạt giả lập PayOS',
+        variant: 'danger',
+      });
     },
   });
 
@@ -226,10 +274,20 @@ export const OrderDetail = () => {
       if (res.data.paymentStatus === 'PAID') {
         setPaymentNotice('Thanh toán thành công! Tiền cọc/tiền hàng đã được giữ an toàn trong ví Escrow.');
       } else {
-        alert('Giao dịch chưa hoàn tất hoặc tiền chưa vào tài khoản. Vui lòng thử lại sau vài giây.');
+        setDialogNotice({
+          isOpen: true,
+          title: 'Trạng thái thanh toán',
+          message: 'Giao dịch chưa hoàn tất hoặc tiền chưa vào tài khoản. Vui lòng thử lại sau vài giây.',
+          variant: 'warning',
+        });
       }
-    } catch (err: any) {
-      alert('Không thể kiểm tra trạng thái thanh toán.');
+    } catch {
+      setDialogNotice({
+        isOpen: true,
+        title: 'Lỗi kiểm tra',
+        message: 'Không thể kiểm tra trạng thái thanh toán lúc này. Vui lòng thử lại sau.',
+        variant: 'danger',
+      });
     } finally {
       setIsCheckingPayment(false);
     }
@@ -928,6 +986,9 @@ export const OrderDetail = () => {
                     <span className="text-xs uppercase font-semibold tracking-wider text-slate-300">
                       Smart Locker Terminal
                     </span>
+                    <span className="px-1.5 py-0.5 text-[9px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-md">
+                      MÔ PHỎNG
+                    </span>
                   </div>
                   <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-white/10 text-slate-200 border border-white/15 rounded-full">
                     SẴN SÀNG LẤY ĐỒ
@@ -1140,6 +1201,9 @@ export const OrderDetail = () => {
                     <span className="text-xs uppercase font-semibold tracking-wider text-slate-300">
                       Locker Return Terminal
                     </span>
+                    <span className="px-1.5 py-0.5 text-[9px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-md">
+                      MÔ PHỎNG
+                    </span>
                   </div>
                   <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-white/10 text-slate-200 border border-white/15 rounded-full">
                     SẴN SÀNG NHẬN LẠI ĐỒ
@@ -1310,11 +1374,7 @@ export const OrderDetail = () => {
                 </div>
                 <button
                   disabled={cancelMutation.isPending}
-                  onClick={() => {
-                    if (window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
-                      cancelMutation.mutate();
-                    }
-                  }}
+                  onClick={() => setConfirmCancelOpen(true)}
                   className="w-full py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-medium transition disabled:opacity-50"
                 >
                   {cancelMutation.isPending ? 'Đang hủy...' : 'Hủy đơn hàng'}
@@ -1431,6 +1491,34 @@ export const OrderDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Accessible Cancellation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmCancelOpen}
+        onClose={() => setConfirmCancelOpen(false)}
+        onConfirm={() => {
+          setConfirmCancelOpen(false);
+          cancelMutation.mutate();
+        }}
+        title="Xác nhận hủy đơn hàng"
+        message="Bạn có chắc chắn muốn hủy đơn đặt mua này? Hành động này sẽ cập nhật trạng thái đơn sang ĐÃ HỦY."
+        confirmText="Xác nhận hủy"
+        cancelText="Đóng"
+        variant="danger"
+        isLoading={cancelMutation.isPending}
+      />
+
+      {/* Accessible Notice Dialog for errors & warnings */}
+      <ConfirmDialog
+        isOpen={dialogNotice.isOpen}
+        onClose={() => setDialogNotice((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setDialogNotice((prev) => ({ ...prev, isOpen: false }))}
+        title={dialogNotice.title}
+        message={dialogNotice.message}
+        confirmText="Đã hiểu"
+        cancelText="Đóng"
+        variant={dialogNotice.variant}
+      />
     </div>
   );
 };

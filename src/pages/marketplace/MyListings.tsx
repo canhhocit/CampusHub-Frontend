@@ -4,7 +4,6 @@ import { axiosInstance } from '../../api/axios';
 import type { PageResponse, Product, ProductStatus } from '../../types/marketplace';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
-  Plus,
   Tag,
   ImageOff,
   Edit3,
@@ -14,6 +13,8 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { UserNavTabs } from '../../components/UserNavTabs';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { EmptyState } from '../../components/common/EmptyState';
 
 export const MyListings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,9 +23,33 @@ export const MyListings = () => {
   const [statusTab, setStatusTab] = useState<'ALL' | ProductStatus>('ALL');
   const queryClient = useQueryClient();
 
+  // Status Change Confirmation Dialog State
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    product: Product | null;
+    targetStatus: ProductStatus | null;
+    title: string;
+    message: string;
+    variant: 'primary' | 'warning' | 'danger';
+  }>({
+    isOpen: false,
+    product: null,
+    targetStatus: null,
+    title: '',
+    message: '',
+    variant: 'primary',
+  });
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const { data: pageData, isLoading, isError, refetch } = useQuery<PageResponse<Product>>({
     queryKey: ['my-products', page, statusTab],
-    queryFn: () => axiosInstance.get('/api/v1/products/me', { params: { page, size: 15, status: statusTab === 'ALL' ? undefined : statusTab } }).then((res) => res.data),
+    queryFn: () =>
+      axiosInstance
+        .get('/api/v1/products/me', {
+          params: { page, size: 15, status: statusTab === 'ALL' ? undefined : statusTab },
+        })
+        .then((res) => res.data),
   });
 
   const statusMutation = useMutation({
@@ -34,22 +59,56 @@ export const MyListings = () => {
       queryClient.invalidateQueries({ queryKey: ['my-products'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product'] });
+      setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+      setErrorMessage(null);
     },
     onError: (err: any) => {
+      setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       if (err.response?.status === 409) {
-        alert('Sản phẩm đã được chỉnh sửa bởi phiên khác. Đang tự động tải lại dữ liệu mới nhất...');
+        setErrorMessage('Sản phẩm đã được chỉnh sửa bởi phiên khác. Đang tải lại dữ liệu mới nhất...');
         queryClient.invalidateQueries({ queryKey: ['my-products'] });
       } else {
-        alert(err.response?.data?.message || 'Cập nhật trạng thái không thành công.');
+        setErrorMessage(err.response?.data?.message || 'Cập nhật trạng thái không thành công.');
       }
     },
   });
 
-  const handleStatusChange = (p: Product, newStatus: ProductStatus) => {
-    const actionLabel = newStatus === 'HIDDEN' ? 'tạm ẩn' : newStatus === 'ACTIVE' ? 'mở bán lại' : 'đánh dấu đã bán';
-    if (window.confirm(`Bạn có chắc chắn muốn ${actionLabel} sản phẩm "${p.title}"?`)) {
-      statusMutation.mutate({ id: p.id, status: newStatus, version: p.version });
+  const handleOpenStatusConfirm = (p: Product, newStatus: ProductStatus) => {
+    let title = '';
+    let message = '';
+    let variant: 'primary' | 'warning' | 'danger' = 'primary';
+
+    if (newStatus === 'HIDDEN') {
+      title = 'Tạm ẩn tin đăng';
+      message = `Bạn có chắc chắn muốn tạm ẩn sản phẩm "${p.title}"? Sản phẩm sẽ không còn xuất hiện trên sàn công khai.`;
+      variant = 'warning';
+    } else if (newStatus === 'ACTIVE') {
+      title = 'Mở bán lại sản phẩm';
+      message = `Sản phẩm "${p.title}" sẽ được kích hoạt và xuất hiện lại trên sàn giao dịch.`;
+      variant = 'primary';
+    } else if (newStatus === 'SOLD') {
+      title = 'Đánh dấu đã bán';
+      message = `Đánh dấu sản phẩm "${p.title}" đã được bán. Thao tác này sẽ lưu trạng thái hoàn tất cho tin đăng.`;
+      variant = 'primary';
     }
+
+    setConfirmDialog({
+      isOpen: true,
+      product: p,
+      targetStatus: newStatus,
+      title,
+      message,
+      variant,
+    });
+  };
+
+  const handleExecuteStatusChange = () => {
+    if (!confirmDialog.product || !confirmDialog.targetStatus) return;
+    statusMutation.mutate({
+      id: confirmDialog.product.id,
+      status: confirmDialog.targetStatus,
+      version: confirmDialog.product.version,
+    });
   };
 
   const filteredProducts = pageData?.content ?? [];
@@ -108,13 +167,13 @@ export const MyListings = () => {
             </p>
           </div>
 
-          {/* Status Filter Tabs (Oreka Style) */}
-          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs text-xs font-bold">
+          {/* Status Filter Tabs */}
+          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-2xs text-xs font-bold">
             <button
               onClick={() => changeStatusTab('ALL')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'ALL'
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-[#eb6e34] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -124,7 +183,7 @@ export const MyListings = () => {
               onClick={() => changeStatusTab('ACTIVE')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'ACTIVE'
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-[#eb6e34] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -134,7 +193,7 @@ export const MyListings = () => {
               onClick={() => changeStatusTab('HIDDEN')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'HIDDEN'
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-[#eb6e34] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -144,7 +203,7 @@ export const MyListings = () => {
               onClick={() => changeStatusTab('SOLD')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'SOLD'
-                  ? 'bg-purple-600 text-white shadow-xs'
+                  ? 'bg-[#eb6e34] text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -153,10 +212,26 @@ export const MyListings = () => {
           </div>
         </div>
 
+        {/* Inline Error Notice */}
+        {errorMessage && (
+          <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+            <button
+              onClick={() => setErrorMessage(null)}
+              className="text-rose-500 hover:text-rose-800 font-bold"
+            >
+              Đóng
+            </button>
+          </div>
+        )}
+
         {/* Table / Card List */}
         {isLoading ? (
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-600 border-t-transparent" />
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#eb6e34] border-t-transparent" />
             <p className="mt-3 text-xs text-slate-500">Đang tải danh sách tin đăng...</p>
           </div>
         ) : isError ? (
@@ -173,29 +248,20 @@ export const MyListings = () => {
             </button>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4 shadow-xs">
-            <div className="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 mx-auto flex items-center justify-center">
-              <Tag size={32} />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900">
-                {statusTab === 'ALL'
-                  ? 'Bạn chưa đăng món đồ nào'
-                  : `Không có sản phẩm nào ở trạng thái ${statusTab}`}
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-                Chia sẻ giáo trình, sách cũ, phụ kiện hoặc đồ dùng không dùng đến để nhận tiền thanh lý và dọn dẹp phòng KTX.
-              </p>
-            </div>
-            <Link
-              to="/marketplace/new"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
-            >
-              <Plus size={15} /> Đăng món đồ đầu tiên
-            </Link>
-          </div>
+          <EmptyState
+            title={
+              statusTab === 'ALL'
+                ? 'Bạn chưa đăng món đồ nào'
+                : `Không có sản phẩm nào ở trạng thái ${statusTab}`
+            }
+            description="Chia sẻ giáo trình, sách cũ, phụ kiện hoặc đồ dùng không dùng đến để nhận tiền thanh lý và dọn dẹp phòng KTX."
+            action={{
+              label: 'Đăng món đồ đầu tiên',
+              onClick: () => (window.location.href = '/marketplace/new'),
+            }}
+          />
         ) : (
-          <div className="bg-white shadow-xs border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="bg-white shadow-2xs border border-slate-200 rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -226,7 +292,7 @@ export const MyListings = () => {
                           <div>
                             <Link
                               to={`/marketplace/${p.id}`}
-                              className="font-bold text-slate-900 hover:text-purple-600 transition block truncate max-w-xs"
+                              className="font-bold text-slate-900 hover:text-[#eb6e34] transition block truncate max-w-xs"
                             >
                               {p.title}
                             </Link>
@@ -236,7 +302,7 @@ export const MyListings = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap font-extrabold text-purple-700 text-sm">
+                      <td className="px-5 py-3.5 whitespace-nowrap font-bold text-[#eb6e34] text-sm">
                         {formatPrice(p.price)}
                       </td>
                       <td className="px-5 py-3.5 whitespace-nowrap">
@@ -245,7 +311,7 @@ export const MyListings = () => {
                       <td className="px-5 py-3.5 whitespace-nowrap text-slate-500">
                         {new Date(p.updatedAt).toLocaleDateString('vi-VN')}
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap text-right space-x-1.5 font-bold">
+                      <td className="px-5 py-3.5 whitespace-nowrap text-right space-x-1.5 font-semibold">
                         <Link
                           to={`/marketplace/${p.id}`}
                           className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
@@ -254,17 +320,19 @@ export const MyListings = () => {
                           <Eye size={12} /> Xem
                         </Link>
 
-                        {p.status !== 'SOLD' && <Link
-                          to={`/marketplace/edit/${p.id}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 rounded-lg transition"
-                          title="Chỉnh sửa"
-                        >
-                          <Edit3 size={12} /> Sửa
-                        </Link>}
+                        {p.status !== 'SOLD' && (
+                          <Link
+                            to={`/marketplace/edit/${p.id}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-orange-700 hover:text-orange-900 bg-orange-50 hover:bg-orange-100 rounded-lg transition"
+                            title="Chỉnh sửa"
+                          >
+                            <Edit3 size={12} /> Sửa
+                          </Link>
+                        )}
 
                         {p.status === 'ACTIVE' && (
                           <button
-                            onClick={() => handleStatusChange(p, 'HIDDEN')}
+                            onClick={() => handleOpenStatusConfirm(p, 'HIDDEN')}
                             disabled={statusMutation.isPending}
                             className="inline-flex items-center gap-1 px-2.5 py-1 text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-lg transition"
                             title="Tạm ẩn tin rao"
@@ -275,7 +343,7 @@ export const MyListings = () => {
 
                         {p.status === 'HIDDEN' && (
                           <button
-                            onClick={() => handleStatusChange(p, 'ACTIVE')}
+                            onClick={() => handleOpenStatusConfirm(p, 'ACTIVE')}
                             disabled={statusMutation.isPending}
                             className="inline-flex items-center gap-1 px-2.5 py-1 text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition"
                             title="Mở bán lại"
@@ -286,7 +354,7 @@ export const MyListings = () => {
 
                         {(p.status === 'ACTIVE' || p.status === 'HIDDEN') && (
                           <button
-                            onClick={() => handleStatusChange(p, 'SOLD')}
+                            onClick={() => handleOpenStatusConfirm(p, 'SOLD')}
                             disabled={statusMutation.isPending}
                             className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
                             title="Đã bán qua kênh khác"
@@ -305,7 +373,7 @@ export const MyListings = () => {
 
         {/* Pagination */}
         {pageData && pageData.totalPages > 1 && (
-          <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-xs">
+          <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs text-xs">
             <button
               disabled={page <= 0}
               onClick={() => setSearchParams({ page: (page - 1).toString() })}
@@ -325,6 +393,18 @@ export const MyListings = () => {
             </button>
           </div>
         )}
+
+        {/* Accessible Confirmation Modal */}
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          onClose={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
+          onConfirm={handleExecuteStatusChange}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          variant={confirmDialog.variant}
+          isLoading={statusMutation.isPending}
+          confirmText="Đồng ý thực hiện"
+        />
       </div>
     </div>
   );

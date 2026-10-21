@@ -65,11 +65,11 @@ export const AuditLogs = () => {
 
   const getActionBadgeClass = (action: AuditAction) => {
     if (action.startsWith('USER_')) return 'bg-blue-50 text-blue-700 border-blue-200';
-    if (action.startsWith('ORDER_')) return 'bg-purple-50 text-purple-700 border-purple-200';
-    if (action.startsWith('PRODUCT_')) return 'bg-amber-50 text-amber-700 border-amber-200';
+    if (action.startsWith('ORDER_')) return 'bg-amber-50 text-amber-800 border-amber-200';
+    if (action.startsWith('PRODUCT_')) return 'bg-[#eb6e34]/10 text-[#eb6e34] border-[#eb6e34]/30';
     if (action.startsWith('LOCKER_') || action.startsWith('COMPARTMENT_'))
       return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    if (action.startsWith('ADMIN_')) return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+    if (action.startsWith('ADMIN_')) return 'bg-slate-900 text-white border-slate-900';
     return 'bg-gray-100 text-gray-700 border-gray-200';
   };
 
@@ -78,7 +78,7 @@ export const AuditLogs = () => {
       {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+            <div className="p-2.5 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl">
               <FileText size={24} />
             </div>
             <div>
@@ -93,7 +93,7 @@ export const AuditLogs = () => {
             disabled={isFetching}
             className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-xs transition"
           >
-            <RefreshCw size={16} className={isFetching ? 'animate-spin text-purple-600' : ''} />
+            <RefreshCw size={16} className={isFetching ? 'animate-spin text-[#eb6e34]' : ''} />
             Làm mới
           </button>
         </div>
@@ -111,7 +111,7 @@ export const AuditLogs = () => {
               setActionFilter(e.target.value);
               setPage(0);
             }}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]"
           >
             <option value="">Tất cả hành động (Action)</option>
             {COMMON_ACTIONS.map((a) => (
@@ -128,7 +128,7 @@ export const AuditLogs = () => {
               setEntityTypeFilter(e.target.value);
               setPage(0);
             }}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]"
           >
             <option value="">Tất cả đối tượng (Entity)</option>
             {ENTITY_TYPES.map((t) => (
@@ -145,7 +145,7 @@ export const AuditLogs = () => {
               setSuccessFilter(e.target.value);
               setPage(0);
             }}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]"
           >
             <option value="">Tất cả kết quả</option>
             <option value="true">Thành công (Success)</option>
@@ -160,7 +160,7 @@ export const AuditLogs = () => {
                 setSuccessFilter('');
                 setPage(0);
               }}
-              className="text-xs text-purple-600 hover:text-purple-800 font-semibold underline ml-auto"
+              className="text-xs text-[#eb6e34] hover:text-[#d85d26] font-semibold underline ml-auto"
             >
               Xóa bộ lọc
             </button>
@@ -292,7 +292,7 @@ export const AuditLogs = () => {
           <div className="mt-6 bg-white p-6 rounded-xl border border-gray-200 shadow-xs animate-in fade-in">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <FileText size={18} className="text-purple-600" />
+                <FileText size={18} className="text-[#eb6e34]" />
                 Chi tiết bản ghi nhật ký #{selectedLog.id}
               </h3>
               <button

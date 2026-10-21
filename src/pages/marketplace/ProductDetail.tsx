@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { getMediaUrl } from '../../api/cloudinary';
 
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+
 export const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -35,6 +37,11 @@ export const ProductDetail = () => {
 
   // Media Gallery State
   const [selectedMedia, setSelectedMedia] = useState<{ type: 'IMAGE' | 'VIDEO'; url: string } | null>(null);
+
+  // Dialog & Notification States
+  const [isConfirmPurchaseOpen, setIsConfirmPurchaseOpen] = useState(false);
+  const [isVerifyPromptOpen, setIsVerifyPromptOpen] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ['product', id],
@@ -61,17 +68,13 @@ export const ProductDetail = () => {
       navigate(`/orders/${data.id}`);
     },
     onError: (err: any) => {
+      setIsConfirmPurchaseOpen(false);
+      setIsRentalModalOpen(false);
       if (err.response?.status === 403) {
-        if (
-          window.confirm(
-            'Yêu cầu xác minh danh tính: Bạn cần hoàn tất xác minh CCCD để thực hiện giao dịch qua hệ thống Smart Locker. Đi tới trang xác minh ngay?'
-          )
-        ) {
-          navigate('/verify-identity');
-          return;
-        }
+        setIsVerifyPromptOpen(true);
+        return;
       }
-      alert(err.response?.data?.message || 'Không thể tạo đơn hàng');
+      setActionError(err.response?.data?.message || 'Không thể tạo đơn hàng');
     },
   });
 
@@ -81,13 +84,7 @@ export const ProductDetail = () => {
       return false;
     }
     if (user && user.role !== 'ROLE_ADMIN' && user.role !== 'ADMIN' && !user.identityVerified) {
-      if (
-        window.confirm(
-          'Yêu cầu xác minh danh tính: Bạn cần hoàn tất xác minh CCCD trước khi đặt mua hoặc thuê đồ qua hệ thống Smart Locker. Đi tới trang xác minh ngay?'
-        )
-      ) {
-        navigate('/verify-identity');
-      }
+      setIsVerifyPromptOpen(true);
       return false;
     }
     return true;
@@ -96,14 +93,11 @@ export const ProductDetail = () => {
   const handlePurchaseClick = () => {
     if (createOrderMutation.isPending) return;
     if (!checkIdentityAndAuth()) return;
+    setIsConfirmPurchaseOpen(true);
+  };
 
-    if (
-      window.confirm(
-        `Xác nhận đặt mua sản phẩm "${product?.title}"? Hệ thống sẽ tạo phiên giao dịch mua qua Tủ Locker.`
-      )
-    ) {
-      createOrderMutation.mutate({ orderType: 'PURCHASE' });
-    }
+  const handleConfirmPurchase = () => {
+    createOrderMutation.mutate({ orderType: 'PURCHASE' });
   };
 
   const handleOpenRentalModal = () => {
@@ -116,7 +110,7 @@ export const ProductDetail = () => {
 
   const handleConfirmRental = () => {
     if (effectiveRentalDays < 1 || effectiveRentalDays > 90) {
-      alert('Thời hạn thuê phải từ 1 đến 90 ngày.');
+      setActionError('Thời hạn thuê phải từ 1 đến 90 ngày.');
       return;
     }
     createOrderMutation.mutate({
@@ -140,7 +134,7 @@ export const ProductDetail = () => {
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-20 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-600 border-t-transparent" />
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#eb6e34] border-t-transparent" />
         <p className="mt-3 text-sm text-slate-500">Đang tải thông tin sản phẩm...</p>
       </div>
     );
@@ -159,7 +153,7 @@ export const ProductDetail = () => {
         <div className="flex gap-3 justify-center">
           <Link
             to="/marketplace"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-700 transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#eb6e34] text-white rounded-xl text-xs font-bold hover:bg-[#d85e25] transition"
           >
             <ArrowLeft size={14} /> Khám phá các món đồ khác
           </Link>
@@ -185,17 +179,17 @@ export const ProductDetail = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
-          <Link to="/" className="hover:text-purple-600">
+          <Link to="/" className="hover:text-[#eb6e34]">
             Trang chủ
           </Link>
           <span>/</span>
-          <Link to="/marketplace" className="hover:text-purple-600">
+          <Link to="/marketplace" className="hover:text-[#eb6e34]">
             Chợ 
           </Link>
           <span>/</span>
           <Link
             to={`/marketplace?categoryId=${product.category?.id}`}
-            className="hover:text-purple-600"
+            className="hover:text-[#eb6e34]"
           >
             {product.category?.name || 'Khác'}
           </Link>
@@ -659,7 +653,7 @@ export const ProductDetail = () => {
               </div>
               <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
                 <span className="font-bold text-slate-900">Tổng tạm giữ:</span>
-                <span className="text-base font-black text-purple-700">
+                <span className="text-base font-black text-[#eb6e34]">
                   {formatPrice(
                     (product.rentPricePerDay || 0) * effectiveRentalDays + (product.depositAmount || 0)
                   )}
@@ -682,13 +676,53 @@ export const ProductDetail = () => {
                 type="button"
                 disabled={createOrderMutation.isPending}
                 onClick={handleConfirmRental}
-                className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20"
+                className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-slate-900/20"
               >
                 {createOrderMutation.isPending ? 'Đang tạo đơn...' : 'Xác nhận thuê qua Locker'}
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Confirmation Dialog for Purchase Order */}
+      <ConfirmDialog
+        isOpen={isConfirmPurchaseOpen}
+        onClose={() => setIsConfirmPurchaseOpen(false)}
+        onConfirm={handleConfirmPurchase}
+        title="Xác nhận đặt mua qua Smart Locker"
+        message={`Bạn có chắc chắn muốn tạo đơn mua "${product.title}" với số tiền ${formatPrice(product.price)}? Giao dịch sẽ được giữ an toàn trong Escrow và bàn giao qua trạm tủ Locker.`}
+        confirmText="Tạo đơn mua hàng"
+        isLoading={createOrderMutation.isPending}
+      />
+
+      {/* Identity Verification Prompt Dialog */}
+      <ConfirmDialog
+        isOpen={isVerifyPromptOpen}
+        onClose={() => setIsVerifyPromptOpen(false)}
+        onConfirm={() => {
+          setIsVerifyPromptOpen(false);
+          navigate('/verify-identity');
+        }}
+        title="Yêu cầu xác minh danh tính"
+        message="Để bảo đảm tính minh bạch và an toàn khi giao nhận hàng hóa qua mạng lưới Smart Locker, bạn cần hoàn tất xác minh căn cước công dân (CCCD). Bạn có muốn tới trang xác minh ngay?"
+        confirmText="Xác minh CCCD ngay"
+        cancelText="Để sau"
+        variant="warning"
+      />
+
+      {/* Error Action Modal/Dialog if any */}
+      {actionError && (
+        <ConfirmDialog
+          isOpen={!!actionError}
+          onClose={() => setActionError(null)}
+          onConfirm={() => setActionError(null)}
+          title="Thông báo hệ thống"
+          message={actionError}
+          confirmText="Đã hiểu"
+          cancelText="Đóng"
+          variant="danger"
+        />
       )}
     </div>
   );

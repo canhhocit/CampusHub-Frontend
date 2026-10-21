@@ -256,14 +256,14 @@ export const ProductForm = () => {
   if (isEditing && isLoadingProduct) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-600 border-t-transparent" />
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#eb6e34] border-t-transparent" />
         <p className="mt-3 text-xs text-slate-500">Đang tải dữ liệu sản phẩm...</p>
       </div>
     );
   }
 
   if (isEditing && (productLoadFailed || !existingProduct || existingProduct.owner.username !== user?.username || existingProduct.status === 'SOLD')) {
-    return <div role="alert" className="p-8 text-center">Không thể chỉnh sửa tin đăng này. <Link to="/marketplace/my-listings">Quay lại tin đăng</Link></div>;
+    return <div role="alert" className="p-8 text-center text-slate-600">Không thể chỉnh sửa tin đăng này. <Link to="/marketplace/my-listings" className="text-[#eb6e34] font-semibold underline">Quay lại tin đăng</Link></div>;
   }
 
   if (isUnverified) {
@@ -279,7 +279,7 @@ export const ProductForm = () => {
         <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
           <Link
             to="/verify-identity"
-            className="px-6 py-3 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-700 transition shadow-xs"
+            className="px-6 py-3 bg-[#eb6e34] text-white rounded-xl text-xs font-bold hover:bg-[#d85e25] transition shadow-xs"
           >
             Xác minh CCCD ngay &rarr;
           </Link>
@@ -299,14 +299,14 @@ export const ProductForm = () => {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-6">
         <Link
           to="/marketplace/my-listings"
-          className="inline-flex items-center gap-1.5 text-xs text-purple-600 hover:text-purple-700 font-bold"
+          className="inline-flex items-center gap-1.5 text-xs text-[#eb6e34] hover:text-[#d85e25] font-bold"
         >
           <ArrowLeft size={14} /> Quay lại danh sách tin đăng
         </Link>
 
         {/* Header */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="p-3 bg-purple-100 text-purple-700 rounded-2xl shrink-0">
+          <div className="p-3 bg-orange-50 text-orange-700 rounded-2xl shrink-0">
             {isEditing ? <Save size={24} /> : <PlusCircle size={24} />}
           </div>
           <div>
@@ -352,7 +352,7 @@ export const ProductForm = () => {
           {/* Section 1: Thông tin cơ bản */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Tag size={14} className="text-purple-600" />
+              <Tag size={14} className="text-[#eb6e34]" />
               1. Thông tin cơ bản
             </h2>
 
@@ -368,7 +368,7 @@ export const ProductForm = () => {
                 type="text"
                 {...register('title')}
                 placeholder="Ví dụ: Giáo trình Giải tích 1 & 2 NXB Giáo Dục còn mới 95%"
-                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 focus:outline-hidden"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden"
               />
               {errors.title && (
                 <p className="text-rose-600 text-[11px] mt-1 font-medium">{errors.title.message}</p>
@@ -382,7 +382,7 @@ export const ProductForm = () => {
               </label>
               <select
                 {...register('categoryId', { valueAsNumber: true })}
-                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 focus:outline-hidden bg-white"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden bg-white"
               >
                 <option value={0}>-- Chọn danh mục phù hợp --</option>
                 {categories?.map((c) => (
@@ -403,7 +403,7 @@ export const ProductForm = () => {
               </label>
               <select
                 {...register('lockerId', { valueAsNumber: true })}
-                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 focus:outline-hidden bg-white"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden bg-white"
               >
                 <option value={0}>-- Chọn tủ gửi đồ thuận tiện nhất --</option>
                 {lockers.map((lk) => (
@@ -418,7 +418,7 @@ export const ProductForm = () => {
           {/* Section 2: Hình thức & Giá cả */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-5">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <DollarSign size={14} className="text-purple-600" />
+              <DollarSign size={14} className="text-[#eb6e34]" />
               2. Hình thức giao dịch & Giá
             </h2>
 
@@ -439,12 +439,12 @@ export const ProductForm = () => {
                     onClick={() => setValue('listingType', item.value as any)}
                     className={`p-3 rounded-2xl border text-left transition-all ${
                       currentListingType === item.value
-                        ? 'border-purple-600 bg-purple-50/70 ring-2 ring-purple-600/20'
+                        ? 'border-[#eb6e34] bg-orange-50/70 ring-2 ring-orange-500/20'
                         : 'border-slate-200 bg-white hover:bg-slate-50'
                     }`}
                   >
                     <span className={`block text-xs font-bold ${
-                      currentListingType === item.value ? 'text-purple-700' : 'text-slate-800'
+                      currentListingType === item.value ? 'text-orange-700' : 'text-slate-800'
                     }`}>
                       {item.label}
                     </span>
@@ -469,7 +469,7 @@ export const ProductForm = () => {
                     placeholder="0"
                     step="1000"
                     min="0"
-                    className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-hidden"
+                    className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden"
                   />
                   <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
                   <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">
@@ -487,7 +487,7 @@ export const ProductForm = () => {
 
             {/* Rental Inputs */}
             {(currentListingType === 'RENT' || currentListingType === 'BOTH') && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-purple-50/50 border border-purple-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-orange-50/50 border border-orange-100">
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
                     Giá thuê / ngày (VNĐ) <span className="text-rose-500">*</span>
@@ -499,7 +499,7 @@ export const ProductForm = () => {
                       placeholder="0"
                       step="1000"
                       min="0"
-                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-hidden bg-white"
+                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden bg-white"
                     />
                     <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
                     <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">/ngày</span>
@@ -520,7 +520,7 @@ export const ProductForm = () => {
                       placeholder="0"
                       step="1000"
                       min="0"
-                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-purple-500 focus:outline-hidden bg-white"
+                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden bg-white"
                     />
                     <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
                     <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">VNĐ</span>
@@ -534,7 +534,7 @@ export const ProductForm = () => {
 
             {/* Smart Locker Delivery Notice */}
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3 text-xs text-slate-600">
-              <Lock size={16} className="text-purple-600 shrink-0 mt-0.5" />
+              <Lock size={16} className="text-[#eb6e34] shrink-0 mt-0.5" />
               <div>
                 <strong className="text-slate-900 block">Bàn giao qua Mạng Lưới Smart Locker</strong>
                 <span>
@@ -548,7 +548,7 @@ export const ProductForm = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <ImageIcon size={14} className="text-purple-600" />
+                <ImageIcon size={14} className="text-[#eb6e34]" />
                 3. Hình ảnh & Video mô tả sản phẩm
               </h2>
               <span className="text-[11px] text-slate-500 font-medium">
@@ -652,12 +652,12 @@ export const ProductForm = () => {
                       type="button"
                       disabled={isUploadingDetailImage}
                       onClick={() => detailImageInputRef.current?.click()}
-                      className="w-full aspect-square rounded-xl border-2 border-dashed border-slate-300 hover:border-purple-500 hover:bg-purple-50/40 text-slate-400 hover:text-purple-700 flex flex-col items-center justify-center gap-1.5 transition disabled:opacity-50"
+                      className="w-full aspect-square rounded-xl border-2 border-dashed border-slate-300 hover:border-orange-500 hover:bg-orange-50/40 text-slate-400 hover:text-orange-700 flex flex-col items-center justify-center gap-1.5 transition disabled:opacity-50"
                     >
                       {isUploadingDetailImage ? (
                         <>
-                          <Loader2 size={20} className="animate-spin text-purple-600" />
-                          <span className="text-[10px] font-bold text-purple-600">Đang tải...</span>
+                          <Loader2 size={20} className="animate-spin text-[#eb6e34]" />
+                          <span className="text-[10px] font-bold text-[#eb6e34]">Đang tải...</span>
                         </>
                       ) : (
                         <>
@@ -676,7 +676,7 @@ export const ProductForm = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                    <Video size={14} className="text-purple-600" />
+                    <Video size={14} className="text-[#eb6e34]" />
                     Video thực tế sản phẩm (Tùy chọn)
                   </label>
                   <p className="text-[11px] text-slate-400">
@@ -719,17 +719,17 @@ export const ProductForm = () => {
                         type="button"
                         disabled={isUploadingVideo}
                         onClick={() => videoInputRef.current?.click()}
-                        className="w-full py-6 px-4 rounded-2xl border-2 border-dashed border-slate-300 hover:border-purple-500 hover:bg-purple-50/40 text-slate-500 hover:text-purple-700 flex flex-col items-center justify-center gap-2 transition disabled:opacity-50"
+                        className="w-full py-6 px-4 rounded-2xl border-2 border-dashed border-slate-300 hover:border-orange-500 hover:bg-orange-50/40 text-slate-500 hover:text-orange-700 flex flex-col items-center justify-center gap-2 transition disabled:opacity-50"
                       >
                         {isUploadingVideo ? (
                           <div className="flex flex-col items-center gap-2">
-                            <Loader2 size={24} className="animate-spin text-purple-600" />
-                            <span className="text-xs font-bold text-purple-700">Đang tải video lên hệ thống...</span>
+                            <Loader2 size={24} className="animate-spin text-[#eb6e34]" />
+                            <span className="text-xs font-bold text-orange-700">Đang tải video lên hệ thống...</span>
                             <span className="text-[10px] text-slate-400">Vui lòng chờ trong giây lát</span>
                           </div>
                         ) : (
                           <>
-                            <div className="p-3 bg-purple-100 text-purple-700 rounded-xl">
+                            <div className="p-3 bg-orange-50 text-orange-700 rounded-xl">
                               <Film size={22} />
                             </div>
                             <div className="text-center">
@@ -761,7 +761,7 @@ export const ProductForm = () => {
                 rows={5}
                 {...register('description')}
                 placeholder="Gợi ý: Mô tả tình trạng món đồ (mới bao nhiêu %, có trầy xước không, còn phụ kiện gì không, lý do thanh lý)..."
-                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 focus:outline-hidden"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden"
               />
               {errors.description && (
                 <p className="text-rose-600 text-[11px] mt-1 font-medium">{errors.description.message}</p>
@@ -780,7 +780,7 @@ export const ProductForm = () => {
             <button
               type="submit"
               disabled={mutation.isPending || isSubmitting}
-              className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-md shadow-purple-600/20 transition disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-2.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-xl text-xs font-bold shadow-md shadow-orange-600/20 transition disabled:opacity-50 flex items-center gap-2"
             >
               {mutation.isPending ? (
                 <>

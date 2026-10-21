@@ -39,10 +39,24 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 
 export const AdminDashboard = () => {
   const { user } = useAuth();
   const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
+
+  // Accessible Notice Dialog state
+  const [dialogNotice, setDialogNotice] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'primary' | 'warning' | 'danger';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'primary',
+  });
 
   // 1. Fetch Dashboard Stats
   const {
@@ -101,10 +115,20 @@ export const AdminDashboard = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-fee-config'] });
       setIsFeeModalOpen(false);
-      alert('Cập nhật biểu phí nền tảng thành công!');
+      setDialogNotice({
+        isOpen: true,
+        title: 'Thành công',
+        message: 'Cập nhật biểu phí nền tảng thành công!',
+        variant: 'primary',
+      });
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể cập nhật biểu phí');
+      setDialogNotice({
+        isOpen: true,
+        title: 'Cập nhật thất bại',
+        message: err.response?.data?.message || 'Không thể cập nhật biểu phí nền tảng',
+        variant: 'danger',
+      });
     },
   });
 
@@ -142,10 +166,20 @@ export const AdminDashboard = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-media-config'] });
       setIsMediaModalOpen(false);
-      alert('Cập nhật giới hạn ảnh và video sản phẩm thành công!');
+      setDialogNotice({
+        isOpen: true,
+        title: 'Thành công',
+        message: 'Cập nhật giới hạn ảnh và video sản phẩm thành công!',
+        variant: 'primary',
+      });
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể cập nhật cấu hình media');
+      setDialogNotice({
+        isOpen: true,
+        title: 'Cập nhật thất bại',
+        message: err.response?.data?.message || 'Không thể cập nhật cấu hình media sản phẩm',
+        variant: 'danger',
+      });
     },
   });
 
@@ -176,11 +210,11 @@ export const AdminDashboard = () => {
 
   const getActionBadgeClass = (action: AuditAction) => {
     if (action.startsWith('USER_')) return 'bg-blue-50 text-blue-700 border-blue-200';
-    if (action.startsWith('ORDER_')) return 'bg-purple-50 text-purple-700 border-purple-200';
-    if (action.startsWith('PRODUCT_')) return 'bg-amber-50 text-amber-700 border-amber-200';
+    if (action.startsWith('ORDER_')) return 'bg-amber-50 text-amber-800 border-amber-200';
+    if (action.startsWith('PRODUCT_')) return 'bg-[#eb6e34]/10 text-[#eb6e34] border-[#eb6e34]/30';
     if (action.startsWith('LOCKER_') || action.startsWith('COMPARTMENT_'))
       return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    if (action.startsWith('ADMIN_')) return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+    if (action.startsWith('ADMIN_')) return 'bg-slate-900 text-white border-slate-900';
     return 'bg-gray-100 text-gray-700 border-gray-200';
   };
 
@@ -214,13 +248,13 @@ export const AdminDashboard = () => {
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 font-sans">
       {/* 1. EXECUTIVE REPORT HEADER */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 relative overflow-hidden">
-        {/* Subtle decorative gradient glow */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-100/40 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+        {/* Subtle decorative glow */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#eb6e34]/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
         <div className="relative flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider rounded-md bg-purple-100 text-purple-700 border border-purple-200">
+              <span className="px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider rounded-md bg-[#eb6e34]/10 text-[#eb6e34] border border-[#eb6e34]/20">
                 BÁO CÁO ĐIỀU HÀNH THỜI GIAN THỰC
               </span>
               <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -246,7 +280,7 @@ export const AdminDashboard = () => {
               </span>
               <span>•</span>
               <span>
-                Người lập báo cáo: <strong className="text-purple-700">{user?.fullName || user?.username || 'Quản trị viên'}</strong>
+                Người lập báo cáo: <strong className="text-[#eb6e34]">{user?.fullName || user?.username || 'Quản trị viên'}</strong>
               </span>
             </div>
           </div>
@@ -265,7 +299,7 @@ export const AdminDashboard = () => {
             <button
               onClick={handleRefreshAll}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-semibold shadow-sm shadow-purple-600/30 transition"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#eb6e34] hover:bg-[#d85d26] disabled:opacity-50 text-white text-sm font-semibold shadow-xs transition"
               title="Làm mới toàn bộ số liệu thống kê và audit log"
             >
               <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
@@ -320,7 +354,7 @@ export const AdminDashboard = () => {
               <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500">Đã xác minh CCCD:</span>
-                  <span className="font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
+                  <span className="font-bold text-[#eb6e34] bg-[#eb6e34]/10 px-2 py-0.5 rounded-md border border-[#eb6e34]/20">
                     {stats.userStats.verifiedUsers ?? 0} ({stats.userStats.totalUsers > 0 ? Math.round(((stats.userStats.verifiedUsers ?? 0) / stats.userStats.totalUsers) * 100) : 0}%)
                   </span>
                 </div>
@@ -386,7 +420,7 @@ export const AdminDashboard = () => {
               <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500">
                 <div className="flex justify-between">
                   <span>Chờ nhận tại tủ:</span>
-                  <strong className="text-purple-600">{stats.orderStats.readyForPickupOrders}</strong>
+                  <strong className="text-amber-600">{stats.orderStats.readyForPickupOrders}</strong>
                 </div>
                 <div className="flex justify-between">
                   <span>Hoàn tất thành công:</span>
@@ -396,13 +430,13 @@ export const AdminDashboard = () => {
             </div>
 
             {/* 4. Tủ Locker Thông minh */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-purple-300 transition group flex flex-col justify-between">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-[#eb6e34]/40 transition group flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                     Tủ Locker Thông minh
                   </span>
-                  <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition">
+                  <div className="p-2.5 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl group-hover:bg-[#eb6e34] group-hover:text-white transition">
                     <Lock size={20} />
                   </div>
                 </div>
@@ -411,7 +445,7 @@ export const AdminDashboard = () => {
                     {stats.lockerStats.totalCompartments}
                     <span className="text-sm font-normal text-slate-500 ml-1">ngăn</span>
                   </div>
-                  <div className="mt-1 flex items-center text-xs font-semibold text-purple-600">
+                  <div className="mt-1 flex items-center text-xs font-semibold text-[#eb6e34]">
                     Tỷ lệ lấp đầy: {stats.lockerStats.utilizationRate.toFixed(1)}%
                   </div>
                 </div>
@@ -424,7 +458,7 @@ export const AdminDashboard = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Đang chứa đồ:</span>
-                  <strong className="text-purple-600">{stats.lockerStats.occupiedCompartments}</strong>
+                  <strong className="text-blue-600">{stats.lockerStats.occupiedCompartments}</strong>
                 </div>
               </div>
             </div>
@@ -436,7 +470,7 @@ export const AdminDashboard = () => {
             <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-purple-100 text-purple-700 rounded-lg">
+                  <div className="p-2 bg-[#eb6e34]/10 text-[#eb6e34] rounded-lg">
                     <Layers size={18} />
                   </div>
                   <div>
@@ -477,14 +511,14 @@ export const AdminDashboard = () => {
                 </div>
 
                 {/* 3. Ready For Pickup */}
-                <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-200/60 flex flex-col justify-between">
-                  <div className="flex items-center gap-1.5 text-purple-800 text-[11px] font-bold uppercase tracking-wider">
+                <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/60 flex flex-col justify-between">
+                  <div className="flex items-center gap-1.5 text-amber-800 text-[11px] font-bold uppercase tracking-wider">
                     <KeyRound size={14} /> Sẵn sàng lấy đồ
                   </div>
-                  <div className="mt-3 text-2xl font-extrabold text-purple-950">
+                  <div className="mt-3 text-2xl font-extrabold text-amber-950">
                     {stats.orderStats.readyForPickupOrders}
                   </div>
-                  <div className="text-[11px] text-purple-700 mt-1">Đang chờ người mua đến tủ</div>
+                  <div className="text-[11px] text-amber-700 mt-1">Đang chờ người mua đến tủ</div>
                 </div>
 
                 {/* 4. Completed */}
@@ -526,7 +560,7 @@ export const AdminDashboard = () => {
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="p-2 bg-purple-100 text-purple-700 rounded-lg">
+                  <div className="p-2 bg-[#eb6e34]/10 text-[#eb6e34] rounded-lg">
                     <Lock size={18} />
                   </div>
                   <div>
@@ -542,13 +576,13 @@ export const AdminDashboard = () => {
                 <div className="mt-2">
                   <div className="flex justify-between text-xs mb-1.5">
                     <span className="font-semibold text-slate-700">Tỷ lệ chiếm dụng ngăn:</span>
-                    <span className="font-extrabold text-purple-700">
+                    <span className="font-extrabold text-[#eb6e34]">
                       {stats.lockerStats.utilizationRate.toFixed(1)}%
                     </span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200">
                     <div
-                      className="bg-purple-600 h-3 rounded-full transition-all duration-500"
+                      className="bg-[#eb6e34] h-3 rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(stats.lockerStats.utilizationRate, 100)}%` }}
                     />
                   </div>
@@ -575,7 +609,7 @@ export const AdminDashboard = () => {
                   </div>
                   <div className="flex justify-between items-center py-1.5">
                     <span className="text-slate-600 flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
                       Đang chứa hàng (Occupied)
                     </span>
                     <strong className="text-slate-900 font-mono text-sm">
@@ -603,7 +637,7 @@ export const AdminDashboard = () => {
 
               <Link
                 to="/admin/lockers"
-                className="mt-6 w-full py-2.5 px-4 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl text-xs font-bold transition text-center flex items-center justify-center gap-2 border border-purple-200 print:hidden"
+                className="mt-6 w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition text-center flex items-center justify-center gap-2 border border-slate-200 print:hidden"
               >
                 Quản lý chi tiết mạng lưới tủ Locker
                 <ArrowRight size={14} />
@@ -630,7 +664,7 @@ export const AdminDashboard = () => {
 
               <button
                 onClick={handleOpenFeeModal}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#eb6e34] hover:bg-[#d85d26] text-white rounded-xl text-xs font-bold transition shadow-xs"
               >
                 <Sliders size={14} /> Điều chỉnh biểu phí
               </button>
@@ -638,19 +672,19 @@ export const AdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
               {/* Sale Commission */}
-              <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-[#eb6e34]/5 border border-[#eb6e34]/20 flex items-center justify-between">
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-purple-700 uppercase tracking-wider block">
+                  <span className="text-xs font-bold text-[#eb6e34] uppercase tracking-wider block">
                     Hoa hồng Đơn Bán Đứt
                   </span>
-                  <div className="text-2xl font-black text-purple-950">
+                  <div className="text-2xl font-black text-slate-900">
                     {feeConfig ? `${feeConfig.saleCommissionPercent}%` : '5%'}
                   </div>
                   <p className="text-[11px] text-slate-500">
                     Khấu trừ tự động từ doanh thu người bán khi người mua hoàn tất nhận hàng tại Locker
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-purple-200/60 text-purple-800 flex items-center justify-center shrink-0 font-bold text-lg">
+                <div className="w-12 h-12 rounded-xl bg-[#eb6e34]/10 text-[#eb6e34] flex items-center justify-center shrink-0 font-bold text-lg">
                   %
                 </div>
               </div>
@@ -747,7 +781,7 @@ export const AdminDashboard = () => {
                     {mediaConfig?.allowProductVideo ? 'Người bán được đăng video' : 'Chặn tải video'}
                   </p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#eb6e34] flex items-center justify-center shrink-0">
                   <Video size={20} />
                 </div>
               </div>
@@ -816,7 +850,7 @@ export const AdminDashboard = () => {
               <div className="flex items-center gap-2 print:hidden">
                 <Link
                   to="/admin/audit"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-[#eb6e34] bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl transition"
                 >
                   Xem toàn bộ lịch sử Audit
                   <ExternalLink size={13} />
@@ -909,7 +943,7 @@ export const AdminDashboard = () => {
                               e.stopPropagation();
                               setSelectedLog(log);
                             }}
-                            className="text-xs font-semibold text-purple-600 hover:text-purple-800 hover:underline"
+                            className="text-xs font-semibold text-[#eb6e34] hover:text-[#d35a22] hover:underline"
                           >
                             Xem log
                           </button>
@@ -926,7 +960,7 @@ export const AdminDashboard = () => {
               <span>Đang hiển thị 10 sự kiện mới nhất. Để tìm kiếm theo người dùng, khoảng ngày hoặc loại hành động:</span>
               <Link
                 to="/admin/audit"
-                className="font-bold text-purple-700 hover:text-purple-900 inline-flex items-center gap-1"
+                className="font-bold text-[#eb6e34] hover:text-[#d35a22] inline-flex items-center gap-1"
               >
                 Mở trang Quản lý Audit Logs đầy đủ <ArrowRight size={14} />
               </Link>
@@ -956,7 +990,7 @@ export const AdminDashboard = () => {
             </button>
 
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl">
+              <div className="p-2.5 bg-orange-50 text-[#eb6e34] rounded-xl">
                 <FileText size={22} />
               </div>
               <div>
@@ -975,7 +1009,7 @@ export const AdminDashboard = () => {
                 </div>
                 <div>
                   <span className="text-slate-400 block mb-0.5 font-medium">Tác nhân (Actor):</span>
-                  <strong className="text-purple-700 font-bold">
+                  <strong className="text-[#eb6e34] font-bold">
                     {selectedLog.username || 'Hệ thống'}
                   </strong>
                 </div>
@@ -1088,7 +1122,7 @@ export const AdminDashboard = () => {
                         saleCommissionPercent: Number(e.target.value),
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#eb6e34]/20 focus:border-[#eb6e34]"
                     placeholder="5.0"
                   />
                   <span className="absolute right-3.5 top-2.5 text-sm text-slate-400 font-bold">%</span>
@@ -1109,8 +1143,8 @@ export const AdminDashboard = () => {
                     onClick={() => setFeeFormData((prev) => ({ ...prev, rentalFeeMode: 'PERCENT' }))}
                     className={`p-3 rounded-xl border text-left text-xs font-bold transition ${
                       feeFormData.rentalFeeMode === 'PERCENT'
-                        ? 'border-purple-600 bg-purple-50 text-purple-900 shadow-xs'
-                        : 'border-slate-200 text-slate-600 hover:border-purple-300'
+                        ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34] shadow-xs'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
                     }`}
                   >
                     Theo phần trăm (%)
@@ -1123,8 +1157,8 @@ export const AdminDashboard = () => {
                     onClick={() => setFeeFormData((prev) => ({ ...prev, rentalFeeMode: 'PER_DAY' }))}
                     className={`p-3 rounded-xl border text-left text-xs font-bold transition ${
                       feeFormData.rentalFeeMode === 'PER_DAY'
-                        ? 'border-purple-600 bg-purple-50 text-purple-900 shadow-xs'
-                        : 'border-slate-200 text-slate-600 hover:border-purple-300'
+                        ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34] shadow-xs'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
                     }`}
                   >
                     Cố định theo ngày (VNĐ/ngày)
@@ -1155,7 +1189,7 @@ export const AdminDashboard = () => {
                         rentalFeeValue: Number(e.target.value),
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#eb6e34]/20 focus:border-[#eb6e34]"
                     placeholder={feeFormData.rentalFeeMode === 'PERCENT' ? '10.0' : '5000'}
                   />
                   <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-bold">
@@ -1180,7 +1214,7 @@ export const AdminDashboard = () => {
                 <button
                   type="submit"
                   disabled={updateFeesMutation.isPending}
-                  className="flex-1 py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/20"
+                  className="flex-1 py-2.5 px-4 bg-[#eb6e34] hover:bg-[#d35a22] text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   {updateFeesMutation.isPending ? 'Đang lưu...' : 'Lưu biểu phí'}
                 </button>
@@ -1335,6 +1369,18 @@ export const AdminDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Accessible Notice Dialog */}
+      <ConfirmDialog
+        isOpen={dialogNotice.isOpen}
+        onClose={() => setDialogNotice((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setDialogNotice((prev) => ({ ...prev, isOpen: false }))}
+        title={dialogNotice.title}
+        message={dialogNotice.message}
+        confirmText="Đã hiểu"
+        cancelText="Đóng"
+        variant={dialogNotice.variant}
+      />
     </div>
   );
 };

@@ -4,12 +4,26 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../../api/axios';
 import type { LockerDetail as LockerDetailType, CompartmentStatus } from '../../../types/locker';
 import { ArrowLeft, Plus, ShieldCheck, Box, MapPin, Edit3 } from 'lucide-react';
+import { ConfirmDialog } from '../../../components/common/ConfirmDialog';
 
 export const LockerDetail = () => {
     const { id } = useParams<{ id: string }>();
     const queryClient = useQueryClient();
     const [newCompartmentCode, setNewCompartmentCode] = useState('');
     const [addError, setAddError] = useState<string | null>(null);
+
+    // Accessible Notice Dialog state
+    const [actionNotice, setActionNotice] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        variant: 'primary' | 'warning' | 'danger';
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        variant: 'primary',
+    });
 
     const { data: locker, isLoading, isError, error } = useQuery<LockerDetailType>({
         queryKey: ['locker', id],
@@ -37,7 +51,12 @@ export const LockerDetail = () => {
             queryClient.invalidateQueries({ queryKey: ['lockers'] });
         },
         onError: (err: any) => {
-            alert(err.response?.data?.message || 'Thao tác bị từ chối do quy tắc an toàn hệ thống.');
+            setActionNotice({
+                isOpen: true,
+                title: 'Thao tác bị từ chối',
+                message: err.response?.data?.message || 'Thao tác bị từ chối do quy tắc an toàn hệ thống.',
+                variant: 'danger',
+            });
         }
     });
 
@@ -53,7 +72,7 @@ export const LockerDetail = () => {
             <div className="max-w-4xl mx-auto py-12 px-4 text-center">
                 <h2 className="text-2xl font-bold text-gray-800">Không tìm thấy tủ đồ</h2>
                 <p className="mt-2 text-gray-600">{(error as any)?.message || 'Tủ đồ được yêu cầu không tồn tại hoặc đã bị xóa.'}</p>
-                <Link to="/admin/lockers" className="text-purple-600 hover:underline mt-4 inline-block">&larr; Quay lại danh sách tủ</Link>
+                <Link to="/admin/lockers" className="text-[#eb6e34] hover:underline mt-4 inline-block">&larr; Quay lại danh sách tủ</Link>
             </div>
         );
     }
@@ -80,7 +99,7 @@ export const LockerDetail = () => {
             case 'OCCUPIED':
                 return <span className="mt-1 px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Đang chứa hàng</span>;
             case 'RESERVED':
-                return <span className="mt-1 px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">Đã đặt trước</span>;
+                return <span className="mt-1 px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-50 text-amber-800 border border-amber-200">Đã đặt trước</span>;
             case 'ERROR':
                 return <span className="mt-1 px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Sự cố kỹ thuật</span>;
             default:
@@ -90,7 +109,7 @@ export const LockerDetail = () => {
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-            <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-purple-600 hover:underline mb-6 font-medium">
+            <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-[#eb6e34] hover:underline mb-6 font-medium">
                     <ArrowLeft size={16} /> Quay lại danh sách tủ
                 </Link>
 
@@ -101,10 +120,13 @@ export const LockerDetail = () => {
                             <div className="flex items-center gap-3">
                                 <h1 className="text-3xl font-bold text-gray-900">{locker.code}</h1>
                                 {renderLockerStatusBadge(locker.status)}
+                                <span className="px-2 py-0.5 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 rounded-md">
+                                    MÔ PHỎNG IoT
+                                </span>
                             </div>
                             <h2 className="text-lg text-gray-600 mt-1">{locker.name}</h2>
                             <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
-                                <MapPin size={15} className="text-purple-600" />
+                                <MapPin size={15} className="text-[#eb6e34]" />
                                 {locker.location}
                             </p>
                         </div>
@@ -127,9 +149,9 @@ export const LockerDetail = () => {
                             <div className="text-xs text-emerald-700 uppercase font-medium">Khả dụng</div>
                             <div className="text-2xl font-bold text-emerald-800 mt-1">{summary.available}</div>
                         </div>
-                        <div className="bg-purple-50 p-3 rounded-lg text-center border border-purple-100">
-                            <div className="text-xs text-purple-700 uppercase font-medium">Đã đặt trước</div>
-                            <div className="text-2xl font-bold text-purple-800 mt-1">{summary.reserved}</div>
+                        <div className="bg-amber-50 p-3 rounded-lg text-center border border-amber-100">
+                            <div className="text-xs text-amber-700 uppercase font-medium">Đã đặt trước</div>
+                            <div className="text-2xl font-bold text-amber-800 mt-1">{summary.reserved}</div>
                         </div>
                         <div className="bg-blue-50 p-3 rounded-lg text-center border border-blue-100">
                             <div className="text-xs text-blue-700 uppercase font-medium">Đang chứa hàng</div>
@@ -151,7 +173,7 @@ export const LockerDetail = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                         <div>
                             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                <Box size={20} className="text-purple-600" /> Danh sách ngăn tủ
+                                <Box size={20} className="text-[#eb6e34]" /> Danh sách ngăn tủ
                             </h2>
                             <p className="text-sm text-gray-500">Quản lý và điều phối trạng thái từng ô ngăn trong tủ này.</p>
                         </div>
@@ -163,12 +185,12 @@ export const LockerDetail = () => {
                                 placeholder="VD: C05"
                                 value={newCompartmentCode}
                                 onChange={(e) => setNewCompartmentCode(e.target.value)}
-                                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-purple-500 w-32 uppercase"
+                                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] w-32 uppercase"
                             />
                             <button
                                 type="submit"
                                 disabled={addCompartmentMutation.isPending || !newCompartmentCode.trim()}
-                                className="px-3.5 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50 flex items-center gap-1 transition"
+                                className="px-3.5 py-1.5 bg-[#eb6e34] text-white rounded-lg text-sm font-medium hover:bg-[#d85d26] disabled:opacity-50 flex items-center gap-1 transition"
                             >
                                 <Plus size={16} /> Thêm ngăn
                             </button>
@@ -224,7 +246,7 @@ export const LockerDetail = () => {
 
                                         {(comp.status === 'OCCUPIED' || comp.status === 'RESERVED') && (
                                             <span className="text-xs text-gray-500 flex items-center gap-1 font-medium">
-                                                <ShieldCheck size={13} className="text-purple-600" /> Theo đơn hàng
+                                                <ShieldCheck size={13} className="text-blue-600" /> Theo đơn hàng
                                             </span>
                                         )}
                                     </div>
@@ -233,6 +255,18 @@ export const LockerDetail = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Accessible Notice Dialog */}
+                <ConfirmDialog
+                    isOpen={actionNotice.isOpen}
+                    onClose={() => setActionNotice((prev) => ({ ...prev, isOpen: false }))}
+                    onConfirm={() => setActionNotice((prev) => ({ ...prev, isOpen: false }))}
+                    title={actionNotice.title}
+                    message={actionNotice.message}
+                    confirmText="Đã hiểu"
+                    cancelText="Đóng"
+                    variant={actionNotice.variant}
+                />
             </div>
     );
 };

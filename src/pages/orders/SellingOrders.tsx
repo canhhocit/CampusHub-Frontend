@@ -21,6 +21,7 @@ import {
   Radio,
 } from 'lucide-react';
 import { UserNavTabs } from '../../components/UserNavTabs';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const statusConfig: Record<
   OrderStatus,
@@ -111,6 +112,19 @@ export const SellingOrders = () => {
   const [rejectReason, setRejectReason] = useState('');
   const [depositModalOrder, setDepositModalOrder] = useState<Order | null>(null);
 
+  // Accessible Notice Dialog state
+  const [actionNotice, setActionNotice] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: 'primary' | 'warning' | 'danger';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'primary',
+  });
+
   // Fetch selling orders
   const { data: pageData, isLoading, isError, refetch } = useQuery<PageResponse<Order>>({
     queryKey: ['selling-orders', page],
@@ -143,7 +157,12 @@ export const SellingOrders = () => {
       setSelectedLockerId('');
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể chấp nhận đơn');
+      setActionNotice({
+        isOpen: true,
+        title: 'Không thể chấp nhận đơn',
+        message: err.response?.data?.message || 'Có lỗi xảy ra khi xác nhận đơn hàng.',
+        variant: 'danger',
+      });
     },
   });
 
@@ -159,7 +178,12 @@ export const SellingOrders = () => {
       setRejectReason('');
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Không thể từ chối đơn');
+      setActionNotice({
+        isOpen: true,
+        title: 'Không thể từ chối đơn',
+        message: err.response?.data?.message || 'Có lỗi xảy ra khi từ chối đơn hàng.',
+        variant: 'danger',
+      });
     },
   });
 
@@ -173,7 +197,12 @@ export const SellingOrders = () => {
       setDepositModalOrder(null);
     },
     onError: (err: any) => {
-      alert(err.response?.data?.message || 'Thao tác gửi hàng thất bại');
+      setActionNotice({
+        isOpen: true,
+        title: 'Thao tác gửi hàng thất bại',
+        message: err.response?.data?.message || 'Không thể ghi nhận trạng thái gửi hàng vào tủ.',
+        variant: 'danger',
+      });
     },
   });
 
@@ -596,9 +625,14 @@ export const SellingOrders = () => {
                   <Radio size={24} />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900">
-                    Bàn giao Smart Locker IoT
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      Bàn giao Smart Locker IoT
+                    </h3>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 rounded-md">
+                      MÔ PHỎNG
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-500">Mô phỏng thao tác đặt đồ vào ngăn tủ vật lý</p>
                 </div>
               </div>
@@ -656,6 +690,18 @@ export const SellingOrders = () => {
             </div>
           </div>
         )}
+
+        {/* Accessible Notice Dialog */}
+        <ConfirmDialog
+          isOpen={actionNotice.isOpen}
+          onClose={() => setActionNotice((prev) => ({ ...prev, isOpen: false }))}
+          onConfirm={() => setActionNotice((prev) => ({ ...prev, isOpen: false }))}
+          title={actionNotice.title}
+          message={actionNotice.message}
+          confirmText="Đã hiểu"
+          cancelText="Đóng"
+          variant={actionNotice.variant}
+        />
       </div>
     </div>
   );
