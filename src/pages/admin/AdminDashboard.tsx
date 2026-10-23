@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
 import type {
@@ -11,7 +11,6 @@ import type {
   UpdateProductMediaSettingsRequest,
 } from '../../types/admin';
 import type { PageResponse } from '../../types/marketplace';
-import { useAuth } from '../../contexts/AuthContext';
 import {
   Users,
   ShoppingBag,
@@ -29,21 +28,25 @@ import {
   Printer,
   FileText,
   CheckCircle,
-  Calendar,
   ExternalLink,
   X,
   Layers,
   Coins,
-  Sliders,
-  Video,
   Image as ImageIcon,
+  ShieldCheck,
+  ChevronRight,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 
+type AuditFilterCategory = 'ALL' | 'IDENTITY' | 'ORDER' | 'SECURITY' | 'PRODUCT';
+
 export const AdminDashboard = () => {
-  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
   const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
+  const [auditCategory, setAuditCategory] = useState<AuditFilterCategory>('ALL');
 
   // Accessible Notice Dialog state
   const [dialogNotice, setDialogNotice] = useState<{
@@ -58,6 +61,19 @@ export const AdminDashboard = () => {
     variant: 'primary',
   });
 
+  // Formatted date and time initialized once and updated upon manual refresh
+  const [formattedToday] = useState(() =>
+    new Date().toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+  );
+
+  const [lastRefreshedTime, setLastRefreshedTime] = useState(() =>
+    new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+  );
+
   // 1. Fetch Dashboard Stats
   const {
     data: stats,
@@ -71,7 +87,7 @@ export const AdminDashboard = () => {
     refetchInterval: 30000,
   });
 
-  // 2. Fetch Recent Audit Logs for the Live Report on Dashboard (Top 10 most recent)
+  // 2. Fetch Recent Audit Logs for the Live Stream (Top 12 recent items)
   const {
     data: logsData,
     isLoading: isLoadingLogs,
@@ -85,15 +101,14 @@ export const AdminDashboard = () => {
         .get('/api/v1/audit', {
           params: {
             page: 0,
-            size: 10,
+            size: 12,
           },
         })
         .then((res) => res.data),
-    refetchInterval: 15000, // Tự động làm mới log mỗi 15 giây
+    refetchInterval: 15000,
   });
 
   // 3. Platform Fee Configuration
-  const queryClient = useQueryClient();
   const [isFeeModalOpen, setIsFeeModalOpen] = useState(false);
   const [feeFormData, setFeeFormData] = useState<UpdateFeeConfigRequest>({
     saleCommissionPercent: 5.0,
@@ -118,7 +133,7 @@ export const AdminDashboard = () => {
       setDialogNotice({
         isOpen: true,
         title: 'Thành công',
-        message: 'Cập nhật biểu phí nền tảng thành công!',
+        message: 'Cập nhật biểu phí dịch vụ nền tảng thành công.',
         variant: 'primary',
       });
     },
@@ -126,7 +141,7 @@ export const AdminDashboard = () => {
       setDialogNotice({
         isOpen: true,
         title: 'Cập nhật thất bại',
-        message: err.response?.data?.message || 'Không thể cập nhật biểu phí nền tảng',
+        message: err.response?.data?.message || 'Không thể cập nhật biểu phí nền tảng.',
         variant: 'danger',
       });
     },
@@ -169,7 +184,7 @@ export const AdminDashboard = () => {
       setDialogNotice({
         isOpen: true,
         title: 'Thành công',
-        message: 'Cập nhật giới hạn ảnh và video sản phẩm thành công!',
+        message: 'Cập nhật chính sách phương tiện sản phẩm thành công.',
         variant: 'primary',
       });
     },
@@ -177,7 +192,7 @@ export const AdminDashboard = () => {
       setDialogNotice({
         isOpen: true,
         title: 'Cập nhật thất bại',
-        message: err.response?.data?.message || 'Không thể cập nhật cấu hình media sản phẩm',
+        message: err.response?.data?.message || 'Không thể cập nhật cấu hình media sản phẩm.',
         variant: 'danger',
       });
     },
@@ -196,6 +211,9 @@ export const AdminDashboard = () => {
   };
 
   const handleRefreshAll = () => {
+    setLastRefreshedTime(
+      new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+    );
     refetchStats();
     refetchLogs();
     refetchFees();
@@ -208,17 +226,57 @@ export const AdminDashboard = () => {
     window.print();
   };
 
-  const getActionBadgeClass = (action: AuditAction) => {
-    if (action.startsWith('USER_')) return 'bg-blue-50 text-blue-700 border-blue-200';
-    if (action.startsWith('ORDER_')) return 'bg-amber-50 text-amber-800 border-amber-200';
-    if (action.startsWith('PRODUCT_')) return 'bg-[#eb6e34]/10 text-[#eb6e34] border-[#eb6e34]/30';
-    if (action.startsWith('LOCKER_') || action.startsWith('COMPARTMENT_'))
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    if (action.startsWith('ADMIN_')) return 'bg-slate-900 text-white border-slate-900';
-    return 'bg-gray-100 text-gray-700 border-gray-200';
+  // Semantic category mapping for audit events
+  const filteredLogs = useMemo(() => {
+    if (!logsData?.content) return [];
+    if (auditCategory === 'ALL') return logsData.content;
+    return logsData.content.filter((item) => {
+      if (auditCategory === 'IDENTITY') return item.action.includes('IDENTITY');
+      if (auditCategory === 'ORDER') return item.action.startsWith('ORDER_') || item.action.startsWith('LOCKER_') || item.action.startsWith('COMPARTMENT_');
+      if (auditCategory === 'SECURITY') return item.action.includes('LOGIN') || item.action.includes('PASSWORD') || item.action.includes('SECURITY') || item.action.includes('TOKEN');
+      if (auditCategory === 'PRODUCT') return item.action.startsWith('PRODUCT_') || item.action.startsWith('CATEGORY_');
+      return true;
+    });
+  }, [logsData, auditCategory]);
+
+  const getActionBadge = (action: AuditAction | string) => {
+    if (action.includes('IDENTITY')) {
+      return {
+        label: action.replace('IDENTITY_', ''),
+        className: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
+      };
+    }
+    if (action.startsWith('ORDER_')) {
+      return {
+        label: action.replace('ORDER_', ''),
+        className: 'bg-amber-50 text-amber-800 border-amber-200/80',
+      };
+    }
+    if (action.startsWith('PRODUCT_')) {
+      return {
+        label: action.replace('PRODUCT_', ''),
+        className: 'bg-orange-50 text-orange-700 border-orange-200/80',
+      };
+    }
+    if (action.startsWith('LOCKER_') || action.startsWith('COMPARTMENT_')) {
+      return {
+        label: action.replace('LOCKER_', '').replace('COMPARTMENT_', ''),
+        className: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+      };
+    }
+    if (action.startsWith('USER_')) {
+      return {
+        label: action.replace('USER_', ''),
+        className: 'bg-slate-100 text-slate-700 border-slate-200',
+      };
+    }
+    return {
+      label: action,
+      className: 'bg-slate-100 text-slate-600 border-slate-200',
+    };
   };
 
-  const getActionLabel = (action: string) => {
+  const getActionHumanLabel = (action: string) => {
     const map: Record<string, string> = {
       USER_LOGIN: 'Đăng nhập hệ thống',
       USER_LOGOUT: 'Đăng xuất',
@@ -226,224 +284,222 @@ export const AdminDashboard = () => {
       USER_PROFILE_UPDATE: 'Cập nhật hồ sơ',
       USER_PASSWORD_CHANGE: 'Đổi mật khẩu',
       USER_STATUS_CHANGE: 'Đổi trạng thái tài khoản',
-      PRODUCT_CREATE: 'Tạo tin rao bán',
-      PRODUCT_UPDATE: 'Cập nhật tin rao',
-      PRODUCT_DELETE: 'Xóa tin rao',
-      ORDER_CREATE: 'Tạo đơn đặt mua',
-      ORDER_ACCEPT: 'Người bán chấp nhận',
-      ORDER_REJECT: 'Người bán từ chối',
+      USER_IDENTITY_REVIEW: 'Duyệt hồ sơ định danh',
+      IDENTITY_ATTEMPT_START: 'Bắt đầu xác thực eKYC',
+      IDENTITY_LIVENESS_STEP: 'Thực hiện cử động sống (Liveness)',
+      IDENTITY_FACE_VERIFY: 'Đối chiếu khuôn mặt sinh trắc học',
+      IDENTITY_ATTEMPT_COMPLETE: 'Hoàn tất quy trình định danh',
+      IDENTITY_ATTEMPT_FAILED: 'Thất bại xác thực định danh',
+      PRODUCT_CREATE: 'Đăng tin sản phẩm mới',
+      PRODUCT_UPDATE: 'Cập nhật tin sản phẩm',
+      PRODUCT_DELETE: 'Gỡ tin sản phẩm',
+      PRODUCT_STATUS_CHANGE: 'Đổi trạng thái tin đăng',
+      ORDER_CREATE: 'Tạo đơn hàng mới',
+      ORDER_ACCEPT: 'Người bán xác nhận đơn',
+      ORDER_REJECT: 'Người bán từ chối đơn',
       ORDER_CANCEL: 'Hủy đơn hàng',
       ORDER_DEPOSIT: 'Gửi hàng vào ngăn tủ',
-      ORDER_PICKUP: 'Nhận hàng mở tủ thành công',
-      ORDER_PICKUP_FAILED: 'Nhập sai OTP lấy đồ',
+      ORDER_PICKUP: 'Mở ngăn lấy hàng thành công',
+      ORDER_PICKUP_FAILED: 'Nhập sai mã OTP lấy đồ',
       ORDER_EXPIRED: 'Đơn quá hạn lưu tủ',
-      ADMIN_ACCESS_DASHBOARD: 'Truy cập Báo cáo Admin',
-      ADMIN_VIEW_USERS: 'Tra cứu Người dùng',
-      ADMIN_CLEAR_EXPIRED_ORDER: 'Xử lý đơn quá hạn',
+      ORDER_CLEARED: 'Giải phóng ngăn tủ quá hạn',
+      LOCKER_STATUS_CHANGE: 'Cập nhật trạng thái trạm tủ',
+      COMPARTMENT_STATUS_CHANGE: 'Cập nhật trạng thái ngăn tủ',
+      ADMIN_ACCESS_DASHBOARD: 'Truy cập trung tâm điều hành',
+      ADMIN_VIEW_USERS: 'Tra cứu danh sách thành viên',
+      ADMIN_CLEAR_EXPIRED_ORDER: 'Xử lý giải phóng ngăn quá hạn',
     };
     return map[action] || action;
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 font-sans">
-      {/* 1. EXECUTIVE REPORT HEADER */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 relative overflow-hidden">
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#eb6e34]/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-
-        <div className="relative flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider rounded-md bg-[#eb6e34]/10 text-[#eb6e34] border border-[#eb6e34]/20">
-                BÁO CÁO ĐIỀU HÀNH THỜI GIAN THỰC
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 font-sans text-slate-800">
+      {/* 1. CONTROL CENTER HEADER */}
+      <div className="bg-white rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-6">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Hệ thống hoạt động bình thường
               </span>
-              <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Vận hành ổn định
-              </span>
-              <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-                Phiên bản: <strong className="text-slate-700 font-mono">CampusHub v2.4</strong>
+              <span className="text-xs text-slate-400 font-medium">
+                Cập nhật lúc {lastRefreshedTime} • {formattedToday}
               </span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Báo cáo Vận hành Toàn diện & Giám sát Hệ thống
+              Trung tâm Điều hành CampusHub
             </h1>
-            <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
-              Tổng hợp thời gian thực các chỉ số tăng trưởng người dùng, định danh CCCD, chu trình giao dịch đơn hàng qua tủ Locker thông minh và luồng sự kiện an ninh hệ thống.
+            <p className="text-sm text-slate-500 max-w-3xl leading-relaxed">
+              Giám sát thời gian thực chu trình giao dịch P2P, tỷ lệ lấp đầy mạng lưới Smart Locker và nhật ký an ninh hệ thống.
             </p>
-
-            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-slate-500">
-              <span className="flex items-center gap-1.5">
-                <Calendar size={14} className="text-slate-400" />
-                Dữ liệu cập nhật: <strong>{new Date().toLocaleDateString('vi-VN')}</strong>
-              </span>
-              <span>•</span>
-              <span>
-                Người lập báo cáo: <strong className="text-[#eb6e34]">{user?.fullName || user?.username || 'Quản trị viên'}</strong>
-              </span>
-            </div>
           </div>
 
-          {/* Action Buttons: Print Report & Instant Refresh */}
-          <div className="flex items-center gap-3 shrink-0 print:hidden">
+          {/* Quick Actions Header */}
+          <div className="flex items-center gap-2.5 shrink-0 print:hidden">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold shadow-xs transition hover:border-slate-400"
-              title="In hoặc lưu file PDF bản báo cáo"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition shadow-xs"
+              title="Xuất báo cáo định dạng in / PDF"
             >
-              <Printer size={16} className="text-slate-600" />
-              In / Xuất Báo cáo
+              <Printer size={15} className="text-slate-500" />
+              In báo cáo
             </button>
 
             <button
               onClick={handleRefreshAll}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#eb6e34] hover:bg-[#d85d26] disabled:opacity-50 text-white text-sm font-semibold shadow-xs transition"
-              title="Làm mới toàn bộ số liệu thống kê và audit log"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#eb6e34] hover:bg-[#d85e25] disabled:opacity-50 text-white text-xs font-semibold transition shadow-xs"
+              title="Đồng bộ lại toàn bộ số liệu thời gian thực"
             >
-              <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-              {isRefreshing ? 'Đang cập nhật...' : 'Làm mới số liệu'}
+              <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
+              {isRefreshing ? 'Đang nạp...' : 'Làm mới'}
             </button>
           </div>
         </div>
       </div>
 
       {isLoadingStats ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-pulse">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-36 bg-slate-200 rounded-2xl" />
+            <div key={i} className="h-32 bg-slate-100 rounded-xl border border-slate-200/80" />
           ))}
         </div>
       ) : isErrorStats || !stats ? (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 p-8 rounded-2xl text-center">
-          <AlertTriangle className="mx-auto mb-3" size={36} />
-          <h3 className="font-bold text-lg">Không thể tải dữ liệu báo cáo thống kê</h3>
-          <p className="text-sm mt-1 text-rose-600">Vui lòng kiểm tra quyền hạn Quản trị viên hoặc kết nối máy chủ.</p>
+        <div className="bg-rose-50/70 border border-rose-200 text-rose-800 p-8 rounded-xl text-center space-y-3">
+          <AlertTriangle className="mx-auto text-rose-500" size={32} />
+          <h2 className="font-bold text-base text-rose-900">Không thể kết nối máy chủ quản trị</h2>
+          <p className="text-xs text-rose-700 max-w-md mx-auto">
+            Hệ thống không thể tải báo cáo thống kê vận hành. Vui lòng xác minh phiên đăng nhập của tài khoản Quản trị viên.
+          </p>
           <button
             onClick={handleRefreshAll}
-            className="mt-4 px-5 py-2.5 bg-rose-600 text-white font-semibold rounded-xl text-sm hover:bg-rose-700 shadow-sm transition"
+            className="px-4 py-2 bg-rose-600 text-white font-medium rounded-lg text-xs hover:bg-rose-700 transition shadow-xs"
           >
-            Thử tải lại dữ liệu
+            Thử tải lại
           </button>
         </div>
       ) : (
-        <div className="space-y-8">
-          {/* 2. EXECUTIVE KPI CARDS (5 Highlights) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {/* 1. Người dùng & Định danh CCCD */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-blue-300 transition group flex flex-col justify-between">
+        <div className="space-y-6">
+          {/* 2. PRIMARY TELEMETRY CARDS (Clean, disciplined metric ribbon) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: Thành viên & Định danh eKYC */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Người dùng & CCCD
-                  </span>
-                  <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition">
-                    <Users size={20} />
+                <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+                  <span>Thành viên & Định danh</span>
+                  <div className="p-1.5 rounded-md bg-slate-100 text-slate-600">
+                    <Users size={16} />
                   </div>
                 </div>
-                <div className="mt-3">
-                  <div className="text-3xl font-extrabold text-slate-900">{stats.userStats.totalUsers}</div>
-                  <div className="mt-1 flex items-center text-xs font-semibold text-emerald-600">
-                    <TrendingUp size={14} className="mr-1" />
-                    +{stats.userStats.newUsersToday} hôm nay / +{stats.userStats.newUsersThisWeek} tuần này
+
+                <div className="mt-2.5">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    {stats.userStats.totalUsers.toLocaleString('vi-VN')}
+                  </div>
+                  <div className="mt-1 flex items-center text-xs text-emerald-600 font-medium">
+                    <TrendingUp size={13} className="mr-1" />
+                    +{stats.userStats.newUsersToday} hôm nay • +{stats.userStats.newUsersThisWeek} tuần này
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Đã xác minh CCCD:</span>
-                  <span className="font-bold text-[#eb6e34] bg-[#eb6e34]/10 px-2 py-0.5 rounded-md border border-[#eb6e34]/20">
-                    {stats.userStats.verifiedUsers ?? 0} ({stats.userStats.totalUsers > 0 ? Math.round(((stats.userStats.verifiedUsers ?? 0) / stats.userStats.totalUsers) * 100) : 0}%)
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-slate-500">Đã xác thực CCCD:</span>
+                <span className="inline-flex items-center gap-1 font-semibold text-slate-900">
+                  <ShieldCheck size={13} className="text-emerald-600" />
+                  {stats.userStats.verifiedUsers ?? 0}
+                  <span className="text-slate-400 font-normal text-[11px]">
+                    ({stats.userStats.totalUsers > 0 ? Math.round(((stats.userStats.verifiedUsers ?? 0) / stats.userStats.totalUsers) * 100) : 0}%)
                   </span>
+                </span>
+              </div>
+            </div>
+
+            {/* Card 2: Thị trường & Sản phẩm niêm yết */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+                  <span>Sản phẩm chợ đồ cũ</span>
+                  <div className="p-1.5 rounded-md bg-slate-100 text-slate-600">
+                    <ShoppingBag size={16} />
+                  </div>
                 </div>
-                <div className="flex justify-between text-slate-500">
-                  <span>Hoạt động: <strong className="text-emerald-600">{stats.userStats.activeUsers}</strong></span>
-                  <span>Khóa: <strong className="text-rose-600">{stats.userStats.lockedUsers}</strong></span>
+
+                <div className="mt-2.5">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    {stats.productStats.totalProducts.toLocaleString('vi-VN')}
+                  </div>
+                  <div className="mt-1 flex items-center text-xs text-slate-500">
+                    <span className="text-emerald-600 font-medium mr-1.5">
+                      +{stats.productStats.newProductsToday} tin mới
+                    </span>
+                    <span>trong ngày</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-slate-500">Đang niêm yết:</span>
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold text-slate-900">
+                    {stats.productStats.activeProducts} <span className="font-normal text-slate-400 text-[11px]">mở bán</span>
+                  </span>
+                  <span className="text-slate-300">•</span>
+                  <span className="font-semibold text-emerald-600">
+                    {stats.productStats.soldProducts} <span className="font-normal text-slate-400 text-[11px]">đã bán</span>
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* 2. Sản phẩm Chợ đồ cũ */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-amber-300 transition group flex flex-col justify-between">
+            {/* Card 3: Giao dịch & Đơn hàng */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Sản phẩm Niêm yết
-                  </span>
-                  <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl group-hover:bg-amber-600 group-hover:text-white transition">
-                    <ShoppingBag size={20} />
+                <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+                  <span>Đơn hàng & Giao dịch</span>
+                  <div className="p-1.5 rounded-md bg-slate-100 text-slate-600">
+                    <Package size={16} />
                   </div>
                 </div>
-                <div className="mt-3">
-                  <div className="text-3xl font-extrabold text-slate-900">{stats.productStats.totalProducts}</div>
-                  <div className="mt-1 flex items-center text-xs font-semibold text-emerald-600">
-                    <TrendingUp size={14} className="mr-1" />
-                    +{stats.productStats.newProductsToday} mới hôm nay
-                  </div>
-                </div>
-              </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500">
-                <div className="flex justify-between">
-                  <span>Đang mở bán:</span>
-                  <strong className="text-blue-600">{stats.productStats.activeProducts}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span>Đã bán thành công:</span>
-                  <strong className="text-emerald-600">{stats.productStats.soldProducts}</strong>
-                </div>
-              </div>
-            </div>
-
-            {/* 3. Tổng số Đơn hàng */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-emerald-300 transition group flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Giao dịch & Đơn hàng
-                  </span>
-                  <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition">
-                    <Package size={20} />
+                <div className="mt-2.5">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    {stats.orderStats.totalOrders.toLocaleString('vi-VN')}
                   </div>
-                </div>
-                <div className="mt-3">
-                  <div className="text-3xl font-extrabold text-slate-900">{stats.orderStats.totalOrders}</div>
-                  <div className="mt-1 flex items-center text-xs font-semibold text-emerald-600">
-                    <CheckCircle2 size={14} className="mr-1" />
+                  <div className="mt-1 flex items-center text-xs text-emerald-600 font-medium">
+                    <CheckCircle2 size={13} className="mr-1" />
                     {stats.orderStats.completedOrdersToday} đơn hoàn tất hôm nay
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500">
-                <div className="flex justify-between">
-                  <span>Chờ nhận tại tủ:</span>
-                  <strong className="text-amber-600">{stats.orderStats.readyForPickupOrders}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span>Hoàn tất thành công:</span>
-                  <strong className="text-emerald-600">{stats.orderStats.completedOrders}</strong>
-                </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-slate-500">Hoàn tất thành công:</span>
+                <span className="font-semibold text-emerald-600">
+                  {stats.orderStats.completedOrders}
+                  <span className="text-slate-400 font-normal text-[11px] ml-1">
+                    ({stats.orderStats.totalOrders > 0 ? Math.round((stats.orderStats.completedOrders / stats.orderStats.totalOrders) * 100) : 0}%)
+                  </span>
+                </span>
               </div>
             </div>
 
-            {/* 4. Tủ Locker Thông minh */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-[#eb6e34]/40 transition group flex flex-col justify-between">
+            {/* Card 4: Công suất Smart Locker */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Tủ Locker Thông minh
-                  </span>
-                  <div className="p-2.5 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl group-hover:bg-[#eb6e34] group-hover:text-white transition">
-                    <Lock size={20} />
+                <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+                  <span>Hạ tầng Smart Locker</span>
+                  <div className="p-1.5 rounded-md bg-slate-100 text-slate-600">
+                    <Lock size={16} />
                   </div>
                 </div>
-                <div className="mt-3">
-                  <div className="text-3xl font-extrabold text-slate-900">
+
+                <div className="mt-2.5">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-baseline gap-1">
                     {stats.lockerStats.totalCompartments}
-                    <span className="text-sm font-normal text-slate-500 ml-1">ngăn</span>
+                    <span className="text-xs font-medium text-slate-500">ngăn tủ ({stats.lockerStats.activeLockers} trạm)</span>
                   </div>
                   <div className="mt-1 flex items-center text-xs font-semibold text-[#eb6e34]">
                     Tỷ lệ lấp đầy: {stats.lockerStats.utilizationRate.toFixed(1)}%
@@ -451,592 +507,528 @@ export const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500">
-                <div className="flex justify-between">
-                  <span>Ngăn trống khả dụng:</span>
-                  <strong className="text-emerald-600">{stats.lockerStats.availableCompartments}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span>Đang chứa đồ:</span>
-                  <strong className="text-blue-600">{stats.lockerStats.occupiedCompartments}</strong>
-                </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-slate-500">Khả dụng / Đang dùng:</span>
+                <span className="font-mono text-xs">
+                  <strong className="text-emerald-600 font-semibold">{stats.lockerStats.availableCompartments}</strong>
+                  <span className="text-slate-400"> / </span>
+                  <strong className="text-slate-800 font-semibold">{stats.lockerStats.occupiedCompartments + stats.lockerStats.reservedCompartments}</strong>
+                </span>
               </div>
             </div>
           </div>
 
-          {/* 3. ORDER PIPELINE & LOCKER CAPACITY BREAKDOWN */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Order Flow Pipeline (2 Columns) */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="flex items-center justify-between mb-5">
+          {/* 3. CORE OPERATIONS: FULFILLMENT PIPELINE & LOCKER TELEMETRY */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left Column (7 cols): Order Fulfillment Pipeline */}
+            <div className="lg:col-span-7 bg-white p-6 rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-[#eb6e34]/10 text-[#eb6e34] rounded-lg">
+                  <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
                     <Layers size={18} />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-slate-900 text-base">
-                      Báo cáo Chu trình Giao dịch Đơn hàng (Pipeline)
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Theo dõi tuần tự 6 bước từ phê duyệt đến bàn giao qua ngăn tủ thông minh
-                    </p>
+                    <h2 className="font-bold text-slate-900 text-base">Chu trình Giao nhận Đơn hàng qua Locker</h2>
+                    <p className="text-xs text-slate-500">Quy trình 4 giai đoạn chuyển giao hàng hóa từ người bán đến người mua</p>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
-                  Tổng: {stats.orderStats.totalOrders} đơn
+                <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                  {stats.orderStats.totalOrders} đơn giao dịch
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-                {/* 1. Pending Seller */}
-                <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/60 flex flex-col justify-between">
-                  <div className="flex items-center gap-1.5 text-amber-800 text-[11px] font-bold uppercase tracking-wider">
-                    <Clock size={14} /> Chờ người bán duyệt
+              {/* Sequential Funnel Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* Stage 1 */}
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-1">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <span>1. Chờ duyệt</span>
+                    <Clock size={13} className="text-amber-500" />
                   </div>
-                  <div className="mt-3 text-2xl font-extrabold text-amber-950">
-                    {stats.orderStats.pendingOrders}
-                  </div>
-                  <div className="text-[11px] text-amber-700 mt-1">Giao dịch mới khởi tạo</div>
+                  <div className="text-2xl font-bold text-slate-900">{stats.orderStats.pendingOrders}</div>
+                  <p className="text-[11px] text-slate-400">Người bán phản hồi</p>
                 </div>
 
-                {/* 2. Awaiting Deposit */}
-                <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200/60 flex flex-col justify-between">
-                  <div className="flex items-center gap-1.5 text-blue-800 text-[11px] font-bold uppercase tracking-wider">
-                    <Package size={14} /> Chờ gửi vào tủ
+                {/* Stage 2 */}
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-1">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <span>2. Chờ nạp tủ</span>
+                    <Package size={13} className="text-blue-500" />
                   </div>
-                  <div className="mt-3 text-2xl font-extrabold text-blue-950">
-                    {stats.orderStats.awaitingDepositOrders}
-                  </div>
-                  <div className="text-[11px] text-blue-700 mt-1">Đã phân ngăn tủ, chờ người bán gửi hàng</div>
+                  <div className="text-2xl font-bold text-slate-900">{stats.orderStats.awaitingDepositOrders}</div>
+                  <p className="text-[11px] text-slate-400">Đã gán ngăn Locker</p>
                 </div>
 
-                {/* 3. Ready For Pickup */}
-                <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/60 flex flex-col justify-between">
-                  <div className="flex items-center gap-1.5 text-amber-800 text-[11px] font-bold uppercase tracking-wider">
-                    <KeyRound size={14} /> Sẵn sàng lấy đồ
+                {/* Stage 3 */}
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-1">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <span>3. Sẵn sàng lấy</span>
+                    <KeyRound size={13} className="text-[#eb6e34]" />
                   </div>
-                  <div className="mt-3 text-2xl font-extrabold text-amber-950">
-                    {stats.orderStats.readyForPickupOrders}
-                  </div>
-                  <div className="text-[11px] text-amber-700 mt-1">Đang chờ người mua đến tủ</div>
+                  <div className="text-2xl font-bold text-slate-900">{stats.orderStats.readyForPickupOrders}</div>
+                  <p className="text-[11px] text-slate-400">Đã cấp OTP lấy đồ</p>
                 </div>
 
-                {/* 4. Completed */}
-                <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/60 flex flex-col justify-between">
-                  <div className="flex items-center gap-1.5 text-emerald-800 text-[11px] font-bold uppercase tracking-wider">
-                    <CheckCircle2 size={14} /> Đã hoàn thành
+                {/* Stage 4 */}
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-1">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <span>4. Hoàn tất</span>
+                    <CheckCircle2 size={13} className="text-emerald-500" />
                   </div>
-                  <div className="mt-3 text-2xl font-extrabold text-emerald-950">
-                    {stats.orderStats.completedOrders}
+                  <div className="text-2xl font-bold text-slate-900">{stats.orderStats.completedOrders}</div>
+                  <p className="text-[11px] text-slate-400">Khách nhận đồ an toàn</p>
+                </div>
+              </div>
+
+              {/* Exception & Warning Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="p-3 rounded-lg border border-rose-200/80 bg-rose-50/50 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-rose-600 shrink-0" />
+                    <div>
+                      <span className="font-semibold text-rose-900">Quá hạn lưu tủ: </span>
+                      <strong className="text-rose-700">{stats.orderStats.expiredOrders} đơn</strong>
+                    </div>
                   </div>
-                  <div className="text-[11px] text-emerald-700 mt-1">Đã nhận hàng thành công</div>
+                  {stats.orderStats.expiredOrders > 0 && (
+                    <Link
+                      to="/admin/lockers"
+                      className="text-[11px] font-semibold text-rose-700 hover:text-rose-900 underline"
+                    >
+                      Giải phóng ngăn
+                    </Link>
+                  )}
                 </div>
 
-                {/* 5. Expired */}
-                <div className="p-4 rounded-xl bg-rose-50/70 border border-rose-200/60 flex flex-col justify-between">
-                  <div className="flex items-center gap-1.5 text-rose-800 text-[11px] font-bold uppercase tracking-wider">
-                    <AlertTriangle size={14} /> Quá hạn lấy đồ
+                <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <XCircle size={15} className="text-slate-400 shrink-0" />
+                    <span>Đã hủy / Từ chối giao dịch:</span>
                   </div>
-                  <div className="mt-3 text-2xl font-extrabold text-rose-950">
-                    {stats.orderStats.expiredOrders}
-                  </div>
-                  <div className="text-[11px] text-rose-700 mt-1">Cần Admin giải phóng ngăn</div>
-                </div>
-
-                {/* 6. Cancelled/Rejected */}
-                <div className="p-4 rounded-xl bg-slate-100/80 border border-slate-200 flex flex-col justify-between">
-                  <div className="flex items-center gap-1.5 text-slate-700 text-[11px] font-bold uppercase tracking-wider">
-                    <XCircle size={14} /> Đã hủy / Từ chối
-                  </div>
-                  <div className="mt-3 text-2xl font-extrabold text-slate-900">
-                    {stats.orderStats.cancelledOrders + stats.orderStats.rejectedOrders}
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-1">Không phát sinh lưu tủ</div>
+                  <span className="font-semibold text-slate-900">
+                    {stats.orderStats.cancelledOrders + stats.orderStats.rejectedOrders} đơn
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Locker Utilization & Security Health (1 Column) */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-2.5 mb-4">
-                  <div className="p-2 bg-[#eb6e34]/10 text-[#eb6e34] rounded-lg">
-                    <Lock size={18} />
+            {/* Right Column (5 cols): Locker Capacity & Security Status */}
+            <div className="lg:col-span-5 bg-white p-6 rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between space-y-5">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
+                      <Lock size={18} />
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-slate-900 text-base">Phân bổ Dung lượng Ngăn tủ</h2>
+                      <p className="text-xs text-slate-500">Hiện trạng {stats.lockerStats.totalCompartments} ngăn trên {stats.lockerStats.activeLockers} trạm tủ</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-extrabold text-slate-900 text-base">
-                      Công suất & Tỷ lệ Lấp đầy Tủ
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      {stats.lockerStats.activeLockers} tủ đang vận hành trên toàn thành phố
-                    </p>
-                  </div>
+                  <Link
+                    to="/admin/lockers"
+                    className="text-xs font-semibold text-[#eb6e34] hover:text-[#d85e25] inline-flex items-center gap-1"
+                  >
+                    Chi tiết <ChevronRight size={13} />
+                  </Link>
                 </div>
 
-                <div className="mt-2">
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="font-semibold text-slate-700">Tỷ lệ chiếm dụng ngăn:</span>
-                    <span className="font-extrabold text-[#eb6e34]">
+                {/* Progress bar visual */}
+                <div>
+                  <div className="flex justify-between items-center text-xs mb-2">
+                    <span className="text-slate-600 font-medium">Tỷ lệ sử dụng ngăn:</span>
+                    <span className="font-extrabold text-slate-900 font-mono">
                       {stats.lockerStats.utilizationRate.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200">
+
+                  <div className="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden flex border border-slate-200/80">
                     <div
-                      className="bg-[#eb6e34] h-3 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(stats.lockerStats.utilizationRate, 100)}%` }}
+                      title={`Đang chứa hàng: ${stats.lockerStats.occupiedCompartments} ngăn`}
+                      className="bg-blue-600 h-full transition-all duration-300"
+                      style={{
+                        width: `${stats.lockerStats.totalCompartments > 0 ? (stats.lockerStats.occupiedCompartments / stats.lockerStats.totalCompartments) * 100 : 0}%`,
+                      }}
+                    />
+                    <div
+                      title={`Đã giữ chỗ: ${stats.lockerStats.reservedCompartments} ngăn`}
+                      className="bg-amber-400 h-full transition-all duration-300"
+                      style={{
+                        width: `${stats.lockerStats.totalCompartments > 0 ? (stats.lockerStats.reservedCompartments / stats.lockerStats.totalCompartments) * 100 : 0}%`,
+                      }}
+                    />
+                    <div
+                      title={`Ngăn trống: ${stats.lockerStats.availableCompartments} ngăn`}
+                      className="bg-emerald-500 h-full transition-all duration-300"
+                      style={{
+                        width: `${stats.lockerStats.totalCompartments > 0 ? (stats.lockerStats.availableCompartments / stats.lockerStats.totalCompartments) * 100 : 0}%`,
+                      }}
                     />
                   </div>
-                </div>
 
-                <div className="mt-5 space-y-2.5 text-xs">
-                  <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
-                    <span className="text-slate-600 flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                      Ngăn trống khả dụng (Available)
-                    </span>
-                    <strong className="text-slate-900 font-mono text-sm">
-                      {stats.lockerStats.availableCompartments}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
-                    <span className="text-slate-600 flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                      Đã đặt chỗ trước (Reserved)
-                    </span>
-                    <strong className="text-slate-900 font-mono text-sm">
-                      {stats.lockerStats.reservedCompartments}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5">
-                    <span className="text-slate-600 flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                      Đang chứa hàng (Occupied)
-                    </span>
-                    <strong className="text-slate-900 font-mono text-sm">
-                      {stats.lockerStats.occupiedCompartments}
-                    </strong>
+                  <div className="grid grid-cols-3 gap-2 mt-3 text-center text-xs">
+                    <div className="p-2 rounded-lg bg-emerald-50/60 border border-emerald-100">
+                      <span className="text-slate-500 text-[11px] block">Trống</span>
+                      <strong className="text-emerald-700 font-mono font-bold text-sm">
+                        {stats.lockerStats.availableCompartments}
+                      </strong>
+                    </div>
+                    <div className="p-2 rounded-lg bg-amber-50/60 border border-amber-100">
+                      <span className="text-slate-500 text-[11px] block">Giữ chỗ</span>
+                      <strong className="text-amber-700 font-mono font-bold text-sm">
+                        {stats.lockerStats.reservedCompartments}
+                      </strong>
+                    </div>
+                    <div className="p-2 rounded-lg bg-blue-50/60 border border-blue-100">
+                      <span className="text-slate-500 text-[11px] block">Đang chứa</span>
+                      <strong className="text-blue-700 font-mono font-bold text-sm">
+                        {stats.lockerStats.occupiedCompartments}
+                      </strong>
+                    </div>
                   </div>
                 </div>
 
-                {/* Security Mini Alert Block */}
-                <div className="mt-5 p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-xs">
-                  <div className="flex items-center gap-1.5 font-bold text-amber-900 mb-1">
-                    <ShieldAlert size={15} className="text-amber-600" />
-                    Cảnh báo bảo mật hôm nay:
+                {/* Security Telemetry Strip */}
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/80 text-xs space-y-2">
+                  <div className="flex items-center gap-1.5 font-semibold text-slate-800 text-[11px] uppercase tracking-wider">
+                    <ShieldAlert size={14} className="text-amber-600" />
+                    Chỉ số an ninh trong ngày
                   </div>
-                  <div className="flex justify-between text-slate-600 mt-1">
+                  <div className="flex justify-between items-center text-slate-600">
                     <span>Đăng nhập thất bại:</span>
-                    <strong className="text-amber-800">{stats.securityStats.failedLoginsToday} lượt</strong>
+                    <span className="font-mono font-semibold text-slate-900">
+                      {stats.securityStats.failedLoginsToday} lượt
+                    </span>
                   </div>
-                  <div className="flex justify-between text-slate-600 mt-1">
-                    <span>Nhập sai OTP tủ:</span>
-                    <strong className="text-rose-700">{stats.securityStats.failedPickupAttemptsToday} lần</strong>
+                  <div className="flex justify-between items-center text-slate-600">
+                    <span>Nhập sai OTP tại cửa tủ:</span>
+                    <span className="font-mono font-semibold text-rose-600">
+                      {stats.securityStats.failedPickupAttemptsToday} lần
+                    </span>
                   </div>
                 </div>
               </div>
 
               <Link
                 to="/admin/lockers"
-                className="mt-6 w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition text-center flex items-center justify-center gap-2 border border-slate-200 print:hidden"
+                className="w-full py-2 px-3 text-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition flex items-center justify-center gap-1.5"
               >
-                Quản lý chi tiết mạng lưới tủ Locker
-                <ArrowRight size={14} />
+                Vào bảng điều khiển quản lý trạm tủ <ArrowRight size={13} />
               </Link>
             </div>
           </div>
 
-          {/* PLATFORM FEE CONFIGURATION CARD */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-amber-100 text-amber-700 rounded-xl">
-                  <Coins size={22} />
+          {/* 4. PLATFORM CONTROLS & SYSTEM SETTINGS (Balanced 2-Column Split) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left: Platform Fees */}
+            <div className="bg-white p-6 rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
+                    <Coins size={18} />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-slate-900 text-base">Biểu phí Nền tảng</h2>
+                    <p className="text-xs text-slate-500">Hoa hồng đơn bán & phí dịch vụ cho thuê đồ</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-extrabold text-slate-900 text-base">
-                    Cấu hình Biểu phí Dịch vụ Nền tảng (Platform Fees)
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Quản lý tỷ lệ hoa hồng trích từ đơn bán và phí dịch vụ đối với lượt cho thuê đồ qua Smart Locker
-                  </p>
-                </div>
+
+                <button
+                  onClick={handleOpenFeeModal}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition"
+                >
+                  <SlidersHorizontal size={13} /> Chỉnh sửa
+                </button>
               </div>
 
-              <button
-                onClick={handleOpenFeeModal}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#eb6e34] hover:bg-[#d85d26] text-white rounded-xl text-xs font-bold transition shadow-xs"
-              >
-                <Sliders size={14} /> Điều chỉnh biểu phí
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-              {/* Sale Commission */}
-              <div className="p-4 rounded-xl bg-[#eb6e34]/5 border border-[#eb6e34]/20 flex items-center justify-between">
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-[#eb6e34] uppercase tracking-wider block">
-                    Hoa hồng Đơn Bán Đứt
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-1">
+                  <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
+                    Bán đứt
                   </span>
-                  <div className="text-2xl font-black text-slate-900">
+                  <div className="text-2xl font-bold text-slate-900 font-mono">
                     {feeConfig ? `${feeConfig.saleCommissionPercent}%` : '5%'}
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    Khấu trừ tự động từ doanh thu người bán khi người mua hoàn tất nhận hàng tại Locker
-                  </p>
+                  <p className="text-[11px] text-slate-400">Trích trên đơn hàng</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-[#eb6e34]/10 text-[#eb6e34] flex items-center justify-center shrink-0 font-bold text-lg">
-                  %
-                </div>
-              </div>
 
-              {/* Rental Commission */}
-              <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100 flex items-center justify-between">
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block">
-                    Phí Dịch vụ Đơn Cho Thuê
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-1">
+                  <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
+                    Cho thuê
                   </span>
-                  <div className="text-2xl font-black text-blue-950">
+                  <div className="text-2xl font-bold text-slate-900 font-mono">
                     {feeConfig?.rentalFeeMode === 'PER_DAY'
-                      ? `${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(feeConfig.rentalFeeValue)}/ngày`
+                      ? `${new Intl.NumberFormat('vi-VN').format(feeConfig.rentalFeeValue)}đ/d`
                       : `${feeConfig?.rentalFeeValue ?? 10}%`}
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    Cách tính:{' '}
-                    <strong className="text-blue-900 font-semibold">
-                      {feeConfig?.rentalFeeMode === 'PER_DAY'
-                        ? 'Cố định theo số ngày thuê thực tế'
-                        : 'Phần trăm (%) tổng doanh thu thuê'}
-                    </strong>
+                  <p className="text-[11px] text-slate-400">
+                    {feeConfig?.rentalFeeMode === 'PER_DAY' ? 'Thu theo ngày thuê' : 'Theo doanh thu thuê'}
                   </p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-blue-200/60 text-blue-800 flex items-center justify-center shrink-0">
-                  <Clock size={22} />
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* PRODUCT MEDIA LIMITS CONFIGURATION CARD */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-blue-100 text-blue-700 rounded-xl">
-                  <ImageIcon size={22} />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-slate-900 text-base">
-                    Cấu hình Giới hạn Đăng Ảnh & Video Sản phẩm (Media Limits)
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Quản lý số lượng ảnh mô tả tối đa, quyền đăng tải video và dung lượng video tải lên hệ thống
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={handleOpenMediaModal}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
-              >
-                <Sliders size={14} /> Điều chỉnh giới hạn Media
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
-              {/* Max Images */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
-                    Ảnh mô tả tối đa
-                  </span>
-                  <div className="text-2xl font-black text-slate-900">
-                    {mediaConfig?.maxProductImages ?? 6} ảnh
+            {/* Right: Media Policy */}
+            <div className="bg-white p-6 rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
+                    <ImageIcon size={18} />
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    Kèm 1 ảnh biểu trưng
-                  </p>
-                </div>
-                <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                  <ImageIcon size={20} />
-                </div>
-              </div>
-
-              {/* Allow Video */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
-                    Tính năng Video
-                  </span>
-                  <div className="text-2xl font-black text-slate-900 flex items-center gap-2">
-                    {mediaConfig?.allowProductVideo ? (
-                      <span className="text-emerald-600 flex items-center gap-1 text-lg">
-                        <CheckCircle2 size={20} /> Cho phép
-                      </span>
-                    ) : (
-                      <span className="text-rose-600 flex items-center gap-1 text-lg">
-                        <XCircle size={20} /> Tạm tắt
-                      </span>
-                    )}
+                  <div>
+                    <h2 className="font-bold text-slate-900 text-base">Chính sách Phương tiện (Media)</h2>
+                    <p className="text-xs text-slate-500">Giới hạn số lượng ảnh mô tả và video sản phẩm</p>
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    {mediaConfig?.allowProductVideo ? 'Người bán được đăng video' : 'Chặn tải video'}
-                  </p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#eb6e34] flex items-center justify-center shrink-0">
-                  <Video size={20} />
-                </div>
+
+                <button
+                  onClick={handleOpenMediaModal}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition"
+                >
+                  <SlidersHorizontal size={13} /> Chỉnh sửa
+                </button>
               </div>
 
-              {/* Max Videos */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
-                    Số video tối đa
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-0.5">
+                  <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
+                    Ảnh tối đa
                   </span>
-                  <div className="text-2xl font-black text-slate-900">
-                    {mediaConfig?.maxProductVideos ?? 1} video
+                  <div className="text-xl font-bold text-slate-900 font-mono">
+                    {mediaConfig?.maxProductImages ?? 6}
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    Cho mỗi tin đăng
-                  </p>
+                  <p className="text-[11px] text-slate-400">ảnh / tin đăng</p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
-                  <Video size={20} />
-                </div>
-              </div>
 
-              {/* Max Video Size */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">
-                    Dung lượng video
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-0.5">
+                  <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
+                    Video tải lên
                   </span>
-                  <div className="text-2xl font-black text-slate-900">
+                  <div className="text-xl font-bold text-slate-900 font-mono">
+                    {mediaConfig?.allowProductVideo ? 'Bật' : 'Tắt'}
+                  </div>
+                  <p className="text-[11px] text-slate-400">tối đa {mediaConfig?.maxProductVideos ?? 1} video</p>
+                </div>
+
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-0.5">
+                  <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
+                    Dung lượng
+                  </span>
+                  <div className="text-xl font-bold text-slate-900 font-mono">
                     {mediaConfig?.maxVideoSizeMb ?? 50} MB
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    Tối đa cho 1 file tải lên
-                  </p>
-                </div>
-                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                  <Sliders size={20} />
+                  <p className="text-[11px] text-slate-400">giới hạn file</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 4. LIVE AUDIT LOGS REPORT (Nhật ký Hệ thống thời gian thực) */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
-                  <FileText size={22} />
+          {/* 5. LIVE AUDIT STREAM (High-Density Event Terminal) */}
+          <div className="bg-white rounded-xl border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
+                  <FileText size={18} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-extrabold text-slate-900 text-lg">
-                      Nhật ký Sự kiện Hệ thống Trực tiếp (Live Audit Stream)
-                    </h3>
-                    <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      Thời gian thực
+                    <h2 className="font-bold text-slate-900 text-base">Nhật ký Hệ thống Trực tiếp</h2>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Live Feed
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Ghi nhận 10 sự kiện gần nhất về bảo mật, đơn hàng, người dùng và truy cập hệ thống.
-                  </p>
+                  <p className="text-xs text-slate-500">Theo dõi 12 sự kiện giao dịch, định danh và bảo mật gần nhất</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 print:hidden">
+              {/* Category Filter Chips */}
+              <div className="flex flex-wrap items-center gap-1.5 print:hidden">
+                {[
+                  { key: 'ALL', label: 'Tất cả' },
+                  { key: 'IDENTITY', label: 'eKYC' },
+                  { key: 'ORDER', label: 'Đơn hàng' },
+                  { key: 'SECURITY', label: 'Bảo mật' },
+                  { key: 'PRODUCT', label: 'Sản phẩm' },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setAuditCategory(tab.key as AuditFilterCategory)}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-lg transition ${
+                      auditCategory === tab.key
+                        ? 'bg-slate-900 text-white font-semibold'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+
                 <Link
                   to="/admin/audit"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-[#eb6e34] bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl transition"
+                  className="ml-2 text-xs font-semibold text-[#eb6e34] hover:text-[#d85e25] inline-flex items-center gap-1"
                 >
-                  Xem toàn bộ lịch sử Audit
-                  <ExternalLink size={13} />
+                  Toàn bộ <ExternalLink size={12} />
                 </Link>
               </div>
             </div>
 
-            {/* Audit Log Table */}
+            {/* Event Table */}
             {isLoadingLogs ? (
-              <div className="py-12 text-center text-slate-400 text-sm animate-pulse">
-                Đang tải dữ liệu nhật ký sự kiện thời gian thực...
+              <div className="py-12 text-center text-slate-400 text-xs animate-pulse">
+                Đang nạp luồng sự kiện...
               </div>
-            ) : isErrorLogs || !logsData || logsData.content.length === 0 ? (
-              <div className="py-8 text-center text-slate-500 text-sm bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                Chưa có sự kiện nào được ghi nhận gần đây.
+            ) : isErrorLogs || !logsData || filteredLogs.length === 0 ? (
+              <div className="py-10 text-center text-slate-400 text-xs bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                Chưa có bản ghi sự kiện nào thuộc bộ lọc này.
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-slate-200">
-                <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-                  <thead className="bg-slate-50 text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <div className="overflow-x-auto rounded-lg border border-slate-200/80">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                     <tr>
-                      <th scope="col" className="px-4 py-3">Thời gian</th>
-                      <th scope="col" className="px-4 py-3">Tác nhân</th>
-                      <th scope="col" className="px-4 py-3">Hành động</th>
-                      <th scope="col" className="px-4 py-3">Đối tượng</th>
-                      <th scope="col" className="px-4 py-3">Địa chỉ IP</th>
-                      <th scope="col" className="px-4 py-3 text-center">Trạng thái</th>
-                      <th scope="col" className="px-4 py-3 text-right print:hidden">Chi tiết</th>
+                      <th className="px-4 py-2.5">Thời gian</th>
+                      <th className="px-4 py-2.5">Tác nhân</th>
+                      <th className="px-4 py-2.5">Hành động</th>
+                      <th className="px-4 py-2.5">Đối tượng</th>
+                      <th className="px-4 py-2.5">IP</th>
+                      <th className="px-4 py-2.5 text-center">Trạng thái</th>
+                      <th className="px-4 py-2.5 text-right print:hidden">Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 bg-white">
-                    {logsData.content.map((log) => (
-                      <tr
-                        key={log.id}
-                        onClick={() => setSelectedLog(log)}
-                        className="hover:bg-slate-50/80 transition cursor-pointer"
-                      >
-                        {/* Time */}
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-500 font-mono">
-                          {new Date(log.createdAt).toLocaleString('vi-VN')}
-                        </td>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {filteredLogs.map((log) => {
+                      const badge = getActionBadge(log.action);
+                      return (
+                        <tr
+                          key={log.id}
+                          onClick={() => setSelectedLog(log)}
+                          className="hover:bg-slate-50/80 transition cursor-pointer"
+                        >
+                          <td className="px-4 py-2.5 whitespace-nowrap text-slate-500 font-mono text-[11px]">
+                            {new Date(log.createdAt).toLocaleTimeString('vi-VN', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                            })}
+                          </td>
 
-                        {/* Actor */}
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="font-semibold text-xs text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">
-                            {log.username || 'Hệ thống'}
-                          </span>
-                        </td>
+                          <td className="px-4 py-2.5 whitespace-nowrap font-medium text-slate-900">
+                            {log.username || <span className="text-slate-400 italic">Hệ thống</span>}
+                          </td>
 
-                        {/* Action Badge */}
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-md border ${getActionBadgeClass(
-                              log.action
-                            )}`}
-                          >
-                            {getActionLabel(log.action)}
-                          </span>
-                        </td>
+                          <td className="px-4 py-2.5 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border ${badge.className}`}
+                              title={getActionHumanLabel(log.action)}
+                            >
+                              {badge.label}
+                            </span>
+                          </td>
 
-                        {/* Entity */}
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-600">
-                          <span className="font-mono bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200 text-[11px]">
+                          <td className="px-4 py-2.5 whitespace-nowrap text-slate-600 font-mono text-[11px]">
                             {log.entityType} {log.entityId ? `#${log.entityId}` : ''}
-                          </span>
-                        </td>
+                          </td>
 
-                        {/* IP Address */}
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-500 font-mono">
-                          {log.ipAddress || '—'}
-                        </td>
+                          <td className="px-4 py-2.5 whitespace-nowrap text-slate-400 font-mono text-[11px]">
+                            {log.ipAddress || '—'}
+                          </td>
 
-                        {/* Status */}
-                        <td className="px-4 py-3 whitespace-nowrap text-center">
-                          {log.success ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                              <CheckCircle size={12} /> Thành công
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
-                              <XCircle size={12} /> Thất bại
-                            </span>
-                          )}
-                        </td>
+                          <td className="px-4 py-2.5 whitespace-nowrap text-center">
+                            {log.success ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                <CheckCircle size={11} /> Thành công
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                                <XCircle size={11} /> Lỗi
+                              </span>
+                            )}
+                          </td>
 
-                        {/* Action Details Link */}
-                        <td className="px-4 py-3 whitespace-nowrap text-right print:hidden">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedLog(log);
-                            }}
-                            className="text-xs font-semibold text-[#eb6e34] hover:text-[#d35a22] hover:underline"
-                          >
-                            Xem log
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                          <td className="px-4 py-2.5 whitespace-nowrap text-right print:hidden">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedLog(log);
+                              }}
+                              className="text-[11px] font-semibold text-[#eb6e34] hover:text-[#d85e25] hover:underline"
+                            >
+                              Xem
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
-
-            {/* Bottom jump link */}
-            <div className="pt-2 flex justify-between items-center text-xs text-slate-500 print:hidden">
-              <span>Đang hiển thị 10 sự kiện mới nhất. Để tìm kiếm theo người dùng, khoảng ngày hoặc loại hành động:</span>
-              <Link
-                to="/admin/audit"
-                className="font-bold text-[#eb6e34] hover:text-[#d35a22] inline-flex items-center gap-1"
-              >
-                Mở trang Quản lý Audit Logs đầy đủ <ArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
-
-          {/* 5. PRINT REPORT FOOTER (Visible only during printing or bottom of report) */}
-          <div className="pt-6 border-t border-slate-200 text-center text-xs text-slate-400">
-            <p>Báo cáo vận hành tự động trích xuất từ Hệ thống Quản trị CampusHub.</p>
-            <p className="mt-1 font-mono text-[11px]">
-              Dữ liệu được bảo mật và lưu trữ theo tiêu chuẩn An toàn Thông tin ISO/IEC 27001.
-            </p>
           </div>
         </div>
       )}
 
-      {/* Audit Log Detail Modal */}
+      {/* Audit Log Detail Drawer / Modal */}
       {selectedLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 print:hidden">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 print:hidden animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 relative">
             <button
               onClick={() => setSelectedLog(null)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-md"
               aria-label="Đóng chi tiết nhật ký"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-orange-50 text-[#eb6e34] rounded-xl">
-                <FileText size={22} />
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+              <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
+                <FileText size={20} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">Chi tiết Sự kiện Audit</h3>
+                <h3 className="text-base font-bold text-slate-900">Chi tiết Sự kiện Nhật ký</h3>
                 <p className="text-xs text-slate-500 font-mono">Mã sự kiện: #{selectedLog.id}</p>
               </div>
             </div>
 
-            <div className="space-y-3.5 text-xs text-slate-700">
-              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-2.5 p-3 bg-slate-50 rounded-lg border border-slate-200/80">
                 <div>
-                  <span className="text-slate-400 block mb-0.5 font-medium">Thời gian tạo:</span>
-                  <strong className="text-slate-900 font-mono">
+                  <span className="text-slate-400 block mb-0.5">Thời gian:</span>
+                  <span className="font-mono text-slate-800 font-medium">
                     {new Date(selectedLog.createdAt).toLocaleString('vi-VN')}
-                  </strong>
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block mb-0.5 font-medium">Tác nhân (Actor):</span>
-                  <strong className="text-[#eb6e34] font-bold">
+                  <span className="text-slate-400 block mb-0.5">Tác nhân:</span>
+                  <span className="font-semibold text-slate-900">
                     {selectedLog.username || 'Hệ thống'}
-                  </strong>
+                  </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-2 gap-2.5 p-3 bg-slate-50 rounded-lg border border-slate-200/80">
                 <div>
-                  <span className="text-slate-400 block mb-0.5 font-medium">Hành động:</span>
-                  <span className="font-bold text-slate-900">{getActionLabel(selectedLog.action)}</span>
+                  <span className="text-slate-400 block mb-0.5">Hành động:</span>
+                  <span className="font-semibold text-slate-900">{getActionHumanLabel(selectedLog.action)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block mb-0.5 font-medium">Đối tượng tác động:</span>
-                  <span className="font-mono text-slate-800">
+                  <span className="text-slate-400 block mb-0.5">Đối tượng:</span>
+                  <span className="font-mono text-slate-700">
                     {selectedLog.entityType} {selectedLog.entityId ? `#${selectedLog.entityId}` : ''}
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-2 gap-2.5 p-3 bg-slate-50 rounded-lg border border-slate-200/80">
                 <div>
-                  <span className="text-slate-400 block mb-0.5 font-medium">Địa chỉ IP:</span>
-                  <span className="font-mono text-slate-900">{selectedLog.ipAddress || '—'}</span>
+                  <span className="text-slate-400 block mb-0.5">IP Address:</span>
+                  <span className="font-mono text-slate-700">{selectedLog.ipAddress || '—'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block mb-0.5 font-medium">Kết quả:</span>
+                  <span className="text-slate-400 block mb-0.5">Kết quả:</span>
                   <span
-                    className={`font-bold ${
+                    className={`font-semibold ${
                       selectedLog.success ? 'text-emerald-600' : 'text-rose-600'
                     }`}
                   >
@@ -1046,28 +1038,29 @@ export const AdminDashboard = () => {
               </div>
 
               {selectedLog.details && (
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                  <span className="text-slate-400 block mb-1 font-medium">Chi tiết nội dung:</span>
-                  <p className="font-mono text-slate-800 bg-white p-2.5 rounded-lg border border-slate-200 break-words text-[11px]">
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/80 space-y-1">
+                  <span className="text-slate-400 block">Nội dung chi tiết:</span>
+                  <p className="font-mono text-[11px] text-slate-800 bg-white p-2.5 rounded border border-slate-200 break-words">
                     {selectedLog.details}
                   </p>
                 </div>
               )}
 
               {selectedLog.errorMessage && (
-                <div className="p-3 bg-rose-50 text-rose-800 rounded-xl border border-rose-200">
-                  <span className="text-rose-600 font-bold block mb-1">Thông báo lỗi:</span>
+                <div className="p-3 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 space-y-1">
+                  <span className="text-rose-600 font-semibold block">Thông báo lỗi:</span>
                   <p className="font-mono text-[11px] break-words">{selectedLog.errorMessage}</p>
                 </div>
               )}
             </div>
 
-            <div className="mt-5 flex justify-end">
+            <div className="pt-2 flex justify-end">
               <button
+                type="button"
                 onClick={() => setSelectedLog(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition"
               >
-                Đóng chi tiết
+                Đóng
               </button>
             </div>
           </div>
@@ -1076,21 +1069,21 @@ export const AdminDashboard = () => {
 
       {/* Fee Settings Edit Modal */}
       {isFeeModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-amber-100 text-amber-700 rounded-xl">
-                  <Sliders size={18} />
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
+                  <Coins size={18} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base">Cấu hình Biểu phí Nền tảng</h3>
-                  <p className="text-xs text-slate-500">Thiết lập hoa hồng bán đứt và phí cho thuê đồ</p>
+                  <h3 className="font-bold text-slate-900 text-base">Điều chỉnh Biểu phí Nền tảng</h3>
+                  <p className="text-xs text-slate-500">Cấu hình hoa hồng cho giao dịch mua bán & cho thuê</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsFeeModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
               >
                 <X size={18} />
               </button>
@@ -1101,11 +1094,10 @@ export const AdminDashboard = () => {
                 e.preventDefault();
                 updateFeesMutation.mutate(feeFormData);
               }}
-              className="space-y-4"
+              className="space-y-4 text-xs"
             >
-              {/* Sale Commission Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 block">
                   Tỷ lệ hoa hồng đơn bán đứt (%):
                 </label>
                 <div className="relative">
@@ -1122,99 +1114,77 @@ export const AdminDashboard = () => {
                         saleCommissionPercent: Number(e.target.value),
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#eb6e34]/20 focus:border-[#eb6e34]"
-                    placeholder="5.0"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
                   />
-                  <span className="absolute right-3.5 top-2.5 text-sm text-slate-400 font-bold">%</span>
+                  <span className="absolute right-3 top-2 text-slate-400 font-bold">%</span>
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Ví dụ: 5% - Nếu sản phẩm 100.000đ, phí nền tảng là 5.000đ, người bán nhận 95.000đ.
-                </p>
+                <p className="text-[11px] text-slate-400">Khấu trừ tự động từ doanh thu người bán khi hoàn tất đơn.</p>
               </div>
 
-              {/* Rental Fee Mode Select */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                <label className="font-semibold text-slate-700 block">
                   Phương thức tính phí cho thuê:
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setFeeFormData((prev) => ({ ...prev, rentalFeeMode: 'PERCENT' }))}
-                    className={`p-3 rounded-xl border text-left text-xs font-bold transition ${
+                    className={`p-2.5 rounded-lg border text-left text-xs font-semibold transition ${
                       feeFormData.rentalFeeMode === 'PERCENT'
-                        ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34] shadow-xs'
+                        ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34]'
                         : 'border-slate-200 text-slate-600 hover:border-slate-300'
                     }`}
                   >
                     Theo phần trăm (%)
-                    <span className="block text-[11px] font-normal text-slate-500 mt-0.5">
-                      Trích % theo tổng tiền thuê
-                    </span>
+                    <span className="block text-[10px] font-normal text-slate-400 mt-0.5">Trích % tiền thuê</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFeeFormData((prev) => ({ ...prev, rentalFeeMode: 'PER_DAY' }))}
-                    className={`p-3 rounded-xl border text-left text-xs font-bold transition ${
+                    className={`p-2.5 rounded-lg border text-left text-xs font-semibold transition ${
                       feeFormData.rentalFeeMode === 'PER_DAY'
-                        ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34] shadow-xs'
+                        ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34]'
                         : 'border-slate-200 text-slate-600 hover:border-slate-300'
                     }`}
                   >
-                    Cố định theo ngày (VNĐ/ngày)
-                    <span className="block text-[11px] font-normal text-slate-500 mt-0.5">
-                      Thu phí cố định mỗi ngày thuê
-                    </span>
+                    Cố định ngày (VNĐ/ngày)
+                    <span className="block text-[10px] font-normal text-slate-400 mt-0.5">Phí theo số ngày</span>
                   </button>
                 </div>
               </div>
 
-              {/* Rental Fee Value Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  {feeFormData.rentalFeeMode === 'PERCENT'
-                    ? 'Tỷ lệ phí thuê (%):'
-                    : 'Mức phí thuê mỗi ngày (VNĐ/ngày):'}
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 block">
+                  {feeFormData.rentalFeeMode === 'PERCENT' ? 'Tỷ lệ phí thuê (%):' : 'Mức phí thuê (VNĐ/ngày):'}
                 </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step={feeFormData.rentalFeeMode === 'PERCENT' ? '0.1' : '1000'}
-                    min="0"
-                    required
-                    value={feeFormData.rentalFeeValue}
-                    onChange={(e) =>
-                      setFeeFormData((prev) => ({
-                        ...prev,
-                        rentalFeeValue: Number(e.target.value),
-                      }))
-                    }
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#eb6e34]/20 focus:border-[#eb6e34]"
-                    placeholder={feeFormData.rentalFeeMode === 'PERCENT' ? '10.0' : '5000'}
-                  />
-                  <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-bold">
-                    {feeFormData.rentalFeeMode === 'PERCENT' ? '%' : 'VNĐ/ngày'}
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  {feeFormData.rentalFeeMode === 'PERCENT'
-                    ? 'Ví dụ: 10% - Tổng tiền thuê 100.000đ thì phí là 10.000đ.'
-                    : 'Ví dụ: 5.000đ/ngày - Thuê 3 ngày thì phí là 15.000đ.'}
-                </p>
+                <input
+                  type="number"
+                  step={feeFormData.rentalFeeMode === 'PERCENT' ? '0.1' : '1000'}
+                  min="0"
+                  required
+                  value={feeFormData.rentalFeeValue}
+                  onChange={(e) =>
+                    setFeeFormData((prev) => ({
+                      ...prev,
+                      rentalFeeValue: Number(e.target.value),
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
+                />
               </div>
 
-              <div className="flex gap-3 pt-3">
+              <div className="pt-2 flex gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsFeeModalOpen(false)}
-                  className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
+                  className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold transition"
                 >
-                  Hủy bỏ
+                  Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={updateFeesMutation.isPending}
-                  className="flex-1 py-2.5 px-4 bg-[#eb6e34] hover:bg-[#d35a22] text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
+                  className="flex-1 py-2 px-3 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg font-semibold transition disabled:opacity-50"
                 >
                   {updateFeesMutation.isPending ? 'Đang lưu...' : 'Lưu biểu phí'}
                 </button>
@@ -1226,20 +1196,21 @@ export const AdminDashboard = () => {
 
       {/* Product Media Settings Modal */}
       {isMediaModalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-100 text-blue-700 rounded-xl">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-slate-100 text-slate-700 rounded-lg">
                   <ImageIcon size={18} />
                 </div>
-                <h3 className="font-extrabold text-slate-900 text-base">
-                  Cài đặt Giới hạn Media Sản phẩm
-                </h3>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Cài đặt Phương tiện (Media)</h3>
+                  <p className="text-xs text-slate-500">Giới hạn số ảnh, video và dung lượng tải lên</p>
+                </div>
               </div>
               <button
                 onClick={() => setIsMediaModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
               >
                 <X size={18} />
               </button>
@@ -1252,10 +1223,9 @@ export const AdminDashboard = () => {
               }}
               className="space-y-4 text-xs"
             >
-              {/* Max Images */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Số lượng ảnh mô tả tối đa (1 - 20):
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 block">
+                  Số lượng ảnh chi tiết tối đa (1 - 20):
                 </label>
                 <input
                   type="number"
@@ -1269,63 +1239,49 @@ export const AdminDashboard = () => {
                       maxProductImages: parseInt(e.target.value) || 1,
                     }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
                 />
-                <p className="text-[11px] text-slate-400">
-                  Người bán được upload tối đa bấy nhiêu ảnh chi tiết kèm 1 ảnh biểu trưng đại diện.
-                </p>
               </div>
 
-              {/* Allow Video Toggle */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-800 text-xs">
-                    Cho phép người bán đăng tải video:
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={mediaFormData.allowProductVideo}
-                    onChange={(e) =>
-                      setMediaFormData((prev) => ({
-                        ...prev,
-                        allowProductVideo: e.target.checked,
-                      }))
-                    }
-                    className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                  />
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/80 flex items-center justify-between">
+                <div>
+                  <span className="font-semibold text-slate-800 block">Cho phép tải video</span>
+                  <span className="text-[11px] text-slate-400">Hiển thị mục upload video ở form đăng bán</span>
                 </div>
-                <p className="text-[11px] text-slate-500">
-                  Nếu tắt, form đăng sản phẩm sẽ khóa mục upload video của thành viên.
-                </p>
-              </div>
-
-              {/* Max Videos */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Số video tối đa mỗi tin đăng (0 - 5):
-                </label>
                 <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  required
-                  value={mediaFormData.maxProductVideos}
+                  type="checkbox"
+                  checked={mediaFormData.allowProductVideo}
                   onChange={(e) =>
                     setMediaFormData((prev) => ({
                       ...prev,
-                      maxProductVideos: parseInt(e.target.value) || 0,
+                      allowProductVideo: e.target.checked,
                     }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="h-4 w-4 text-[#eb6e34] rounded border-slate-300 focus:ring-[#eb6e34]"
                 />
               </div>
 
-              {/* Max Video Size MB */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Dung lượng video tối đa (MB, 1 - 100):
-                </label>
-                <div className="relative">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 block">Số video tối đa:</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="5"
+                    required
+                    value={mediaFormData.maxProductVideos}
+                    onChange={(e) =>
+                      setMediaFormData((prev) => ({
+                        ...prev,
+                        maxProductVideos: parseInt(e.target.value) || 0,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 block">Dung lượng video (MB):</label>
                   <input
                     type="number"
                     min="1"
@@ -1338,29 +1294,23 @@ export const AdminDashboard = () => {
                         maxVideoSizeMb: parseInt(e.target.value) || 1,
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
                   />
-                  <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-bold">
-                    MB
-                  </span>
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Hệ thống từ chối các file video có dung lượng vượt quá giá trị này.
-                </p>
               </div>
 
-              <div className="flex gap-3 pt-3">
+              <div className="pt-2 flex gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsMediaModalOpen(false)}
-                  className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
+                  className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold transition"
                 >
-                  Hủy bỏ
+                  Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={updateMediaMutation.isPending}
-                  className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20"
+                  className="flex-1 py-2 px-3 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg font-semibold transition disabled:opacity-50"
                 >
                   {updateMediaMutation.isPending ? 'Đang lưu...' : 'Lưu cài đặt'}
                 </button>
