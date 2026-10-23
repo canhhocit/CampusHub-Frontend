@@ -56,6 +56,7 @@ export const VerifyIdentity = () => {
   // Liveness & Webcam state
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const cameraSessionIdRef = useRef(0);
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCapturingFrames, setIsCapturingFrames] = useState(false);
@@ -92,13 +93,6 @@ export const VerifyIdentity = () => {
     loadLatestAttempt();
   }, [loadLatestAttempt]);
 
-  // Clean up media stream when component unmounts
-  useEffect(() => {
-    return () => {
-      stopCamera();
-    };
-  }, []);
-
   // Clean up object URLs on change
   useEffect(() => {
     return () => {
@@ -107,8 +101,9 @@ export const VerifyIdentity = () => {
     };
   }, [cardPreviewUrl, selfiePreviewUrl]);
 
-  // Stop camera tracks
-  const stopCamera = () => {
+  // Stop camera tracks and release device
+  const stopCamera = useCallback(() => {
+    cameraSessionIdRef.current += 1;
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
       mediaStreamRef.current = null;
@@ -117,16 +112,19 @@ export const VerifyIdentity = () => {
       videoRef.current.srcObject = null;
     }
     setCameraActive(false);
-  };
+  }, []);
 
-  // Start webcam
-  const startCamera = async () => {
+  // Start webcam with session token guard to prevent racing or orphaned streams
+  const startCamera = useCallback(async () => {
     stopCamera();
+    const currentSessionId = ++cameraSessionIdRef.current;
     setCameraError(null);
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setCameraError('Trình duyệt của bạn không hỗ trợ truy cập thiết bị ghi hình (Webcam).');
+        if (currentSessionId === cameraSessionIdRef.current) {
+          setCameraError('Trình duyệt của bạn không hỗ trợ truy cập thiết bị ghi hình (Webcam).');
+        }
         return;
       }
 
@@ -139,6 +137,12 @@ export const VerifyIdentity = () => {
         audio: false,
       });
 
+      // If stopCamera was called while getUserMedia was resolving, discard immediately
+      if (currentSessionId !== cameraSessionIdRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+
       mediaStreamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -146,6 +150,7 @@ export const VerifyIdentity = () => {
       }
       setCameraActive(true);
     } catch (err: any) {
+      if (currentSessionId !== cameraSessionIdRef.current) return;
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         setCameraError('Bạn đã từ chối quyền truy cập camera. Vui lòng cấp quyền trong cài đặt trình duyệt để tiếp tục.');
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
@@ -155,16 +160,19 @@ export const VerifyIdentity = () => {
       }
       setCameraActive(false);
     }
-  };
+  }, [stopCamera]);
 
-  // Switch camera automatically when entering step 2 or 3
+  // Switch camera automatically when entering step 2 or 3, and ensure full teardown
   useEffect(() => {
     if ((currentStep === 2 || currentStep === 3) && !selfieBlob) {
       startCamera();
     } else {
       stopCamera();
     }
-  }, [currentStep, selfieBlob]);
+    return () => {
+      stopCamera();
+    };
+  }, [currentStep, selfieBlob, startCamera, stopCamera]);
 
   // Attach video stream to element if ref mounts after startCamera
   useEffect(() => {
@@ -327,6 +335,12 @@ export const VerifyIdentity = () => {
       }
 
       setIsCapturingFrames(false);
+
+      if (frames.length < 3) {
+        setErrorMessage('Không thu thập đủ khung hình hợp lệ từ camera (yêu cầu tối thiểu 3 khung hình). Vui lòng kiểm tra lại thiết bị camera và thử lại.');
+        return;
+      }
+
       setLoading(true);
 
       const result = await identityApi.submitLivenessStep(attemptId, frames);
@@ -334,6 +348,7 @@ export const VerifyIdentity = () => {
       if (result.actionCompleted) {
         if (result.livenessPassed || !result.nextChallenge) {
           // Liveness fully passed -> move to step 3
+          stopCamera();
           setSuccessNotice('Xác thực cử động sống thành công! Vui lòng chụp ảnh chân dung selfie để đối chiếu.');
           setCurrentStep(3);
         } else {
@@ -368,11 +383,11 @@ export const VerifyIdentity = () => {
       setErrorMessage('Không thể chụp ảnh từ webcam. Vui lòng thử lại.');
       return;
     }
+    stopCamera();
     setSelfieBlob(blob);
     if (selfiePreviewUrl) URL.revokeObjectURL(selfiePreviewUrl);
     setSelfiePreviewUrl(URL.createObjectURL(blob));
     setErrorMessage('');
-    stopCamera();
   };
 
   const handleRetakeSelfie = () => {
@@ -381,7 +396,6 @@ export const VerifyIdentity = () => {
       URL.revokeObjectURL(selfiePreviewUrl);
       setSelfiePreviewUrl(null);
     }
-    startCamera();
   };
 
   // STEP 3: Complete verification by matching face
