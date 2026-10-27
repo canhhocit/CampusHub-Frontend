@@ -378,7 +378,7 @@ export const MarketplaceList = () => {
 
             {/* Filter 2: Địa điểm tủ Smart Locker */}
             <div className="pt-3 border-t border-slate-100 space-y-2.5">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wide block flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                 <MapPin size={13} className="text-emerald-600" />
                 Địa điểm tủ Locker
               </span>
@@ -420,7 +420,7 @@ export const MarketplaceList = () => {
 
             {/* Filter 3: Hình thức Thuê / Bán */}
             <div className="pt-3 border-t border-slate-100 space-y-2.5">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wide block flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                 <Tag size={13} className="text-emerald-600" />
                 Hình thức giao dịch
               </span>
@@ -460,7 +460,7 @@ export const MarketplaceList = () => {
 
             {/* Filter 4: Khoảng giá */}
             <div className="pt-3 border-t border-slate-100 space-y-2.5">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wide block flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                 <DollarSign size={13} className="text-emerald-600" />
                 Khoảng giá (VND)
               </span>
@@ -783,7 +783,7 @@ export const MarketplaceList = () => {
                             return prev;
                           })
                         }
-                        className={`min-w-[32px] h-8 rounded-md text-xs font-bold transition ${
+                        className={`min-w-8 h-8 rounded-md text-xs font-bold transition ${
                           page === idx
                             ? 'bg-emerald-600 text-white shadow-2xs'
                             : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'

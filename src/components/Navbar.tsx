@@ -110,7 +110,7 @@ export const Navbar = () => {
           {/* Center Global Search (Oreka Pattern - Clean Input Group) */}
           <form
             onSubmit={handleGlobalSearch}
-            className="hidden md:flex flex-1 min-w-[160px] max-w-md items-center"
+            className="hidden md:flex flex-1 min-w-40 max-w-md items-center"
           >
             <div className="flex w-full items-center bg-slate-50 hover:bg-white focus-within:bg-white border border-slate-300 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 rounded-lg overflow-hidden transition shadow-2xs">
               <div className="pl-3 text-slate-400 shrink-0">
@@ -184,7 +184,7 @@ export const Navbar = () => {
                   <div className="w-7 h-7 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shrink-0">
                     {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'U'}
                   </div>
-                  <span className="text-xs font-semibold text-slate-700 max-w-[70px] xl:max-w-[110px] truncate">
+                  <span className="text-xs font-semibold text-slate-700 max-w-17.5 xl:max-w-27.5 truncate">
                     {user?.fullName || user?.username}
                   </span>
                 </Link>

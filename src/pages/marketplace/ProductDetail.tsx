@@ -194,7 +194,7 @@ export const ProductDetail = () => {
             {product.category?.name || 'Khác'}
           </Link>
           <span>/</span>
-          <span className="text-slate-900 font-medium truncate max-w-[200px] sm:max-w-md">
+          <span className="text-slate-900 font-medium truncate max-w-50 sm:max-w-md">
             {product.title}
           </span>
         </nav>
@@ -458,7 +458,7 @@ export const ProductDetail = () => {
                   <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                     Mô tả chi tiết từ người bán
                   </h3>
-                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap bg-slate-50/50 p-4 rounded-2xl border border-slate-200/80 min-h-[100px]">
+                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap bg-slate-50/50 p-4 rounded-2xl border border-slate-200/80 min-h-25">
                     {product.description || 'Người bán chưa cung cấp thêm mô tả chi tiết cho sản phẩm này.'}
                   </div>
                 </div>
