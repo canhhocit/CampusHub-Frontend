@@ -1,24 +1,29 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Package, Inbox, Send, Plus } from 'lucide-react';
+import { Package, Inbox, Send, Plus, Wallet } from 'lucide-react';
 
 export const UserNavTabs = () => {
   const location = useLocation();
 
   const tabs = [
     {
-      to: '/marketplace/my-listings',
-      label: 'Tin đăng của tôi',
-      icon: Package,
+      to: '/wallet',
+      label: 'Ví của tôi',
+      icon: Wallet,
     },
     {
       to: '/orders/buying',
-      label: 'Đơn mua của tôi',
+      label: 'Đơn mua',
       icon: Inbox,
     },
     {
       to: '/orders/selling',
-      label: 'Đơn bán của tôi',
+      label: 'Đơn bán',
       icon: Send,
+    },
+    {
+      to: '/marketplace/my-listings',
+      label: 'Tin đăng bán',
+      icon: Package,
     },
   ];
 
@@ -32,13 +37,13 @@ export const UserNavTabs = () => {
             <Link
               key={tab.to}
               to={tab.to}
-              className={`shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              className={`shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                 isActive
-                  ? 'bg-[#eb6e34] text-white shadow-xs'
+                  ? 'bg-emerald-600 text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              <Icon size={16} />
+              <Icon size={15} />
               {tab.label}
             </Link>
           );
@@ -47,9 +52,9 @@ export const UserNavTabs = () => {
 
       <Link
         to="/marketplace/new"
-        className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 transition shadow-xs"
+        className="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/80 transition shadow-2xs"
       >
-        <Plus size={16} />
+        <Plus size={15} />
         Đăng tin bán mới
       </Link>
     </div>

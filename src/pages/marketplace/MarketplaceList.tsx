@@ -239,7 +239,7 @@ export const MarketplaceList = () => {
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder="Tìm kiếm sản phẩm, giáo trình, máy tính Casio, bàn phím, đồ KTX..."
-                  className="w-full pl-10 pr-24 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 focus:border-[#eb6e34] rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-[#eb6e34] transition"
+                  className="w-full pl-10 pr-24 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 focus:border-emerald-500 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-500 transition"
                 />
                 <Search className="absolute left-3.5 text-slate-400" size={17} />
                 {searchInput && (
@@ -253,7 +253,7 @@ export const MarketplaceList = () => {
                 )}
                 <button
                   type="submit"
-                  className="absolute right-1 px-4 py-1.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-md text-xs font-semibold transition flex items-center gap-1 shadow-2xs"
+                  className="absolute right-1 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold transition flex items-center gap-1 shadow-2xs"
                 >
                   <Search size={13} />
                   <span>Tìm kiếm</span>
@@ -268,13 +268,13 @@ export const MarketplaceList = () => {
                 onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
                 className="md:hidden flex items-center gap-1.5 px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 bg-white"
               >
-                <Filter size={14} className="text-[#eb6e34]" />
+                <Filter size={14} className="text-emerald-600" />
                 <span>Bộ lọc {hasActiveFilters && '•'}</span>
               </button>
 
               <Link
                 to="/marketplace/new"
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg text-xs font-bold transition shadow-xs shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-2xs shrink-0"
               >
                 <Plus size={16} />
                 <span>Đăng bán đồ cũ</span>
@@ -298,7 +298,7 @@ export const MarketplaceList = () => {
                 }}
                 className={`px-2.5 py-1 rounded-md text-xs transition shrink-0 ${
                   search === kw
-                    ? 'bg-orange-100 text-[#eb6e34] font-semibold'
+                    ? 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200/80'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                 }`}
               >
@@ -319,13 +319,13 @@ export const MarketplaceList = () => {
             {/* Sidebar Title */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <Filter size={15} className="text-[#eb6e34]" />
+                <Filter size={15} className="text-emerald-600" />
                 Bộ lọc tìm kiếm
               </h2>
               {hasActiveFilters && (
                 <button
                   onClick={handleResetFilters}
-                  className="text-[11px] text-[#eb6e34] hover:underline font-semibold flex items-center gap-1"
+                  className="text-[11px] text-emerald-700 hover:underline font-semibold flex items-center gap-1"
                 >
                   <RotateCcw size={11} /> Xóa tất cả
                 </button>
@@ -342,14 +342,14 @@ export const MarketplaceList = () => {
                   onClick={() => handleCategorySelect('')}
                   className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition ${
                     !categoryId
-                      ? 'bg-orange-50 text-[#eb6e34] font-bold'
+                      ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   <span className="flex items-center gap-2">
                     <Layers size={14} /> Tất cả danh mục
                   </span>
-                  {!categoryId && <span className="w-1.5 h-1.5 rounded-full bg-[#eb6e34]"></span>}
+                  {!categoryId && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
                 </button>
 
                 {categories?.map((cat) => {
@@ -361,15 +361,15 @@ export const MarketplaceList = () => {
                       onClick={() => handleCategorySelect(cat.id.toString())}
                       className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition ${
                         isSelected
-                          ? 'bg-orange-50 text-[#eb6e34] font-bold'
+                          ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
                           : 'text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       <span className="flex items-center gap-2 truncate">
-                        <Icon size={14} className={isSelected ? 'text-[#eb6e34]' : 'text-slate-400'} />
+                        <Icon size={14} className={isSelected ? 'text-emerald-700' : 'text-slate-400'} />
                         <span className="truncate">{cat.name}</span>
                       </span>
-                      {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#eb6e34]"></span>}
+                      {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
                     </button>
                   );
                 })}
@@ -379,7 +379,7 @@ export const MarketplaceList = () => {
             {/* Filter 2: Địa điểm tủ Smart Locker */}
             <div className="pt-3 border-t border-slate-100 space-y-2.5">
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wide block flex items-center gap-1.5">
-                <MapPin size={13} className="text-[#eb6e34]" />
+                <MapPin size={13} className="text-emerald-600" />
                 Địa điểm tủ Locker
               </span>
               <div className="space-y-1.5 text-xs">
@@ -387,12 +387,12 @@ export const MarketplaceList = () => {
                   onClick={() => handleLockerSelect('')}
                   className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition ${
                     !lockerId
-                      ? 'bg-orange-50 text-[#eb6e34] font-bold'
+                      ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   <span>Tất cả các tủ</span>
-                  {!lockerId && <span className="w-1.5 h-1.5 rounded-full bg-[#eb6e34]"></span>}
+                  {!lockerId && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
                 </button>
 
                 {lockers.map((lk) => {
@@ -403,13 +403,13 @@ export const MarketplaceList = () => {
                       onClick={() => handleLockerSelect(lk.id.toString())}
                       className={`w-full text-left px-2.5 py-1.5 rounded-lg transition ${
                         isSelected
-                          ? 'bg-orange-50 text-[#eb6e34] font-bold'
+                          ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
                           : 'text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="truncate">{lk.name}</span>
-                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#eb6e34]"></span>}
+                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
                       </div>
                       <p className="text-[10px] text-slate-400 truncate mt-0.5">{lk.location}</p>
                     </button>
@@ -421,7 +421,7 @@ export const MarketplaceList = () => {
             {/* Filter 3: Hình thức Thuê / Bán */}
             <div className="pt-3 border-t border-slate-100 space-y-2.5">
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wide block flex items-center gap-1.5">
-                <Tag size={13} className="text-[#eb6e34]" />
+                <Tag size={13} className="text-emerald-600" />
                 Hình thức giao dịch
               </span>
               <div className="grid grid-cols-1 gap-1.5 text-xs">
@@ -429,7 +429,7 @@ export const MarketplaceList = () => {
                   onClick={() => handleListingTypeSelect('')}
                   className={`px-3 py-1.5 rounded-lg text-left transition border ${
                     !listingType
-                      ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34] font-bold'
+                      ? 'border-emerald-500 bg-emerald-50/80 text-emerald-800 font-bold'
                       : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
@@ -439,7 +439,7 @@ export const MarketplaceList = () => {
                   onClick={() => handleListingTypeSelect('SALE')}
                   className={`px-3 py-1.5 rounded-lg text-left transition border ${
                     listingType === 'SALE'
-                      ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34] font-bold'
+                      ? 'border-emerald-500 bg-emerald-50/80 text-emerald-800 font-bold'
                       : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
@@ -449,7 +449,7 @@ export const MarketplaceList = () => {
                   onClick={() => handleListingTypeSelect('BOTH')}
                   className={`px-3 py-1.5 rounded-lg text-left transition border ${
                     listingType === 'BOTH'
-                      ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34] font-bold'
+                      ? 'border-emerald-500 bg-emerald-50/80 text-emerald-800 font-bold'
                       : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
@@ -458,10 +458,10 @@ export const MarketplaceList = () => {
               </div>
             </div>
 
-            {/* Filter 4: Khoảng giá (Shopee Price Range) */}
+            {/* Filter 4: Khoảng giá */}
             <div className="pt-3 border-t border-slate-100 space-y-2.5">
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wide block flex items-center gap-1.5">
-                <DollarSign size={13} className="text-[#eb6e34]" />
+                <DollarSign size={13} className="text-emerald-600" />
                 Khoảng giá (VND)
               </span>
 
@@ -474,7 +474,7 @@ export const MarketplaceList = () => {
                     placeholder="Từ đ"
                     value={priceMinInput}
                     onChange={(e) => setPriceMinInput(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs focus:outline-hidden focus:border-[#eb6e34]"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs focus:outline-hidden focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                   <span className="text-slate-400 text-xs">-</span>
                   <input
@@ -484,12 +484,12 @@ export const MarketplaceList = () => {
                     placeholder="Đến đ"
                     value={priceMaxInput}
                     onChange={(e) => setPriceMaxInput(e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs focus:outline-hidden focus:border-[#eb6e34]"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs focus:outline-hidden focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-1.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded text-xs font-bold uppercase tracking-wider transition"
+                  className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold uppercase tracking-wider transition shadow-2xs"
                 >
                   Áp dụng
                 </button>
@@ -501,7 +501,7 @@ export const MarketplaceList = () => {
                   onClick={() => handleQuickPrice(undefined, 100000)}
                   className={`w-full text-left px-2 py-1 rounded transition ${
                     minPrice === '' && maxPrice === '100000'
-                      ? 'bg-orange-50 text-[#eb6e34] font-bold'
+                      ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -511,7 +511,7 @@ export const MarketplaceList = () => {
                   onClick={() => handleQuickPrice(100000, 300000)}
                   className={`w-full text-left px-2 py-1 rounded transition ${
                     minPrice === '100000' && maxPrice === '300000'
-                      ? 'bg-orange-50 text-[#eb6e34] font-bold'
+                      ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -521,7 +521,7 @@ export const MarketplaceList = () => {
                   onClick={() => handleQuickPrice(300000, 500000)}
                   className={`w-full text-left px-2 py-1 rounded transition ${
                     minPrice === '300000' && maxPrice === '500000'
-                      ? 'bg-orange-50 text-[#eb6e34] font-bold'
+                      ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -531,7 +531,7 @@ export const MarketplaceList = () => {
                   onClick={() => handleQuickPrice(500000, undefined)}
                   className={`w-full text-left px-2 py-1 rounded transition ${
                     minPrice === '500000' && maxPrice === ''
-                      ? 'bg-orange-50 text-[#eb6e34] font-bold'
+                      ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -566,7 +566,7 @@ export const MarketplaceList = () => {
                   onClick={() => handleSortChange('createdAt', 'desc')}
                   className={`px-3 py-1.5 rounded-md font-semibold transition ${
                     sort === 'createdAt' && direction === 'desc'
-                      ? 'bg-[#eb6e34] text-white shadow-xs'
+                      ? 'bg-emerald-600 text-white shadow-2xs'
                       : 'bg-white hover:bg-slate-50 text-slate-800'
                   }`}
                 >
@@ -580,7 +580,7 @@ export const MarketplaceList = () => {
                   }}
                   className={`px-3 py-1.5 rounded-md font-semibold transition ${
                     listingType === 'BOTH'
-                      ? 'bg-[#eb6e34] text-white shadow-xs'
+                      ? 'bg-emerald-600 text-white shadow-2xs'
                       : 'bg-white hover:bg-slate-50 text-slate-800'
                   }`}
                 >
@@ -599,7 +599,7 @@ export const MarketplaceList = () => {
                     }}
                     className={`px-3 py-1.5 rounded-md font-semibold focus:outline-hidden transition cursor-pointer ${
                       sort === 'price'
-                        ? 'bg-[#eb6e34] text-white'
+                        ? 'bg-emerald-600 text-white'
                         : 'bg-white hover:bg-slate-50 text-slate-800'
                     }`}
                   >
@@ -679,7 +679,7 @@ export const MarketplaceList = () => {
 
                 <button
                   onClick={handleResetFilters}
-                  className="text-xs text-[#eb6e34] hover:underline font-semibold ml-1"
+                  className="text-xs text-emerald-700 hover:underline font-semibold ml-1"
                 >
                   Xóa tất cả
                 </button>
@@ -709,14 +709,14 @@ export const MarketplaceList = () => {
                   </p>
                   <button
                     onClick={() => refetch()}
-                    className="px-4 py-2 bg-[#eb6e34] text-white rounded-lg text-xs font-semibold hover:bg-[#d85e25] transition"
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition shadow-2xs"
                   >
                     Thử lại
                   </button>
                 </div>
               ) : productsPage?.content.length === 0 ? (
                 <div className="bg-white rounded-xl border border-slate-200 p-12 text-center space-y-3 shadow-2xs">
-                  <div className="w-14 h-14 rounded-2xl bg-orange-50 text-[#eb6e34] mx-auto flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
                     <Search size={26} />
                   </div>
                   <h3 className="text-base font-bold text-slate-900">
@@ -736,7 +736,7 @@ export const MarketplaceList = () => {
                     )}
                     <Link
                       to="/marketplace/new"
-                      className="px-4 py-2 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg text-xs font-semibold shadow-xs"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-2xs"
                     >
                       Đăng bán ngay
                     </Link>
@@ -785,7 +785,7 @@ export const MarketplaceList = () => {
                         }
                         className={`min-w-[32px] h-8 rounded-md text-xs font-bold transition ${
                           page === idx
-                            ? 'bg-[#eb6e34] text-white shadow-2xs'
+                            ? 'bg-emerald-600 text-white shadow-2xs'
                             : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'
                         }`}
                       >

@@ -134,7 +134,7 @@ export const ProductDetail = () => {
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-20 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#eb6e34] border-t-transparent" />
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-600 border-t-transparent" />
         <p className="mt-3 text-sm text-slate-500">Đang tải thông tin sản phẩm...</p>
       </div>
     );
@@ -153,7 +153,7 @@ export const ProductDetail = () => {
         <div className="flex gap-3 justify-center">
           <Link
             to="/marketplace"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#eb6e34] text-white rounded-xl text-xs font-bold hover:bg-[#d85e25] transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition"
           >
             <ArrowLeft size={14} /> Khám phá các món đồ khác
           </Link>
@@ -179,17 +179,17 @@ export const ProductDetail = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
-          <Link to="/" className="hover:text-[#eb6e34]">
+          <Link to="/" className="hover:text-emerald-700">
             Trang chủ
           </Link>
           <span>/</span>
-          <Link to="/marketplace" className="hover:text-[#eb6e34]">
+          <Link to="/marketplace" className="hover:text-emerald-700">
             Chợ 
           </Link>
           <span>/</span>
           <Link
             to={`/marketplace?categoryId=${product.category?.id}`}
-            className="hover:text-[#eb6e34]"
+            className="hover:text-emerald-700"
           >
             {product.category?.name || 'Khác'}
           </Link>
@@ -368,7 +368,7 @@ export const ProductDetail = () => {
                     </span>
                     <span>•</span>
                     {product.locker ? (
-                      <span className="inline-flex items-center gap-1 text-[#eb6e34] font-semibold bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
+                      <span className="inline-flex items-center gap-1 text-emerald-800 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80">
                         <MapPin size={12} /> {product.locker.name} ({product.locker.location})
                       </span>
                     ) : (
@@ -380,7 +380,7 @@ export const ProductDetail = () => {
                 </div>
 
                 {/* Price Display */}
-                <div className="p-4 rounded-xl bg-orange-50/50 border border-orange-100 space-y-3">
+                <div className="p-4 rounded-xl bg-emerald-50/40 border border-emerald-100/70 space-y-3">
                   {/* Purchase Price if applicable */}
                   {isForSale && (
                     <div className="flex items-baseline justify-between">
@@ -388,11 +388,11 @@ export const ProductDetail = () => {
                         <span className="text-xs text-slate-500 block">
                           {product.listingType === 'BOTH' ? 'Giá mua đứt:' : 'Giá chuyển nhượng:'}
                         </span>
-                        <span className="text-3xl font-extrabold text-[#eb6e34] tracking-tight">
+                        <span className="text-3xl font-extrabold text-emerald-700 tracking-tight">
                           {formatPrice(product.price)}
                         </span>
                       </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 bg-white text-orange-700 rounded-md border border-orange-200">
+                      <span className="text-xs font-semibold px-2.5 py-1 bg-white text-emerald-800 rounded-md border border-emerald-200/80">
                         Thanh lý sinh viên
                       </span>
                     </div>
@@ -499,7 +499,7 @@ export const ProductDetail = () => {
                         <button
                           onClick={handlePurchaseClick}
                           disabled={createOrderMutation.isPending}
-                          className="py-3 px-4 bg-[#eb6e34] hover:bg-[#d85e25] text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                          className="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                         >
                           <ShoppingBag size={16} /> Mua đứt ({formatPrice(product.price)})
                         </button>
@@ -523,7 +523,7 @@ export const ProductDetail = () => {
                       <button
                         onClick={handlePurchaseClick}
                         disabled={createOrderMutation.isPending}
-                        className="w-full py-3.5 px-6 bg-[#eb6e34] hover:bg-[#d85e25] text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
+                        className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
                       >
                         {createOrderMutation.isPending ? (
                           <span>Đang khởi tạo đơn hàng qua Locker...</span>
@@ -653,7 +653,7 @@ export const ProductDetail = () => {
               </div>
               <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
                 <span className="font-bold text-slate-900">Tổng tạm giữ:</span>
-                <span className="text-base font-black text-[#eb6e34]">
+                <span className="text-base font-black text-emerald-700">
                   {formatPrice(
                     (product.rentPricePerDay || 0) * effectiveRentalDays + (product.depositAmount || 0)
                   )}

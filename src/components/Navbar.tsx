@@ -16,6 +16,7 @@ import {
   Search,
   Lock,
   BookOpen,
+  Wallet,
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -43,32 +44,33 @@ export const Navbar = () => {
 
   const navLinks = [
     { to: '/marketplace', label: 'Chợ đồ cũ', icon: ShoppingBag },
-    { to: '/about-guide', label: 'Giới thiệu & Hướng dẫn', icon: BookOpen },
     { to: '/orders/buying', label: 'Đơn mua', icon: Inbox, authOnly: true },
     { to: '/orders/selling', label: 'Đơn bán', icon: Send, authOnly: true },
-    { to: '/marketplace/my-listings', label: 'Tin của tôi', icon: Package, authOnly: true },
+    { to: '/wallet', label: 'Ví tiền', icon: Wallet, authOnly: true },
+    { to: '/marketplace/my-listings', label: 'Tin bán', icon: Package, authOnly: true },
+    { to: '/about-guide', label: 'Hướng dẫn', icon: BookOpen },
   ];
 
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 font-sans shadow-xs">
-      {/* Top Value Proposition Banner (Inspired by Oreka Value Banner) */}
-      <div className="bg-orange-50/70 border-b border-orange-100 text-slate-700 text-xs py-1.5 px-4 text-center font-normal flex items-center justify-center gap-2">
-        <span className="inline-flex items-center gap-1 font-semibold text-orange-700">
-          <Lock size={12} className="text-orange-600" /> Smart Locker Campus:
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 font-sans shadow-2xs">
+      {/* Top Value Proposition Banner (Fresh Oreka Eco Style) */}
+      <div className="bg-emerald-50/80 border-b border-emerald-100/70 text-slate-700 text-xs py-1 px-4 text-center font-normal flex items-center justify-center gap-2">
+        <span className="inline-flex items-center gap-1 font-semibold text-emerald-800">
+          <Lock size={12} className="text-emerald-700" /> Smart Locker Campus:
         </span>
         <span className="hidden sm:inline">Nền tảng mua bán đồ cũ sinh viên & Giao nhận qua tủ thông minh</span>
-        <span className="hidden sm:inline text-orange-300">•</span>
-        <span>Cam kết giữ tiền bảo đảm 100%</span>
-        <span className="hidden md:inline text-orange-300">•</span>
-        <span className="hidden md:inline">Không cần gặp mặt trực tiếp</span>
+        <span className="hidden sm:inline text-emerald-300">•</span>
+        <span>Bảo đảm an toàn 100%</span>
+        <span className="hidden md:inline text-emerald-300">•</span>
+        <span className="hidden md:inline">Không cần gặp mặt</span>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 gap-4">
+        <div className="flex justify-between items-center h-15 gap-4">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3 xl:gap-5 shrink-0">
             <Link to={isAdmin ? '/admin/dashboard' : '/'} className="flex items-center gap-2 group shrink-0">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#eb6e34] flex items-center justify-center text-white shadow-xs group-hover:bg-[#d85e25] transition shrink-0">
+              <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-2xs group-hover:bg-emerald-700 transition shrink-0">
                 <Package size={18} />
               </div>
               <div>
@@ -82,22 +84,22 @@ export const Navbar = () => {
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1">
+            <nav className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) => {
                 if (link.authOnly && !isAuthenticated) return null;
                 const Icon = link.icon;
-                const isActive = location.pathname === link.to || location.pathname.startsWith(`${link.to}/`);
+                const isActive = location.pathname === link.to || (link.to !== '/' && location.pathname.startsWith(`${link.to}/`));
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`inline-flex items-center gap-1 px-2 xl:px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition ${
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition ${
                       isActive
-                        ? 'bg-orange-50 text-orange-700 font-semibold border border-orange-200'
+                        ? 'bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200/80'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
-                    <Icon size={14} />
+                    <Icon size={14} className={isActive ? 'text-emerald-700' : 'text-slate-500'} />
                     {link.label}
                   </Link>
                 );
@@ -105,25 +107,25 @@ export const Navbar = () => {
             </nav>
           </div>
 
-          {/* Center Global Search (Oreka Pattern - Flexbox Input Group) */}
+          {/* Center Global Search (Oreka Pattern - Clean Input Group) */}
           <form
             onSubmit={handleGlobalSearch}
             className="hidden md:flex flex-1 min-w-[160px] max-w-md items-center"
           >
-            <div className="flex w-full items-center bg-slate-50 hover:bg-white focus-within:bg-white border border-slate-300 focus-within:border-[#eb6e34] focus-within:ring-1 focus-within:ring-[#eb6e34] rounded-lg overflow-hidden transition shadow-2xs">
-              <div className="pl-2.5 text-slate-400 shrink-0">
+            <div className="flex w-full items-center bg-slate-50 hover:bg-white focus-within:bg-white border border-slate-300 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 rounded-lg overflow-hidden transition shadow-2xs">
+              <div className="pl-3 text-slate-400 shrink-0">
                 <Search size={15} />
               </div>
               <input
                 type="text"
                 value={navSearch}
                 onChange={(e) => setNavSearch(e.target.value)}
-                placeholder="Tìm giáo trình, laptop, đồ KTX..."
+                placeholder="Tìm giáo trình, Casio, laptop, đồ KTX..."
                 className="w-full px-2.5 py-1.5 text-xs sm:text-sm bg-transparent border-none focus:outline-hidden placeholder:text-slate-400 min-w-0"
               />
               <button
                 type="submit"
-                className="px-3 py-1.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white text-xs font-semibold shrink-0 transition"
+                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0 transition"
               >
                 Tìm
               </button>
@@ -143,10 +145,10 @@ export const Navbar = () => {
               </Link>
             )}
 
-            {/* Post Listing Action (Oreka's signature orange Đăng bán button) */}
+            {/* Post Listing Action (Fresh Green Button) */}
             <Link
               to={isAuthenticated ? "/marketplace/new" : "/login"}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold bg-[#eb6e34] hover:bg-[#d85e25] text-white shadow-xs shrink-0 transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs shrink-0 transition"
             >
               <Plus size={15} />
               <span>Đăng bán</span>
@@ -155,7 +157,7 @@ export const Navbar = () => {
             {/* CCCD Badge */}
             {isAuthenticated && !isAdmin && (
               user?.identityVerified ? (
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shrink-0">
                   <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
                   <span className="hidden xl:inline">Đã duyệt</span> CCCD
                 </span>
@@ -216,7 +218,7 @@ export const Navbar = () => {
           <div className="md:hidden flex items-center gap-2">
             <Link
               to="/marketplace/new"
-              className="p-1.5 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg text-xs font-semibold flex items-center gap-1"
+              className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs"
             >
               <Plus size={15} /> Đăng bán
             </Link>
@@ -236,7 +238,7 @@ export const Navbar = () => {
         <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-3">
           {/* Mobile Search */}
           <form onSubmit={handleGlobalSearch} className="flex items-center">
-            <div className="flex w-full items-center bg-slate-50 border border-slate-300 focus-within:border-[#eb6e34] focus-within:ring-1 focus-within:ring-[#eb6e34] rounded-lg overflow-hidden transition">
+            <div className="flex w-full items-center bg-slate-50 border border-slate-300 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 rounded-lg overflow-hidden transition">
               <div className="pl-3 text-slate-400 shrink-0">
                 <Search size={15} />
               </div>
@@ -249,7 +251,7 @@ export const Navbar = () => {
               />
               <button
                 type="submit"
-                className="px-3.5 py-2 bg-[#eb6e34] hover:bg-[#d85e25] text-white text-xs font-semibold shrink-0 transition"
+                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0 transition"
               >
                 Tìm
               </button>

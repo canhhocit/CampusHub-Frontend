@@ -173,7 +173,7 @@ export const MyListings = () => {
               onClick={() => changeStatusTab('ALL')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'ALL'
-                  ? 'bg-[#eb6e34] text-white shadow-xs'
+                  ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -183,7 +183,7 @@ export const MyListings = () => {
               onClick={() => changeStatusTab('ACTIVE')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'ACTIVE'
-                  ? 'bg-[#eb6e34] text-white shadow-xs'
+                  ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -193,7 +193,7 @@ export const MyListings = () => {
               onClick={() => changeStatusTab('HIDDEN')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'HIDDEN'
-                  ? 'bg-[#eb6e34] text-white shadow-xs'
+                  ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -203,7 +203,7 @@ export const MyListings = () => {
               onClick={() => changeStatusTab('SOLD')}
               className={`px-3 py-1.5 rounded-lg transition ${
                 statusTab === 'SOLD'
-                  ? 'bg-[#eb6e34] text-white shadow-xs'
+                  ? 'bg-emerald-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -231,7 +231,7 @@ export const MyListings = () => {
         {/* Table / Card List */}
         {isLoading ? (
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#eb6e34] border-t-transparent" />
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-600 border-t-transparent" />
             <p className="mt-3 text-xs text-slate-500">Đang tải danh sách tin đăng...</p>
           </div>
         ) : isError ? (
@@ -292,7 +292,7 @@ export const MyListings = () => {
                           <div>
                             <Link
                               to={`/marketplace/${p.id}`}
-                              className="font-bold text-slate-900 hover:text-[#eb6e34] transition block truncate max-w-xs"
+                              className="font-bold text-slate-900 hover:text-emerald-700 transition block truncate max-w-xs"
                             >
                               {p.title}
                             </Link>
@@ -302,7 +302,7 @@ export const MyListings = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap font-bold text-[#eb6e34] text-sm">
+                      <td className="px-5 py-3.5 whitespace-nowrap font-bold text-emerald-700 text-sm">
                         {formatPrice(p.price)}
                       </td>
                       <td className="px-5 py-3.5 whitespace-nowrap">

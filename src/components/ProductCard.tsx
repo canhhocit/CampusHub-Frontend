@@ -25,7 +25,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Link
       to={`/marketplace/${product.id}`}
-      className="group bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-md hover:-translate-y-0.5 hover:border-orange-300 transition-all flex flex-col h-full"
+      className="group bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-sm hover:-translate-y-0.5 hover:border-emerald-300 transition-all flex flex-col h-full"
     >
       {/* Product Image (1:1 Ratio) */}
       <div className="aspect-square bg-slate-50 relative overflow-hidden flex items-center justify-center">
@@ -49,7 +49,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             {product.category?.name || 'Khác'}
           </span>
           {product.listingType === 'BOTH' && (
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-600/90 backdrop-blur-xs text-white shadow-2xs">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-700/90 backdrop-blur-xs text-white shadow-2xs">
               Cho thuê
             </span>
           )}
@@ -57,7 +57,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Smart Locker Delivery Pill with Location */}
         <div className="absolute bottom-2.5 left-2.5 right-2.5 pointer-events-none">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-[#eb6e34]/90 backdrop-blur-xs text-white shadow-2xs max-w-full truncate">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-800/85 backdrop-blur-xs text-white shadow-2xs max-w-full truncate">
             <Lock size={10} className="text-white shrink-0" />
             <span className="truncate">{product.locker?.name || 'Smart Locker'}</span>
           </span>
@@ -84,17 +84,17 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       <div className="p-3.5 flex-1 flex flex-col justify-between gap-3">
         <div>
           {/* Title with line clamp */}
-          <h3 className="font-semibold text-slate-900 text-sm sm:text-base line-clamp-2 group-hover:text-[#eb6e34] transition-colors leading-snug">
+          <h3 className="font-semibold text-slate-900 text-sm sm:text-base line-clamp-2 group-hover:text-emerald-700 transition-colors leading-snug">
             {product.title}
           </h3>
 
-          {/* Price */}
+          {/* Price (Oreka fresh green prominent price) */}
           <div className="mt-1.5 flex flex-wrap items-baseline gap-1.5">
-            <span className="text-base sm:text-lg font-bold text-[#eb6e34] tracking-tight">
+            <span className="text-base sm:text-lg font-bold text-emerald-700 tracking-tight">
               {formatPrice(product.price)}
             </span>
             {product.listingType === 'BOTH' && product.rentPricePerDay && (
-              <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+              <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded">
                 Thuê: {formatPrice(product.rentPricePerDay)}/ngày
               </span>
             )}

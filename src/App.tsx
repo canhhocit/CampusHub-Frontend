@@ -27,6 +27,7 @@ import { AdminLayout } from './components/AdminLayout';
 import { BuyingOrders } from './pages/orders/BuyingOrders';
 import { SellingOrders } from './pages/orders/SellingOrders';
 import { OrderDetail } from './pages/orders/OrderDetail';
+import { WalletPage } from './pages/wallet/WalletPage';
 import { UserLayout } from './components/UserLayout';
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
             {/* Member Protected Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/wallet" element={<WalletPage />} />
               <Route path="/marketplace/new" element={<ProductForm />} />
               <Route path="/marketplace/edit/:id" element={<ProductForm />} />
               <Route path="/marketplace/my-listings" element={<MyListings />} />
