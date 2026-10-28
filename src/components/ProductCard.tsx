@@ -25,7 +25,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Link
       to={`/marketplace/${product.id}`}
-      className="group bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-sm hover:-translate-y-0.5 hover:border-emerald-300 transition-all flex flex-col h-full"
+      className="group bg-white rounded-lg border border-slate-200 overflow-hidden shadow-2xs hover:shadow-xs hover:border-emerald-300 transition-all flex flex-col h-full"
     >
       {/* Product Image (1:1 Ratio) */}
       <div className="aspect-square bg-slate-50 relative overflow-hidden flex items-center justify-center">

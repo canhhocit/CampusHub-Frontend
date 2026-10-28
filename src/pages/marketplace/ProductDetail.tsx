@@ -142,8 +142,8 @@ export const ProductDetail = () => {
 
   if (error || !product) {
     return (
-      <div className="max-w-md mx-auto my-20 p-8 bg-white rounded-3xl border border-slate-200 text-center shadow-xs">
-        <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-500 mx-auto flex items-center justify-center mb-4">
+      <div className="max-w-md mx-auto my-20 p-8 bg-white rounded-lg border border-slate-200 text-center shadow-xs">
+        <div className="w-16 h-16 rounded-lg bg-rose-50 text-rose-500 mx-auto flex items-center justify-center mb-4">
           <AlertCircle size={32} />
         </div>
         <h2 className="text-xl font-bold text-slate-900 mb-2">Không tìm thấy sản phẩm</h2>
@@ -176,7 +176,7 @@ export const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 py-6 sm:py-8 font-sans">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
           <Link to="/" className="hover:text-emerald-700">
@@ -200,13 +200,13 @@ export const ProductDetail = () => {
         </nav>
 
         {/* Main Product Details Card */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
             {/* Left Column: Product Imagery (lg:col-span-6) */}
             <div className="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between bg-slate-50/50 space-y-4">
               <div className="space-y-4">
                 {/* Main Media Viewer */}
-                <div className="aspect-square bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative flex items-center justify-center shadow-xs">
+                <div className="aspect-square bg-slate-100 rounded-lg border border-slate-200 overflow-hidden relative flex items-center justify-center shadow-xs">
                   {currentMedia?.type === 'VIDEO' ? (
                     <video
                       src={getMediaUrl(currentMedia.url)}
@@ -421,7 +421,7 @@ export const ProductDetail = () => {
                 </div>
 
                 {/* Seller Profile Card (Oreka Seller Card Pattern) */}
-                <div className="p-4 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3">
+                <div className="p-4 rounded-lg border border-slate-200 bg-white shadow-xs space-y-3">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                     Thông tin người bán
                   </span>
@@ -458,7 +458,7 @@ export const ProductDetail = () => {
                   <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                     Mô tả chi tiết từ người bán
                   </h3>
-                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap bg-slate-50/50 p-4 rounded-2xl border border-slate-200/80 min-h-25">
+                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap bg-slate-50/50 p-4 rounded-lg border border-slate-200/80 min-h-25">
                     {product.description || 'Người bán chưa cung cấp thêm mô tả chi tiết cho sản phẩm này.'}
                   </div>
                 </div>
@@ -467,7 +467,7 @@ export const ProductDetail = () => {
               {/* CTAs / Action Block */}
               <div className="pt-4 border-t border-slate-200 space-y-3">
                 {isOwner ? (
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3">
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-amber-800">
                         Bạn là người đăng sản phẩm này
@@ -564,10 +564,10 @@ export const ProductDetail = () => {
       {/* Rental Duration Picker Modal */}
       {isRentalModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in duration-200">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-100 text-blue-700 rounded-xl">
+                <div className="p-2 bg-blue-100 text-blue-700 rounded-lg">
                   <Calendar size={18} />
                 </div>
                 <div>
@@ -628,7 +628,7 @@ export const ProductDetail = () => {
             </div>
 
             {/* Cost Breakdown */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-2 text-xs">
               <div className="flex justify-between text-slate-600">
                 <span>Đơn giá theo ngày:</span>
                 <span className="font-semibold text-slate-900">

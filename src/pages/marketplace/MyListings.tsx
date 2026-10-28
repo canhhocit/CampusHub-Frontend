@@ -152,7 +152,7 @@ export const MyListings = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 py-6 sm:py-8 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Unified Hub Navigation Tabs */}
         <UserNavTabs />
 
@@ -230,19 +230,19 @@ export const MyListings = () => {
 
         {/* Table / Card List */}
         {isLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+          <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-600 border-t-transparent" />
             <p className="mt-3 text-xs text-slate-500">Đang tải danh sách tin đăng...</p>
           </div>
         ) : isError ? (
-          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center space-y-3">
+          <div className="bg-rose-50 border border-rose-200 rounded-lg p-8 text-center space-y-3">
             <AlertCircle size={24} className="mx-auto text-rose-600" />
             <p className="text-xs sm:text-sm text-rose-700 font-semibold">
               Không thể tải danh sách tin đăng lúc này.
             </p>
             <button
               onClick={() => refetch()}
-              className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 transition"
+              className="px-4 py-2 bg-rose-600 text-white rounded-md text-xs font-bold hover:bg-rose-700 transition"
             >
               Thử lại
             </button>
@@ -261,7 +261,7 @@ export const MyListings = () => {
             }}
           />
         ) : (
-          <div className="bg-white shadow-2xs border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="bg-white shadow-2xs border border-slate-200 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -373,11 +373,11 @@ export const MyListings = () => {
 
         {/* Pagination */}
         {pageData && pageData.totalPages > 1 && (
-          <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs text-xs">
+          <div className="flex justify-between items-center bg-white p-4 rounded-lg border border-slate-200 shadow-2xs text-xs">
             <button
               disabled={page <= 0}
               onClick={() => setSearchParams({ page: (page - 1).toString() })}
-              className="px-3.5 py-1.5 border border-slate-300 rounded-xl text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 transition"
+              className="px-3.5 py-1.5 border border-slate-300 rounded-md text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 transition"
             >
               Trang trước
             </button>
@@ -387,7 +387,7 @@ export const MyListings = () => {
             <button
               disabled={page >= pageData.totalPages - 1}
               onClick={() => setSearchParams({ page: (page + 1).toString() })}
-              className="px-3.5 py-1.5 border border-slate-300 rounded-xl text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 transition"
+              className="px-3.5 py-1.5 border border-slate-300 rounded-md text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 transition"
             >
               Trang sau
             </button>

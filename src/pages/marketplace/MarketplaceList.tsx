@@ -227,7 +227,7 @@ export const MarketplaceList = () => {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] py-4 sm:py-6 font-sans">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-4">
+      <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-4">
         {/* 1. Shopee-style Search Header & Quick Chips */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
           <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
@@ -715,8 +715,8 @@ export const MarketplaceList = () => {
                   </button>
                 </div>
               ) : productsPage?.content.length === 0 ? (
-                <div className="bg-white rounded-xl border border-slate-200 p-12 text-center space-y-3 shadow-2xs">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
+                <div className="bg-white rounded-lg border border-slate-200 p-12 text-center space-y-3 shadow-2xs">
+                  <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
                     <Search size={26} />
                   </div>
                   <h3 className="text-base font-bold text-slate-900">
@@ -743,7 +743,7 @@ export const MarketplaceList = () => {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
                   {productsPage?.content.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}

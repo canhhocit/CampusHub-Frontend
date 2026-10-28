@@ -178,13 +178,13 @@ export const WalletPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50/70 py-6 font-sans">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <UserNavTabs />
 
         {/* 1. Header & Balance Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Card 1: Available Balance */}
-          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200/80 p-5 shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Số dư khả dụng
@@ -215,7 +215,7 @@ export const WalletPage = () => {
           </div>
 
           {/* Card 2: Frozen Balance */}
-          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs space-y-3">
+          <div className="bg-white rounded-lg border border-slate-200/80 p-5 shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Đang xử lý rút
@@ -239,7 +239,7 @@ export const WalletPage = () => {
           </div>
 
           {/* Card 3: Bank Accounts Widget */}
-          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs space-y-3 flex flex-col justify-between">
+          <div className="bg-white rounded-lg border border-slate-200/80 p-5 shadow-2xs space-y-3 flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Tài khoản ngân hàng
@@ -304,7 +304,7 @@ export const WalletPage = () => {
         </div>
 
         {/* 2. Main Tabbed History (Oreka Clean Style) */}
-        <div className="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-2xs">
+        <div className="bg-white rounded-lg border border-slate-200/80 overflow-hidden shadow-2xs">
           {/* Tabs Navigation */}
           <div className="flex border-b border-slate-200 px-5 pt-3 gap-6 text-xs sm:text-sm font-semibold">
             <button
@@ -537,7 +537,7 @@ export const WalletPage = () => {
       {/* MODAL 1: YÊU CẦU RÚT TIỀN */}
       {withdrawModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <ArrowDownLeft size={18} className="text-emerald-600" />
@@ -641,7 +641,7 @@ export const WalletPage = () => {
       {/* MODAL 2: THÊM TÀI KHOẢN NGÂN HÀNG */}
       {bankModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Building2 size={18} className="text-emerald-600" />

@@ -165,7 +165,7 @@ export const BuyingOrders = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 py-6 sm:py-8 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Unified Hub Navigation Tabs */}
         <UserNavTabs />
 
@@ -227,26 +227,26 @@ export const BuyingOrders = () => {
 
         {/* Main Orders Content */}
         {isLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center">
+          <div className="bg-white rounded-lg border border-slate-200 p-16 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-slate-900 border-t-transparent" />
             <p className="mt-3 text-xs text-slate-500 font-medium">Đang tải danh sách đơn mua...</p>
           </div>
         ) : isError ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3 shadow-2xs">
+          <div className="bg-white border border-slate-200 rounded-lg p-8 text-center space-y-3 shadow-2xs">
             <AlertTriangle size={24} className="mx-auto text-slate-500" />
             <p className="text-xs sm:text-sm text-slate-700 font-medium">
               Không thể tải danh sách đơn mua lúc này.
             </p>
             <button
               onClick={() => refetch()}
-              className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-medium hover:bg-slate-800 transition"
+              className="px-4 py-2 bg-slate-900 text-white rounded-md text-xs font-medium hover:bg-slate-800 transition"
             >
               Thử lại
             </button>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-4 shadow-2xs">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 mx-auto flex items-center justify-center">
+          <div className="bg-white rounded-lg border border-slate-200 p-12 text-center space-y-4 shadow-2xs">
+            <div className="w-12 h-12 rounded-lg bg-slate-100 text-slate-600 mx-auto flex items-center justify-center">
               <Inbox size={24} />
             </div>
             <div className="space-y-1">
@@ -261,7 +261,7 @@ export const BuyingOrders = () => {
             </div>
             <Link
               to="/marketplace"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-medium transition shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-xs font-medium transition shadow-2xs"
             >
               <ShoppingBag size={15} /> Khám phá Chợ ngay
             </Link>
@@ -281,7 +281,7 @@ export const BuyingOrders = () => {
               return (
                 <div
                   key={order.id}
-                  className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow"
+                  className="bg-white border border-slate-200 rounded-lg p-5 shadow-2xs hover:shadow-xs transition-shadow"
                 >
                   {/* Order Card Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
@@ -393,11 +393,11 @@ export const BuyingOrders = () => {
 
             {/* Pagination */}
             {pageData && pageData.totalPages > 1 && (
-              <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-xs">
+              <div className="flex justify-between items-center bg-white p-4 rounded-lg border border-slate-200 shadow-2xs text-xs">
                 <button
                   disabled={page <= 0}
                   onClick={() => setSearchParams({ page: (page - 1).toString() })}
-                  className="px-3.5 py-1.5 border border-slate-300 rounded-xl text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 transition"
+                  className="px-3.5 py-1.5 border border-slate-300 rounded-md text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 transition"
                 >
                   Trang trước
                 </button>
@@ -407,7 +407,7 @@ export const BuyingOrders = () => {
                 <button
                   disabled={page >= pageData.totalPages - 1}
                   onClick={() => setSearchParams({ page: (page + 1).toString() })}
-                  className="px-3.5 py-1.5 border border-slate-300 rounded-xl text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 transition"
+                  className="px-3.5 py-1.5 border border-slate-300 rounded-md text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 transition"
                 >
                   Trang sau
                 </button>

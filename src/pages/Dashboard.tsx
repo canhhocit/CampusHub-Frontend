@@ -66,14 +66,14 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 py-6 sm:py-8 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="w-full max-w-[1600px] mx-auto space-y-6">
         <UserNavTabs />
 
         {/* Main Profile & Welcome Card */}
-        <div className="bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden p-5 sm:p-7">
+        <div className="bg-white rounded-lg shadow-2xs border border-slate-200 overflow-hidden p-5 sm:p-7">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white font-extrabold flex items-center justify-center text-lg shadow-xs shrink-0">
+              <div className="w-12 h-12 rounded-lg bg-slate-900 text-white font-extrabold flex items-center justify-center text-lg shadow-2xs shrink-0">
                 {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'U'}
               </div>
               <div>
@@ -82,11 +82,11 @@ export const Dashboard = () => {
                     Xin chào, {user?.fullName || user?.username}!
                   </h1>
                   {user?.identityVerified ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                       <CheckCircle2 size={13} className="text-emerald-600" /> Đã duyệt CCCD
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                       <ShieldAlert size={13} className="text-amber-600" /> Chưa xác minh CCCD
                     </span>
                   )}
@@ -154,16 +154,16 @@ export const Dashboard = () => {
                     key={service.to}
                     type="button"
                     onClick={() => navigate(service.to)}
-                    className="p-4 bg-slate-50/70 hover:bg-white border border-slate-200 hover:border-orange-300 rounded-xl text-left transition-all group shadow-2xs hover:shadow-xs flex items-start gap-3.5"
+                    className="p-4 bg-slate-50/70 hover:bg-white border border-slate-200 hover:border-emerald-300 rounded-lg text-left transition-all group shadow-2xs hover:shadow-xs flex items-start gap-3.5"
                   >
                     <div
-                      className={`p-2.5 rounded-xl ${service.iconColor} group-hover:scale-105 transition-transform shrink-0`}
+                      className={`p-2.5 rounded-lg ${service.iconColor} group-hover:scale-105 transition-transform shrink-0`}
                     >
                       <Icon size={20} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 className="text-sm font-bold text-slate-800 group-hover:text-[#eb6e34] transition-colors truncate">
+                        <h3 className="text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition-colors truncate">
                           {service.title}
                         </h3>
                         <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 px-1.5 py-0.5 rounded-md shrink-0">

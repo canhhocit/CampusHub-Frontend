@@ -12,12 +12,12 @@ export const Footer = () => {
   return (
     <footer className="bg-white border-t border-slate-200 text-slate-600 font-sans mt-auto">
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-6">
           {/* Column 1: Brand & Contact Info (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
             <Link to="/" className="inline-flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-xl bg-[#eb6e34] flex items-center justify-center text-white shadow-xs group-hover:bg-[#d85e25] transition">
+              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-2xs group-hover:bg-emerald-700 transition">
                 <Package size={18} />
               </div>
               <span className="font-extrabold text-slate-900 text-lg tracking-tight">
@@ -32,15 +32,15 @@ export const Footer = () => {
 
             <div className="space-y-2 text-xs text-slate-600 pt-1">
               <div className="flex items-start gap-2">
-                <MapPin size={14} className="text-[#eb6e34] shrink-0 mt-0.5" />
+                <MapPin size={14} className="text-emerald-600 shrink-0 mt-0.5" />
                 <span>Trụ sở chính: Khuôn viên Đại học Bách Khoa / Ký túc xá Đại học Quốc gia, Cầu Giấy, Hà Nội</span>
               </div>
               <div className="flex items-center gap-2">
-                <Phone size={14} className="text-[#eb6e34] shrink-0" />
+                <Phone size={14} className="text-emerald-600 shrink-0" />
                 <span>Hotline: <strong className="text-slate-900 font-semibold">1900 6868</strong> (8:00 – 22:00 hàng ngày)</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail size={14} className="text-[#eb6e34] shrink-0" />
+                <Mail size={14} className="text-emerald-600 shrink-0" />
                 <span>Email hỗ trợ: <strong className="text-slate-900 font-semibold">support@campushub.vn</strong></span>
               </div>
             </div>
@@ -53,32 +53,32 @@ export const Footer = () => {
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link to="/" className="text-slate-600 hover:text-[#eb6e34] transition">
+                <Link to="/" className="text-slate-600 hover:text-emerald-700 transition">
                   Trang chủ
                 </Link>
               </li>
               <li>
-                <Link to="/about-guide" className="text-slate-600 hover:text-[#eb6e34] transition font-medium text-[#eb6e34]">
+                <Link to="/about-guide" className="text-slate-600 hover:text-emerald-700 transition font-medium text-emerald-800">
                   Giới thiệu & Hướng dẫn sử dụng
                 </Link>
               </li>
               <li>
-                <Link to="/marketplace" className="text-slate-600 hover:text-[#eb6e34] transition">
+                <Link to="/marketplace" className="text-slate-600 hover:text-emerald-700 transition">
                   Sàn đồ cũ sinh viên
                 </Link>
               </li>
               <li>
-                <Link to="/marketplace/new" className="text-slate-600 hover:text-[#eb6e34] transition">
+                <Link to="/marketplace/new" className="text-slate-600 hover:text-emerald-700 transition">
                   Đăng tin bán / cho thuê
                 </Link>
               </li>
               <li>
-                <Link to="/about-guide#how-it-works" className="text-slate-600 hover:text-[#eb6e34] transition">
+                <Link to="/about-guide#how-it-works" className="text-slate-600 hover:text-emerald-700 transition">
                   Quy trình tủ Smart Locker
                 </Link>
               </li>
               <li>
-                <Link to="/about-guide#faq" className="text-slate-600 hover:text-[#eb6e34] transition">
+                <Link to="/about-guide#faq" className="text-slate-600 hover:text-emerald-700 transition">
                   Trung tâm trợ giúp & FAQ
                 </Link>
               </li>
@@ -92,7 +92,7 @@ export const Footer = () => {
             </h4>
             <div className="space-y-2.5 text-xs">
               <div className="flex items-start gap-2">
-                <div className="w-6 h-6 rounded-full bg-orange-100 text-[#eb6e34] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">
                   C
                 </div>
                 <div>
@@ -102,7 +102,7 @@ export const Footer = () => {
                   <span className="text-[11px] text-slate-500 block">
                     Tác giả & Nhà phát triển
                   </span>
-                  <span className="text-[11px] text-[#eb6e34] font-medium block">
+                  <span className="text-[11px] text-emerald-700 font-medium block">
                     Full-Stack Engineer
                   </span>
                 </div>
@@ -113,7 +113,7 @@ export const Footer = () => {
           {/* Column 4: Thanh toán & Giao nhận (3 cols) */}
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <CreditCard size={14} className="text-[#eb6e34]" />
+              <CreditCard size={14} className="text-emerald-600" />
               Thanh toán & Giao nhận
             </h4>
             <p className="text-xs text-slate-600 leading-relaxed">
@@ -134,7 +134,7 @@ export const Footer = () => {
 
       {/* Bottom Sub-footer */}
       <div className="border-t border-slate-200 bg-slate-50/60 py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
           <div>
             CampusHub Team — đem công nghệ và tiện ích đến từng khuôn viên trường đại học.
           </div>

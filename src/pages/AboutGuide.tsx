@@ -46,16 +46,16 @@ export const AboutGuide = () => {
   return (
     <div className="min-h-screen bg-[#f8f9fa] font-sans pb-16">
       {/* 1. Hero Section */}
-      <section className="bg-gradient-to-b from-orange-50/80 via-amber-50/30 to-transparent border-b border-orange-100 py-12 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-orange-100/90 text-orange-800 border border-orange-200">
-            <Sparkles size={14} className="text-[#eb6e34]" />
+      <section className="bg-gradient-to-b from-emerald-50/80 via-slate-50/30 to-transparent border-b border-emerald-100/70 py-12 sm:py-16">
+        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-200">
+            <Sparkles size={14} className="text-emerald-600" />
             Nền tảng Công nghệ & Tiện ích Thông minh Sinh viên
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight max-w-4xl mx-auto">
             Giải pháp Mua bán, Cho thuê Đồ dùng & Giao nhận qua{' '}
-            <span className="text-[#eb6e34]">Smart Locker</span>
+            <span className="text-emerald-700">Smart Locker</span>
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
@@ -66,14 +66,14 @@ export const AboutGuide = () => {
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/marketplace"
-              className="px-6 py-3 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-xl text-sm font-bold shadow-xs transition flex items-center gap-2"
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-sm font-bold shadow-2xs transition flex items-center gap-2"
             >
               <ShoppingBag size={17} />
               Khám phá Chợ đồ cũ
             </Link>
             <Link
               to="/marketplace/new"
-              className="px-5 py-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-sm font-semibold transition flex items-center gap-2"
+              className="px-5 py-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-md text-sm font-semibold transition flex items-center gap-2"
             >
               <Send size={16} />
               Đăng tin thanh lý ngay
@@ -82,8 +82,8 @@ export const AboutGuide = () => {
 
           {/* 3 Value Pillars */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-8 max-w-4xl mx-auto text-left">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#eb6e34] flex items-center justify-center font-bold">
+            <div className="bg-white p-5 rounded-lg border border-slate-200/90 shadow-2xs space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
                 <Lock size={20} />
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Giao nhận Tủ Smart Locker</h3>
@@ -92,8 +92,8 @@ export const AboutGuide = () => {
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <div className="bg-white p-5 rounded-lg border border-slate-200/90 shadow-2xs space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
                 <ShieldCheck size={20} />
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Thanh toán Bảo đảm Escrow</h3>
@@ -102,8 +102,8 @@ export const AboutGuide = () => {
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+            <div className="bg-white p-5 rounded-lg border border-slate-200/90 shadow-2xs space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
                 <UserCheck size={20} />
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Xác minh Danh tính CCCD</h3>
@@ -116,11 +116,11 @@ export const AboutGuide = () => {
       </section>
 
       {/* 2. Giới thiệu dự án & Tác giả */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-2xs">
+      <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white rounded-lg border border-slate-200 p-6 sm:p-10 shadow-2xs">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-8 space-y-4">
-              <span className="text-xs font-bold text-[#eb6e34] uppercase tracking-wider block">
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
                 Về Dự Án & Sứ Mệnh
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
@@ -135,9 +135,9 @@ export const AboutGuide = () => {
             </div>
 
             {/* Author Card: Pham Huu Canh */}
-            <div className="lg:col-span-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-md space-y-4">
+            <div className="lg:col-span-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-lg shadow-md space-y-4">
               <div className="flex items-center gap-3 border-b border-slate-700/80 pb-4">
-                <div className="w-12 h-12 rounded-xl bg-[#eb6e34] text-white flex items-center justify-center font-black text-lg shadow-xs">
+                <div className="w-12 h-12 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-black text-lg shadow-xs">
                   C
                 </div>
                 <div>
@@ -177,9 +177,9 @@ export const AboutGuide = () => {
       </section>
 
       {/* 3. Quy trình & Hướng dẫn sử dụng chi tiết (Step-by-Step Guide) */}
-      <section id="how-it-works" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <section id="how-it-works" className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="text-center space-y-3 mb-8">
-          <span className="text-xs font-bold text-[#eb6e34] uppercase tracking-wider block">
+          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
             Hướng dẫn sử dụng
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -190,12 +190,12 @@ export const AboutGuide = () => {
           </p>
 
           {/* Role Tabs */}
-          <div className="inline-flex p-1 bg-slate-200 rounded-xl text-xs font-bold">
+          <div className="inline-flex p-1 bg-slate-200 rounded-md text-xs font-bold">
             <button
               onClick={() => setActiveRoleTab('buyer')}
-              className={`px-5 py-2 rounded-lg transition ${
+              className={`px-5 py-2 rounded-md transition ${
                 activeRoleTab === 'buyer'
-                  ? 'bg-white text-[#eb6e34] shadow-xs'
+                  ? 'bg-white text-emerald-800 shadow-2xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -304,10 +304,10 @@ export const AboutGuide = () => {
       </section>
 
       {/* 4. Mạng lưới trạm tủ Smart Locker */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-lg space-y-6">
+      <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="bg-slate-900 text-white rounded-lg p-6 sm:p-10 shadow-lg space-y-6">
           <div className="space-y-2">
-            <span className="text-xs font-bold text-orange-400 uppercase tracking-wider block">
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
               Hệ Sinh Thái Phần Cứng
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
@@ -402,24 +402,24 @@ export const AboutGuide = () => {
       </section>
 
       {/* 6. Call to Action */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="bg-gradient-to-r from-orange-500 to-[#eb6e34] rounded-3xl p-8 sm:p-12 text-white text-center space-y-4 shadow-md">
+      <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-lg p-8 sm:p-12 text-white text-center space-y-4 shadow-md">
           <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
             Sẵn sàng trải nghiệm CampusHub ngay hôm nay?
           </h2>
-          <p className="text-orange-100 text-xs sm:text-base max-w-xl mx-auto leading-relaxed">
+          <p className="text-emerald-100 text-xs sm:text-base max-w-xl mx-auto leading-relaxed">
             Tham gia cộng đồng sinh viên thông minh, trao gửi đồ dùng và trải nghiệm giao nhận Smart Locker 24/7 an tâm tuyệt đối.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-3">
             <Link
               to="/marketplace"
-              className="px-6 py-3 bg-white text-[#eb6e34] hover:bg-orange-50 rounded-xl text-sm font-bold shadow-xs transition"
+              className="px-6 py-3 bg-white text-emerald-800 hover:bg-emerald-50 rounded-md text-sm font-bold shadow-2xs transition"
             >
               Xem ngay các món đồ đang bán & cho thuê
             </Link>
             <Link
               to="/marketplace/new"
-              className="px-6 py-3 bg-slate-900/60 hover:bg-slate-900/80 text-white rounded-xl text-sm font-semibold transition border border-white/20"
+              className="px-6 py-3 bg-slate-900/60 hover:bg-slate-900/80 text-white rounded-md text-sm font-semibold transition border border-white/20"
             >
               Đăng tin thanh lý đầu tiên
             </Link>

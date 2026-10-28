@@ -362,8 +362,8 @@ export const OrderDetail = () => {
   if (isError || !order) {
     const errorStatus = (error as any)?.response?.status;
     return (
-      <div className="max-w-md mx-auto my-20 p-8 bg-white rounded-2xl border border-slate-200 text-center shadow-2xs space-y-4">
-        <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-500 mx-auto flex items-center justify-center">
+      <div className="max-w-md mx-auto my-20 p-8 bg-white rounded-lg border border-slate-200 text-center shadow-2xs space-y-4">
+        <div className="w-12 h-12 rounded-lg bg-slate-100 text-slate-500 mx-auto flex items-center justify-center">
           <AlertTriangle size={24} />
         </div>
         <div>
@@ -388,8 +388,8 @@ export const OrderDetail = () => {
 
   return (
     <div className="min-h-screen bg-slate-50/70 py-6 sm:py-8 font-sans">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <p role="status" className="rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-2xs">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <p role="status" className="rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-2xs">
           Chế độ mô phỏng Smart Locker: thao tác gửi và nhận hàng chưa điều khiển thiết bị vật lý.
         </p>
 
@@ -410,7 +410,7 @@ export const OrderDetail = () => {
         </nav>
 
         {/* Header Info Banner */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+        <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5">
@@ -564,7 +564,7 @@ export const OrderDetail = () => {
           {/* Left Column: Product & Transaction Snapshot (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
             {/* Product Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+            <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs space-y-4">
               <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Sản phẩm giao dịch
               </h2>
@@ -691,7 +691,7 @@ export const OrderDetail = () => {
             </div>
 
             {/* Smart Locker Location & Station Details */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+            <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs space-y-4">
               <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                 <MapPin size={14} className="text-slate-600" />
                 Địa điểm Smart Locker
@@ -733,7 +733,7 @@ export const OrderDetail = () => {
           <div className="lg:col-span-5 space-y-6">
             {/* ESCROW & PAYMENT CARD */}
             {order.paymentStatus === 'PAID' ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
+              <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
                     <ShieldCheck size={20} />
@@ -783,7 +783,7 @@ export const OrderDetail = () => {
                 </div>
               </div>
             ) : isBuyer ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-5">
+              <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
@@ -966,7 +966,7 @@ export const OrderDetail = () => {
                 )}
               </div>
             ) : isSeller ? (
-              <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5 text-xs text-slate-600 space-y-2">
+              <div className="bg-slate-50 rounded-lg border border-slate-200 p-5 text-xs text-slate-600 space-y-2">
                 <div className="flex items-center gap-2 font-semibold text-slate-900 text-sm">
                   <Clock size={16} className="text-slate-500" />
                   Chờ người mua ký quỹ thanh toán
@@ -979,7 +979,7 @@ export const OrderDetail = () => {
 
             {/* Buyer Pickup Terminal Flow */}
             {order.status === 'READY_FOR_PICKUP' && (
-              <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-sm border border-slate-800 space-y-5">
+              <div className="bg-slate-900 text-white rounded-lg p-6 shadow-sm border border-slate-800 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Radio size={16} className="text-slate-400" />
@@ -1090,7 +1090,7 @@ export const OrderDetail = () => {
 
             {/* Rental Active: Renting Period State */}
             {order.status === 'RENTING' && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
+              <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
                     <Clock size={20} />
@@ -1141,7 +1141,7 @@ export const OrderDetail = () => {
 
             {/* Buyer Deposit Return Item Into Locker */}
             {order.status === 'AWAITING_RETURN_DEPOSIT' && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
+              <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
                     <RotateCcw size={20} />
@@ -1194,7 +1194,7 @@ export const OrderDetail = () => {
 
             {/* Seller Return Pickup Terminal Flow */}
             {order.status === 'READY_FOR_RETURN_PICKUP' && (
-              <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-sm border border-slate-800 space-y-5">
+              <div className="bg-slate-900 text-white rounded-lg p-6 shadow-sm border border-slate-800 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Radio size={16} className="text-slate-400" />
@@ -1324,7 +1324,7 @@ export const OrderDetail = () => {
 
             {/* Seller Deposit Item Action */}
             {order.status === 'AWAITING_DEPOSIT' && isSeller && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
+              <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
                     <Package size={20} />
@@ -1365,7 +1365,7 @@ export const OrderDetail = () => {
 
             {/* Buyer Cancel if still PENDING_SELLER */}
             {order.status === 'PENDING_SELLER' && isBuyer && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-4">
+              <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">Hủy đơn đặt mua</h3>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -1384,7 +1384,7 @@ export const OrderDetail = () => {
 
             {/* Completed State Celebration Card */}
             {order.status === 'COMPLETED' && (
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center space-y-2">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 text-center space-y-2">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 mx-auto flex items-center justify-center">
                   <CheckCircle2 size={20} />
                 </div>
@@ -1414,7 +1414,7 @@ export const OrderDetail = () => {
       {/* Return Locker Selection Modal */}
       {isReturnModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-5 animate-in fade-in duration-150">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-5 animate-in fade-in duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
