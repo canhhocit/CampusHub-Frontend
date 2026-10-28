@@ -32,21 +32,21 @@ export const VerifyEmail = () => {
   }, [token, verifyEmail]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="w-full max-w-md bg-white p-7 sm:p-8 rounded-lg shadow-2xs border border-slate-200 text-center">
         {status === 'loading' && (
           <div>
-            <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#eb6e34] border-t-transparent mx-auto"></div>
-            <p className="mt-4 text-gray-600 text-sm">Đang xác thực địa chỉ email của bạn...</p>
+            <div className="animate-spin rounded-full h-10 w-10 border-2 border-emerald-600 border-t-transparent mx-auto"></div>
+            <p className="mt-4 text-slate-600 text-xs sm:text-sm font-medium">Đang xác thực địa chỉ email của bạn...</p>
           </div>
         )}
         
         {status === 'success' && (
           <div className="flex flex-col items-center">
-            <CheckCircle size={48} className="text-emerald-500" />
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">Xác thực thành công!</h2>
-            <p className="mt-2 text-gray-600 text-sm">Tài khoản của bạn đã được kích hoạt và sẵn sàng sử dụng.</p>
-            <Link to="/login" className="mt-6 inline-flex justify-center rounded-xl bg-[#eb6e34] py-2.5 px-5 text-sm font-semibold text-white hover:bg-[#d85d26] transition">
+            <CheckCircle size={40} className="text-emerald-600" />
+            <h2 className="mt-4 text-xl sm:text-2xl font-extrabold text-slate-900">Xác thực thành công!</h2>
+            <p className="mt-2 text-slate-600 text-xs sm:text-sm">Tài khoản của bạn đã được kích hoạt và sẵn sàng sử dụng.</p>
+            <Link to="/login" className="mt-6 inline-flex justify-center rounded-md bg-emerald-600 py-2.5 px-5 text-sm font-bold text-white hover:bg-emerald-700 transition shadow-2xs">
               Đăng nhập ngay
             </Link>
           </div>
@@ -54,10 +54,10 @@ export const VerifyEmail = () => {
 
         {status === 'error' && (
           <div className="flex flex-col items-center">
-            <AlertCircle size={48} className="text-red-500" />
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">Xác thực thất bại</h2>
-            <p className="mt-2 text-red-600 text-sm">{errorMsg}</p>
-            <Link to="/login" className="mt-6 inline-flex justify-center rounded-xl bg-gray-700 py-2.5 px-5 text-sm font-semibold text-white hover:bg-gray-800 transition">
+            <AlertCircle size={40} className="text-red-500" />
+            <h2 className="mt-4 text-xl sm:text-2xl font-extrabold text-slate-900">Xác thực thất bại</h2>
+            <p className="mt-2 text-red-600 text-xs sm:text-sm">{errorMsg}</p>
+            <Link to="/login" className="mt-6 inline-flex justify-center rounded-md bg-slate-800 py-2.5 px-5 text-sm font-bold text-white hover:bg-slate-900 transition shadow-2xs">
               Quay lại Đăng nhập
             </Link>
           </div>

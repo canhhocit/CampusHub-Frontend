@@ -479,13 +479,13 @@ export const ProductDetail = () => {
                     <div className="flex gap-2">
                       <Link
                         to={`/marketplace/edit/${product.id}`}
-                        className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold text-center transition flex items-center justify-center gap-1.5"
+                        className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold text-center transition flex items-center justify-center gap-1.5"
                       >
                         <Edit3 size={14} /> Chỉnh sửa tin
                       </Link>
                       <Link
                         to="/marketplace/my-listings"
-                        className="py-2.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-medium hover:bg-slate-50 transition"
+                        className="py-2.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-50 transition"
                       >
                         Quản lý tin đăng
                       </Link>
@@ -539,7 +539,7 @@ export const ProductDetail = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="p-4 rounded-2xl bg-slate-100 text-slate-600 text-center text-xs space-y-2">
+                  <div className="p-4 rounded-lg bg-slate-100 text-slate-600 text-center text-xs space-y-2">
                     <p className="font-semibold">
                       {product.status === 'SOLD'
                         ? 'Sản phẩm này đã được bán thành công cho thành viên khác.'

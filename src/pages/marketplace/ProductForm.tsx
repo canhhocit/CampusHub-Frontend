@@ -469,7 +469,7 @@ export const ProductForm = () => {
                     placeholder="0"
                     step="1000"
                     min="0"
-                    className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden"
+                    className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-md text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:outline-hidden"
                   />
                   <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
                   <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">
@@ -499,7 +499,7 @@ export const ProductForm = () => {
                       placeholder="0"
                       step="1000"
                       min="0"
-                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden bg-white"
+                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-md text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:outline-hidden bg-white"
                     />
                     <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
                     <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">/ngày</span>
@@ -520,7 +520,7 @@ export const ProductForm = () => {
                       placeholder="0"
                       step="1000"
                       min="0"
-                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden bg-white"
+                      className="w-full pl-9 pr-16 py-2.5 border border-slate-300 rounded-md text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:outline-hidden bg-white"
                     />
                     <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₫</span>
                     <span className="absolute right-3.5 top-2.5 text-xs text-slate-400 font-medium">VNĐ</span>

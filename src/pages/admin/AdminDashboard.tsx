@@ -350,7 +350,7 @@ export const AdminDashboard = () => {
             <button
               onClick={handleRefreshAll}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#eb6e34] hover:bg-[#d85e25] disabled:opacity-50 text-white text-xs font-semibold transition shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold transition shadow-2xs"
               title="Đồng bộ lại toàn bộ số liệu thời gian thực"
             >
               <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
@@ -501,7 +501,7 @@ export const AdminDashboard = () => {
                     {stats.lockerStats.totalCompartments}
                     <span className="text-xs font-medium text-slate-500">ngăn tủ ({stats.lockerStats.activeLockers} trạm)</span>
                   </div>
-                  <div className="mt-1 flex items-center text-xs font-semibold text-[#eb6e34]">
+                  <div className="mt-1 flex items-center text-xs font-semibold text-emerald-700">
                     Tỷ lệ lấp đầy: {stats.lockerStats.utilizationRate.toFixed(1)}%
                   </div>
                 </div>
@@ -563,7 +563,7 @@ export const AdminDashboard = () => {
                 <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-1">
                   <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                     <span>3. Sẵn sàng lấy</span>
-                    <KeyRound size={13} className="text-[#eb6e34]" />
+                    <KeyRound size={13} className="text-emerald-600" />
                   </div>
                   <div className="text-2xl font-bold text-slate-900">{stats.orderStats.readyForPickupOrders}</div>
                   <p className="text-[11px] text-slate-400">Đã cấp OTP lấy đồ</p>
@@ -627,7 +627,7 @@ export const AdminDashboard = () => {
                   </div>
                   <Link
                     to="/admin/lockers"
-                    className="text-xs font-semibold text-[#eb6e34] hover:text-[#d85e25] inline-flex items-center gap-1"
+                    className="text-xs font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1"
                   >
                     Chi tiết <ChevronRight size={13} />
                   </Link>
@@ -866,7 +866,7 @@ export const AdminDashboard = () => {
 
                 <Link
                   to="/admin/audit"
-                  className="ml-2 text-xs font-semibold text-[#eb6e34] hover:text-[#d85e25] inline-flex items-center gap-1"
+                  className="ml-2 text-xs font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1"
                 >
                   Toàn bộ <ExternalLink size={12} />
                 </Link>
@@ -953,7 +953,7 @@ export const AdminDashboard = () => {
                                 e.stopPropagation();
                                 setSelectedLog(log);
                               }}
-                              className="text-[11px] font-semibold text-[#eb6e34] hover:text-[#d85e25] hover:underline"
+                              className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
                             >
                               Xem
                             </button>
@@ -1114,7 +1114,7 @@ export const AdminDashboard = () => {
                         saleCommissionPercent: Number(e.target.value),
                       }))
                     }
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition"
                   />
                   <span className="absolute right-3 top-2 text-slate-400 font-bold">%</span>
                 </div>
@@ -1129,9 +1129,9 @@ export const AdminDashboard = () => {
                   <button
                     type="button"
                     onClick={() => setFeeFormData((prev) => ({ ...prev, rentalFeeMode: 'PERCENT' }))}
-                    className={`p-2.5 rounded-lg border text-left text-xs font-semibold transition ${
+                    className={`p-2.5 rounded-md border text-left text-xs font-semibold transition ${
                       feeFormData.rentalFeeMode === 'PERCENT'
-                        ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34]'
+                        ? 'border-emerald-600 bg-emerald-50/70 text-emerald-800'
                         : 'border-slate-200 text-slate-600 hover:border-slate-300'
                     }`}
                   >
@@ -1141,9 +1141,9 @@ export const AdminDashboard = () => {
                   <button
                     type="button"
                     onClick={() => setFeeFormData((prev) => ({ ...prev, rentalFeeMode: 'PER_DAY' }))}
-                    className={`p-2.5 rounded-lg border text-left text-xs font-semibold transition ${
+                    className={`p-2.5 rounded-md border text-left text-xs font-semibold transition ${
                       feeFormData.rentalFeeMode === 'PER_DAY'
-                        ? 'border-[#eb6e34] bg-orange-50/60 text-[#eb6e34]'
+                        ? 'border-emerald-600 bg-emerald-50/70 text-emerald-800'
                         : 'border-slate-200 text-slate-600 hover:border-slate-300'
                     }`}
                   >
@@ -1169,7 +1169,7 @@ export const AdminDashboard = () => {
                       rentalFeeValue: Number(e.target.value),
                     }))
                   }
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition"
                 />
               </div>
 
@@ -1177,14 +1177,14 @@ export const AdminDashboard = () => {
                 <button
                   type="button"
                   onClick={() => setIsFeeModalOpen(false)}
-                  className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold transition"
+                  className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={updateFeesMutation.isPending}
-                  className="flex-1 py-2 px-3 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg font-semibold transition disabled:opacity-50"
+                  className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-bold transition disabled:opacity-50 shadow-2xs"
                 >
                   {updateFeesMutation.isPending ? 'Đang lưu...' : 'Lưu biểu phí'}
                 </button>
@@ -1239,11 +1239,11 @@ export const AdminDashboard = () => {
                       maxProductImages: parseInt(e.target.value) || 1,
                     }))
                   }
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition"
                 />
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/80 flex items-center justify-between">
+              <div className="p-3 bg-slate-50 rounded-md border border-slate-200/80 flex items-center justify-between">
                 <div>
                   <span className="font-semibold text-slate-800 block">Cho phép tải video</span>
                   <span className="text-[11px] text-slate-400">Hiển thị mục upload video ở form đăng bán</span>
@@ -1257,7 +1257,7 @@ export const AdminDashboard = () => {
                       allowProductVideo: e.target.checked,
                     }))
                   }
-                  className="h-4 w-4 text-[#eb6e34] rounded border-slate-300 focus:ring-[#eb6e34]"
+                  className="h-4 w-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500/20"
                 />
               </div>
 
@@ -1276,7 +1276,7 @@ export const AdminDashboard = () => {
                         maxProductVideos: parseInt(e.target.value) || 0,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition"
                   />
                 </div>
 
@@ -1294,7 +1294,7 @@ export const AdminDashboard = () => {
                         maxVideoSizeMb: parseInt(e.target.value) || 1,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]/30 focus:border-[#eb6e34]"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition"
                   />
                 </div>
               </div>
@@ -1303,14 +1303,14 @@ export const AdminDashboard = () => {
                 <button
                   type="button"
                   onClick={() => setIsMediaModalOpen(false)}
-                  className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold transition"
+                  className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={updateMediaMutation.isPending}
-                  className="flex-1 py-2 px-3 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg font-semibold transition disabled:opacity-50"
+                  className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-bold transition disabled:opacity-50 shadow-2xs"
                 >
                   {updateMediaMutation.isPending ? 'Đang lưu...' : 'Lưu cài đặt'}
                 </button>

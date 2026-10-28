@@ -108,20 +108,20 @@ export const ImageUpload = ({
 
       {/* Manual URL Input (Collapsible) */}
       {allowUrl && showUrlInput && (
-        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 animate-in fade-in duration-150">
+        <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 animate-in fade-in duration-150">
           <input
             type="text"
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Dán link ảnh (https://...)"
-            className="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-lg focus:border-[#eb6e34] focus:ring-1 focus:ring-[#eb6e34] focus:outline-hidden bg-white"
+            className="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md focus:border-emerald-600 focus:ring-1 focus:ring-emerald-500/20 focus:outline-hidden bg-white transition"
           />
         </div>
       )}
 
       {/* Image Preview if available */}
       {value ? (
-        <div className="relative rounded-xl border border-slate-200 bg-slate-50 overflow-hidden group">
+        <div className="relative rounded-lg border border-slate-200 bg-slate-50 overflow-hidden group">
           <div className="relative h-56 sm:h-64 w-full flex items-center justify-center bg-slate-900/5">
             <img
               src={value}
@@ -164,26 +164,26 @@ export const ImageUpload = ({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => !isUploading && fileInputRef.current?.click()}
-          className={`border border-dashed rounded-xl p-5 text-center cursor-pointer transition flex flex-col items-center justify-center ${
+          className={`border border-dashed rounded-lg p-5 text-center cursor-pointer transition flex flex-col items-center justify-center ${
             isDragging
-              ? 'border-[#eb6e34] bg-orange-50/40'
+              ? 'border-emerald-500 bg-emerald-50/40'
               : 'border-slate-300 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50'
           } ${isUploading ? 'opacity-70 pointer-events-none' : ''}`}
         >
           {isUploading ? (
             <div className="py-4 flex flex-col items-center">
-              <Loader2 className="animate-spin text-[#eb6e34] mb-2" size={28} />
+              <Loader2 className="animate-spin text-emerald-600 mb-2" size={28} />
               <p className="text-xs font-semibold text-slate-700">
                 Đang tải ảnh lên...
               </p>
             </div>
           ) : (
             <div className="py-2 flex flex-col items-center">
-              <div className="p-2 bg-slate-100 text-slate-500 rounded-xl mb-2">
+              <div className="p-2 bg-slate-100 text-slate-500 rounded-md mb-2">
                 <UploadCloud size={22} />
               </div>
               <p className="text-xs font-medium text-slate-700">
-                Kéo thả ảnh vào đây hoặc <span className="text-[#eb6e34] font-semibold hover:underline">tải từ máy tính</span>
+                Kéo thả ảnh vào đây hoặc <span className="text-emerald-700 font-bold hover:underline">tải từ máy tính</span>
               </p>
               <p className="text-[11px] text-slate-400 mt-1">
                 Hỗ trợ JPG, PNG, WEBP (Tối đa 5MB)

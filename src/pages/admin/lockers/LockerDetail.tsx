@@ -72,7 +72,7 @@ export const LockerDetail = () => {
             <div className="max-w-4xl mx-auto py-12 px-4 text-center">
                 <h2 className="text-2xl font-bold text-gray-800">Không tìm thấy tủ đồ</h2>
                 <p className="mt-2 text-gray-600">{(error as any)?.message || 'Tủ đồ được yêu cầu không tồn tại hoặc đã bị xóa.'}</p>
-                <Link to="/admin/lockers" className="text-[#eb6e34] hover:underline mt-4 inline-block">&larr; Quay lại danh sách tủ</Link>
+                <Link to="/admin/lockers" className="text-emerald-700 hover:text-emerald-800 font-bold hover:underline mt-4 inline-block">&larr; Quay lại danh sách tủ</Link>
             </div>
         );
     }
@@ -108,25 +108,25 @@ export const LockerDetail = () => {
     };
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-            <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-sm text-[#eb6e34] hover:underline mb-6 font-medium">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto font-sans">
+            <Link to="/admin/lockers" className="inline-flex items-center gap-1 text-xs sm:text-sm text-emerald-700 hover:text-emerald-800 hover:underline mb-6 font-bold">
                     <ArrowLeft size={16} /> Quay lại danh sách tủ
                 </Link>
 
                 {/* Locker Header Card */}
-                <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-6 mb-8">
+                <div className="bg-white rounded-lg shadow-2xs border border-slate-200 p-6 mb-8">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <div className="flex items-center gap-3">
-                                <h1 className="text-3xl font-bold text-gray-900">{locker.code}</h1>
+                                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{locker.code}</h1>
                                 {renderLockerStatusBadge(locker.status)}
-                                <span className="px-2 py-0.5 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 rounded-md">
+                                <span className="px-2 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 rounded-md">
                                     MÔ PHỎNG IoT
                                 </span>
                             </div>
-                            <h2 className="text-lg text-gray-600 mt-1">{locker.name}</h2>
-                            <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
-                                <MapPin size={15} className="text-[#eb6e34]" />
+                            <h2 className="text-lg text-slate-600 mt-1">{locker.name}</h2>
+                            <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-1.5">
+                                <MapPin size={15} className="text-emerald-600" />
                                 {locker.location}
                             </p>
                         </div>
@@ -169,13 +169,13 @@ export const LockerDetail = () => {
                 </div>
 
                 {/* Compartments Section */}
-                <div className="bg-white rounded-xl shadow-xs border border-gray-200 p-6">
+                <div className="bg-white rounded-lg shadow-2xs border border-slate-200 p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                <Box size={20} className="text-[#eb6e34]" /> Danh sách ngăn tủ
+                            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                                <Box size={20} className="text-emerald-600" /> Danh sách ngăn tủ
                             </h2>
-                            <p className="text-sm text-gray-500">Quản lý và điều phối trạng thái từng ô ngăn trong tủ này.</p>
+                            <p className="text-xs sm:text-sm text-slate-500">Quản lý và điều phối trạng thái từng ô ngăn trong tủ này.</p>
                         </div>
 
                         {/* Add Compartment Inline Form */}
@@ -185,14 +185,14 @@ export const LockerDetail = () => {
                                 placeholder="VD: C05"
                                 value={newCompartmentCode}
                                 onChange={(e) => setNewCompartmentCode(e.target.value)}
-                                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] w-32 uppercase"
+                                className="px-3 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 w-32 uppercase transition"
                             />
                             <button
                                 type="submit"
                                 disabled={addCompartmentMutation.isPending || !newCompartmentCode.trim()}
-                                className="px-3.5 py-1.5 bg-[#eb6e34] text-white rounded-lg text-sm font-medium hover:bg-[#d85d26] disabled:opacity-50 flex items-center gap-1 transition"
+                                className="px-3.5 py-1.5 bg-emerald-600 text-white rounded-md text-sm font-bold hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1 shadow-2xs transition"
                             >
-                                <Plus size={16} /> Thêm ngăn
+                                <Plus size={15} /> Thêm ngăn
                             </button>
                         </form>
                     </div>

@@ -35,7 +35,7 @@ export const Dashboard = () => {
       description: 'Khám phá giáo trình, đồ điện tử, thiết bị học tập ký túc xá',
       to: '/marketplace',
       icon: ShoppingBag,
-      iconColor: 'text-[#eb6e34] bg-orange-50',
+      iconColor: 'text-emerald-700 bg-emerald-50',
       badge: 'Khám phá',
     },
     {
@@ -100,7 +100,7 @@ export const Dashboard = () => {
             <div className="flex items-center gap-2 self-start sm:self-auto">
               <Link
                 to="/marketplace/new"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-xl text-xs font-semibold shadow-xs transition"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-bold shadow-2xs transition"
               >
                 <Plus size={15} />
                 Đăng bán đồ cũ
@@ -108,7 +108,7 @@ export const Dashboard = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-xs font-semibold transition"
                 title="Đăng xuất"
               >
                 <LogOut size={15} />
@@ -183,12 +183,12 @@ export const Dashboard = () => {
           {/* Smart Locker Guide / Assurance Footer */}
           <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-500">
             <div className="flex items-center gap-2">
-              <Lock size={15} className="text-[#eb6e34]" />
+              <Lock size={15} className="text-emerald-600" />
               <span>Giao dịch an toàn 100% qua Tủ Thông Minh CampusHub Smart Locker.</span>
             </div>
             <Link
               to="/about-guide"
-              className="text-[#eb6e34] hover:underline font-semibold flex items-center gap-1"
+              className="text-emerald-700 hover:text-emerald-800 hover:underline font-bold flex items-center gap-1"
             >
               Xem cẩm nang hướng dẫn <ArrowRight size={13} />
             </Link>

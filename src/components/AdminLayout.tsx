@@ -209,9 +209,9 @@ export const AdminLayout = () => {
                     <Link
                       key={item.to}
                       to={item.to}
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
                         item.active
-                          ? 'bg-[#eb6e34] text-white shadow-md shadow-orange-600/25 ring-1 ring-orange-400/40 font-semibold'
+                          ? 'bg-emerald-600 text-white shadow-2xs font-bold'
                           : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                       }`}
                     >
@@ -242,16 +242,16 @@ export const AdminLayout = () => {
 
         {/* Bottom User Profile & Sign Out Card */}
         <div className="p-4 border-t border-slate-800 bg-slate-950/80">
-          <div className="flex items-center justify-between gap-3 p-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div className="flex items-center justify-between gap-3 p-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-orange-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-inner">
+              <div className="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-inner">
                 {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'A'}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold text-white truncate">
                   {user?.fullName || user?.username || 'Quản trị viên'}
                 </div>
-                <div className="text-[11px] text-orange-300 flex items-center gap-1">
+                <div className="text-[11px] text-emerald-400 flex items-center gap-1">
                   <Shield size={11} /> Quản trị viên tối cao
                 </div>
               </div>
@@ -292,15 +292,15 @@ export const AdminLayout = () => {
           {/* Right Header: Clock, Quick Home Link & Profile */}
           <div className="flex items-center gap-3 sm:gap-4">
             {currentTime && (
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600">
-                <Clock size={14} className="text-[#eb6e34]" />
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs font-semibold text-slate-600">
+                <Clock size={14} className="text-emerald-600" />
                 <span className="font-mono">{currentTime}</span>
               </div>
             )}
 
             <Link
               to="/"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 rounded-md transition"
             >
               <Home size={14} />
               Cổng dịch vụ

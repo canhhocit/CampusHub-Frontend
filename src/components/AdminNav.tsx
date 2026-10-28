@@ -44,8 +44,8 @@ export const AdminNav = () => {
               Về trang chủ
             </Link>
             <div className="h-5 w-px bg-gray-300" />
-            <span className="font-bold text-gray-900 text-lg flex items-center gap-2">
-              <span className="px-2 py-0.5 text-xs font-semibold bg-orange-100 text-[#eb6e34] rounded-md">
+            <span className="font-bold text-slate-900 text-lg flex items-center gap-2">
+              <span className="px-2 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 rounded-md">
                 ADMIN
               </span>
               CampusHub Portal
@@ -59,10 +59,10 @@ export const AdminNav = () => {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition ${
                     item.active
-                      ? 'bg-orange-50 text-[#eb6e34] font-semibold border border-orange-200'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
                   <Icon size={16} className="mr-1.5" />

@@ -497,7 +497,7 @@ export const VerifyIdentity = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/marketplace/new')}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#eb6e34] hover:bg-[#d85e25] text-white rounded-lg text-xs font-semibold transition"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-bold transition shadow-2xs"
                 >
                   <PlusCircle size={14} /> Đăng tin bán hàng
                 </button>
@@ -556,7 +556,7 @@ export const VerifyIdentity = () => {
                 </button>
                 <Link
                   to="/marketplace"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#eb6e34] hover:bg-[#d85e25] text-white text-xs font-semibold rounded-lg transition"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-md transition shadow-2xs"
                 >
                   <ShoppingBag size={13} /> Quay lại Chợ sinh viên
                 </Link>
@@ -646,22 +646,22 @@ export const VerifyIdentity = () => {
                 <form onSubmit={handleStartAttempt} className="space-y-5">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold uppercase tracking-wider text-slate-900 border-l-2 border-[#eb6e34] pl-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-900 border-l-2 border-emerald-600 pl-2">
                         1. Tệp hình ảnh Căn cước công dân gắn chip (Mặt trước)
                       </label>
                       <span className="text-[11px] text-slate-500">(Bắt buộc)</span>
                     </div>
 
-                    <div className="border-2 border-dashed border-slate-300 hover:border-[#eb6e34] rounded-xl p-5 text-center transition bg-slate-50/50">
+                    <div className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-lg p-5 text-center transition bg-slate-50/50">
                       {cardPreviewUrl ? (
                         <div className="space-y-3">
                           <img
                             src={cardPreviewUrl}
                             alt="Mặt trước CCCD"
-                            className="max-h-56 mx-auto rounded-lg border border-slate-300 shadow-xs object-contain"
+                            className="max-h-56 mx-auto rounded-md border border-slate-300 shadow-xs object-contain"
                           />
                           <div className="flex justify-center items-center gap-3">
-                            <label className="cursor-pointer text-xs font-semibold text-[#eb6e34] hover:text-[#d85e25] transition inline-flex items-center gap-1">
+                            <label className="cursor-pointer text-xs font-bold text-emerald-700 hover:text-emerald-800 transition inline-flex items-center gap-1">
                               <RotateCcw size={12} /> Chọn ảnh khác
                               <input
                                 type="file"
@@ -692,8 +692,8 @@ export const VerifyIdentity = () => {
                     </div>
 
                     {isScanningQr && (
-                      <div className="text-xs text-slate-600 flex items-center gap-2 bg-slate-50 p-2 rounded border border-slate-200">
-                        <Loader2 size={13} className="animate-spin text-[#eb6e34]" />
+                      <div className="text-xs text-slate-600 flex items-center gap-2 bg-slate-50 p-2 rounded-md border border-slate-200">
+                        <Loader2 size={13} className="animate-spin text-emerald-600" />
                         <span>Đang đọc dữ liệu mã QR trên thẻ CCCD...</span>
                       </div>
                     )}
@@ -734,7 +734,7 @@ export const VerifyIdentity = () => {
                         type="checkbox"
                         checked={confirmedCommitment}
                         onChange={(e) => setConfirmedCommitment(e.target.checked)}
-                        className="mt-0.5 rounded border-slate-300 text-[#eb6e34] focus:ring-[#eb6e34]"
+                        className="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500/20"
                       />
                       <span className="leading-relaxed text-[11px] text-slate-600">
                         Tôi cam đoan tệp ảnh giấy tờ tùy thân cung cấp trên đây là chính chủ, chính xác và đồng ý sử dụng dữ liệu sinh trắc học để phục vụ việc xác thực qua Smart Locker.
@@ -746,7 +746,7 @@ export const VerifyIdentity = () => {
                   <button
                     type="submit"
                     disabled={loading || !rawCardFile || !confirmedCommitment}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#eb6e34] hover:bg-[#d85e25] text-white font-semibold text-xs sm:text-sm rounded-lg transition shadow-2xs disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-md transition shadow-2xs disabled:opacity-50"
                   >
                     {loading ? (
                       <>
@@ -803,23 +803,23 @@ export const VerifyIdentity = () => {
               {/* -------------------- STEP 2: ACTIVE LIVENESS -------------------- */}
               {currentStep === 2 && (
                 <div className="space-y-5">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-900 border-l-2 border-[#eb6e34] pl-2 flex items-center justify-between">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-900 border-l-2 border-emerald-600 pl-2 flex items-center justify-between">
                     <span>2. Kiểm tra cử động khuôn mặt chống giả mạo</span>
-                    <span className="text-[11px] font-mono text-[#eb6e34]">
+                    <span className="text-[11px] font-mono text-emerald-700 font-bold">
                       Động tác {stepIndex + 1} / {totalChallenges}
                     </span>
                   </div>
 
                   {/* Challenge Action Instruction Box */}
-                  <div className="p-4 bg-slate-900 text-white rounded-xl flex items-center gap-3 shadow-xs">
+                  <div className="p-4 bg-slate-900 text-white rounded-lg flex items-center gap-3 shadow-xs">
                     <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                      {currentChallenge?.action === 'TURN_HEAD_LEFT' && <ArrowLeft size={20} className="text-[#eb6e34]" />}
-                      {currentChallenge?.action === 'TURN_HEAD_RIGHT' && <ArrowRightIcon size={20} className="text-[#eb6e34]" />}
-                      {currentChallenge?.action === 'NOD_HEAD' && <RotateCcw size={20} className="text-[#eb6e34]" />}
-                      {currentChallenge?.action === 'FACE_CENTER' && <Eye size={20} className="text-[#eb6e34]" />}
+                      {currentChallenge?.action === 'TURN_HEAD_LEFT' && <ArrowLeft size={20} className="text-emerald-400" />}
+                      {currentChallenge?.action === 'TURN_HEAD_RIGHT' && <ArrowRightIcon size={20} className="text-emerald-400" />}
+                      {currentChallenge?.action === 'NOD_HEAD' && <RotateCcw size={20} className="text-emerald-400" />}
+                      {currentChallenge?.action === 'FACE_CENTER' && <Eye size={20} className="text-emerald-400" />}
                       {!['TURN_HEAD_LEFT', 'TURN_HEAD_RIGHT', 'NOD_HEAD', 'FACE_CENTER'].includes(
                         currentChallenge?.action || ''
-                      ) && <Camera size={20} className="text-[#eb6e34]" />}
+                      ) && <Camera size={20} className="text-emerald-400" />}
                     </div>
                     <div>
                       <div className="text-[11px] text-slate-300 font-medium uppercase tracking-wider">
@@ -860,7 +860,7 @@ export const VerifyIdentity = () => {
                           <div
                             className={`w-48 sm:w-56 h-64 sm:h-72 rounded-[50%] border-2 transition-all duration-300 ${
                               isCapturingFrames
-                                ? 'border-[#eb6e34] border-dashed shadow-[0_0_20px_rgba(235,110,52,0.6)]'
+                                ? 'border-emerald-500 border-dashed shadow-[0_0_20px_rgba(16,185,129,0.6)]'
                                 : 'border-white/60'
                             }`}
                           />
@@ -885,7 +885,7 @@ export const VerifyIdentity = () => {
                       type="button"
                       onClick={handlePerformLivenessStep}
                       disabled={loading || isCapturingFrames || !cameraActive}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#eb6e34] hover:bg-[#d85e25] text-white font-semibold text-xs sm:text-sm rounded-lg transition shadow-2xs disabled:opacity-50"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-md transition shadow-2xs disabled:opacity-50"
                     >
                       {loading ? (
                         <>
@@ -915,7 +915,7 @@ export const VerifyIdentity = () => {
               {/* -------------------- STEP 3: FACE MATCH VERIFICATION -------------------- */}
               {currentStep === 3 && (
                 <div className="space-y-5">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-900 border-l-2 border-[#eb6e34] pl-2">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-900 border-l-2 border-emerald-600 pl-2">
                     3. Chụp ảnh chân dung & đối chiếu với thẻ CCCD
                   </div>
 
@@ -960,7 +960,7 @@ export const VerifyIdentity = () => {
                           type="button"
                           onClick={handleCompleteFaceVerification}
                           disabled={loading}
-                          className="flex-2 py-2 px-4 bg-[#eb6e34] hover:bg-[#d85e25] text-white text-xs sm:text-sm font-semibold rounded-lg transition inline-flex items-center justify-center gap-2 shadow-2xs disabled:opacity-50"
+                          className="flex-2 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-md transition inline-flex items-center justify-center gap-2 shadow-2xs disabled:opacity-50"
                         >
                           {loading ? (
                             <>
@@ -1013,7 +1013,7 @@ export const VerifyIdentity = () => {
                         type="button"
                         onClick={handleTakeSelfie}
                         disabled={!cameraActive}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#eb6e34] hover:bg-[#d85e25] text-white font-semibold text-xs sm:text-sm rounded-lg transition shadow-2xs disabled:opacity-50"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-md transition shadow-2xs disabled:opacity-50"
                       >
                         <Camera size={15} />
                         Chụp ảnh chân dung

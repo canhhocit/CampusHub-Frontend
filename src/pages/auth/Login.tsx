@@ -30,31 +30,31 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="w-full max-w-md space-y-7 bg-white p-7 sm:p-8 rounded-lg shadow-2xs border border-slate-200">
         <div className="text-center">
-          <div className="w-12 h-12 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl mx-auto flex items-center justify-center font-bold text-xl mb-3">
+          <div className="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-lg mx-auto flex items-center justify-center font-black text-xl mb-3 border border-emerald-200/60 shadow-2xs">
             CH
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
             Đăng nhập tài khoản
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Chào mừng bạn quay trở lại với CampusHub
           </p>
         </div>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 text-red-700 p-3.5 rounded-xl border border-red-200 flex items-center gap-2 text-sm">
-              <AlertCircle size={18} className="shrink-0" />
+            <div className="bg-red-50 text-red-700 p-3.5 rounded-md border border-red-200 flex items-center gap-2 text-xs sm:text-sm">
+              <AlertCircle size={16} className="shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-xs font-semibold text-gray-700 mb-1">
+              <label htmlFor="username" className="block text-xs font-semibold text-slate-700 mb-1">
                 Tên đăng nhập hoặc Email
               </label>
               <div className="relative">
@@ -63,17 +63,17 @@ export const Login = () => {
                   name="username"
                   type="text"
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
+                  className="block w-full rounded-md border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 text-sm transition"
                   placeholder="Nhập username hoặc email của bạn..."
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
                 />
-                <User size={18} className="absolute left-3 top-3 text-gray-400" />
+                <User size={18} className="absolute left-3 top-3 text-slate-400" />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-semibold text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-xs font-semibold text-slate-700 mb-1">
                 Mật khẩu
               </label>
               <div className="relative">
@@ -82,18 +82,18 @@ export const Login = () => {
                   name="password"
                   type="password"
                   required
-                  className="block w-full rounded-xl border border-gray-300 pl-10 pr-3.5 py-2.5 text-gray-900 placeholder-gray-400 focus:border-[#eb6e34] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] text-sm"
+                  className="block w-full rounded-md border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 text-sm transition"
                   placeholder="Nhập mật khẩu..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <Lock size={18} className="absolute left-3 top-3 text-gray-400" />
+                <Lock size={18} className="absolute left-3 top-3 text-slate-400" />
               </div>
             </div>
           </div>
 
           <div className="flex items-center justify-end">
-            <Link to="/forgot-password" className="text-xs font-medium text-[#eb6e34] hover:text-[#d85d26]">
+            <Link to="/forgot-password" className="text-xs font-semibold text-emerald-700 hover:text-emerald-800">
               Quên mật khẩu?
             </Link>
           </div>
@@ -101,16 +101,16 @@ export const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center gap-2 rounded-xl bg-[#eb6e34] py-3 px-4 text-sm font-semibold text-white hover:bg-[#d85d26] focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] disabled:opacity-70 transition shadow-sm"
+            className="w-full flex justify-center items-center gap-2 rounded-md bg-emerald-600 py-2.5 sm:py-3 px-4 text-sm font-bold text-white hover:bg-emerald-700 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-70 transition shadow-2xs"
           >
             {loading ? 'Đang xác thực...' : 'Đăng nhập ngay'}
             <ArrowRight size={16} />
           </button>
         </form>
 
-        <div className="text-center text-sm text-gray-600 pt-2 border-t border-gray-100">
+        <div className="text-center text-xs sm:text-sm text-slate-600 pt-3 border-t border-slate-100">
           Chưa có tài khoản?{' '}
-          <Link to="/register" className="font-semibold text-[#eb6e34] hover:text-[#d85d26]">
+          <Link to="/register" className="font-bold text-emerald-700 hover:text-emerald-800">
             Đăng ký tài khoản (từ 13 tuổi)
           </Link>
         </div>

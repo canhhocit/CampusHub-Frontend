@@ -205,7 +205,7 @@ export const AboutGuide = () => {
               onClick={() => setActiveRoleTab('seller')}
               className={`px-5 py-2 rounded-lg transition ${
                 activeRoleTab === 'seller'
-                  ? 'bg-white text-[#eb6e34] shadow-xs'
+                  ? 'bg-white text-emerald-700 shadow-2xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -217,18 +217,18 @@ export const AboutGuide = () => {
         {/* Tab Content: Buyer */}
         {activeRoleTab === 'buyer' ? (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3 relative">
-              <div className="w-8 h-8 rounded-lg bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center text-sm">
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-3 relative">
+              <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold flex items-center justify-center text-sm">
                 1
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Tìm kiếm & Lọc món đồ</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Vào trang Chợ, sử dụng bộ lọc Shopee để tìm theo mức giá, danh mục, hoặc trạm tủ Locker gần bạn nhất.
+                Vào trang Chợ, sử dụng bộ lọc để tìm theo mức giá, danh mục, hoặc trạm tủ Locker gần bạn nhất.
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3 relative">
-              <div className="w-8 h-8 rounded-lg bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center text-sm">
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-3 relative">
+              <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold flex items-center justify-center text-sm">
                 2
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Đặt hàng & Thanh toán QR</h3>
@@ -237,8 +237,8 @@ export const AboutGuide = () => {
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3 relative">
-              <div className="w-8 h-8 rounded-lg bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center text-sm">
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-3 relative">
+              <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold flex items-center justify-center text-sm">
                 3
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Nhận mã PIN mở tủ</h3>
@@ -247,8 +247,8 @@ export const AboutGuide = () => {
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3 relative">
-              <div className="w-8 h-8 rounded-lg bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center text-sm">
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-3 relative">
+              <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold flex items-center justify-center text-sm">
                 4
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Mở tủ nhận đồ 24/7</h3>
@@ -260,8 +260,8 @@ export const AboutGuide = () => {
         ) : (
           /* Tab Content: Seller */
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3 relative">
-              <div className="w-8 h-8 rounded-lg bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center text-sm">
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-3 relative">
+              <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold flex items-center justify-center text-sm">
                 1
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Xác thực CCCD chính chủ</h3>
@@ -270,8 +270,8 @@ export const AboutGuide = () => {
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3 relative">
-              <div className="w-8 h-8 rounded-lg bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center text-sm">
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-3 relative">
+              <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold flex items-center justify-center text-sm">
                 2
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Đăng tin & Chọn tủ Locker</h3>
@@ -280,8 +280,8 @@ export const AboutGuide = () => {
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3 relative">
-              <div className="w-8 h-8 rounded-lg bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center text-sm">
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-3 relative">
+              <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold flex items-center justify-center text-sm">
                 3
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Mang đồ đặt vào ngăn tủ</h3>
@@ -290,8 +290,8 @@ export const AboutGuide = () => {
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3 relative">
-              <div className="w-8 h-8 rounded-lg bg-orange-100 text-[#eb6e34] font-bold flex items-center justify-center text-sm">
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-2xs space-y-3 relative">
+              <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold flex items-center justify-center text-sm">
                 4
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Nhận tiền tự động</h3>
@@ -358,7 +358,7 @@ export const AboutGuide = () => {
       {/* 5. Câu hỏi thường gặp (FAQ) */}
       <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div className="text-center space-y-2">
-          <span className="text-xs font-bold text-[#eb6e34] uppercase tracking-wider block">
+          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
             Hỗ Trợ & Giải Đáp
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -372,21 +372,21 @@ export const AboutGuide = () => {
             return (
               <div
                 key={idx}
-                className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs transition"
+                className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-2xs transition"
               >
                 <button
                   type="button"
                   onClick={() => toggleFaq(idx)}
-                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 text-slate-900 font-bold text-sm hover:text-[#eb6e34] transition"
+                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 text-slate-900 font-bold text-sm hover:text-emerald-700 transition"
                 >
                   <span className="flex items-center gap-2">
-                    <HelpCircle size={16} className="text-[#eb6e34] shrink-0" />
+                    <HelpCircle size={16} className="text-emerald-600 shrink-0" />
                     <span>{faq.q}</span>
                   </span>
                   <ChevronDown
                     size={16}
                     className={`shrink-0 transition-transform text-slate-400 ${
-                      isOpen ? 'rotate-180 text-[#eb6e34]' : ''
+                      isOpen ? 'rotate-180 text-emerald-600' : ''
                     }`}
                   />
                 </button>

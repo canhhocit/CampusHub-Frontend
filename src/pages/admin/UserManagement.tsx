@@ -160,12 +160,12 @@ export const UserManagement = () => {
       {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#eb6e34]/10 text-[#eb6e34] rounded-xl">
+            <div className="p-2.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200/60 shadow-2xs">
               <Users size={24} />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Quản lý Người dùng</h1>
-              <p className="mt-0.5 text-sm text-gray-500">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Quản lý Người dùng</h1>
+              <p className="mt-0.5 text-xs sm:text-sm text-slate-500">
                 Tra cứu thông tin tài khoản, phân quyền và kiểm soát trạng thái hoạt động của thành viên trong toàn thành phố.
               </p>
             </div>
@@ -173,41 +173,41 @@ export const UserManagement = () => {
           <button
             onClick={() => refetch()}
             disabled={isFetching}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-xs transition"
+            className="inline-flex items-center gap-2 px-3.5 py-2 border border-slate-300 rounded-md text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 shadow-2xs transition"
           >
-            <RefreshCw size={16} className={isFetching ? 'animate-spin text-[#eb6e34]' : ''} />
+            <RefreshCw size={15} className={isFetching ? 'animate-spin text-emerald-600' : ''} />
             Làm mới
           </button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
           <form onSubmit={handleSearchSubmit} className="flex relative w-full sm:w-96">
             <input
               type="text"
               name="search"
               defaultValue={searchTerm}
               placeholder="Tìm theo tên đăng nhập, họ tên, email..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition"
             />
-            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
             <button
               type="submit"
-              className="ml-2 px-4 py-2 bg-[#eb6e34] text-white rounded-lg text-sm font-medium hover:bg-[#d85d26] transition"
+              className="ml-2 px-4 py-2 bg-emerald-600 text-white rounded-md text-sm font-bold hover:bg-emerald-700 transition shadow-2xs"
             >
               Tìm kiếm
             </button>
           </form>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-sm text-gray-500 whitespace-nowrap">Trạng thái:</span>
+            <span className="text-xs sm:text-sm text-slate-500 whitespace-nowrap">Trạng thái:</span>
             <select
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setPage(0);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34]"
+              className="border border-slate-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
             >
               <option value="">Tất cả trạng thái</option>
               <option value="ACTIVE">Đang hoạt động</option>
@@ -421,7 +421,7 @@ export const UserManagement = () => {
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Ví dụ: Vi phạm quy định đăng tin rác, lừa đảo hoặc mở khóa theo yêu cầu hỗ trợ..."
-                className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#eb6e34] focus:outline-hidden"
+                className="w-full p-2.5 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:outline-hidden"
                 rows={3}
               />
             </div>
@@ -518,7 +518,7 @@ export const UserManagement = () => {
                       type="button"
                       onClick={handleAdminScanQr}
                       disabled={adminScanningQr}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#eb6e34]/10 hover:bg-[#eb6e34]/20 text-[#eb6e34] rounded-lg text-xs font-semibold transition disabled:opacity-50"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-md text-xs font-bold transition disabled:opacity-50"
                     >
                       <QrCode size={13} />
                       {adminScanningQr ? 'Đang quét...' : 'Quét mã QR từ ảnh'}
@@ -528,7 +528,7 @@ export const UserManagement = () => {
 
                 {/* Admin QR Scan Result Box */}
                 {adminQrResult && (
-                  <div className="mb-2.5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1.5 text-xs animate-in fade-in">
+                  <div className="mb-2.5 p-3 bg-emerald-50 border border-emerald-200 rounded-lg space-y-1.5 text-xs animate-in fade-in">
                     <div className="font-bold text-emerald-800 flex items-center gap-1.5">
                       <CheckCircle2 size={15} className="text-emerald-600" />
                       Kết quả bóc tách mã QR trên CCCD:

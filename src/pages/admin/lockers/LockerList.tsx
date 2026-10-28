@@ -54,44 +54,44 @@ export const LockerList = () => {
                     <button
                         onClick={() => refetch()}
                         disabled={isFetching}
-                        className="p-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 text-sm"
+                        className="p-2 border border-slate-300 rounded-md text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition"
                         title="Làm mới"
                     >
-                        <RefreshCw size={16} className={isFetching ? 'animate-spin text-[#eb6e34]' : ''} />
+                        <RefreshCw size={15} className={isFetching ? 'animate-spin text-emerald-600' : ''} />
                         Làm mới
                     </button>
                     <Link
                         to="/admin/lockers/new"
-                        className="px-4 py-2 bg-[#eb6e34] text-white rounded-lg hover:bg-[#d85d26] flex items-center gap-2 text-sm font-medium shadow-xs transition"
+                        className="px-3.5 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 flex items-center gap-1.5 text-xs sm:text-sm font-bold shadow-2xs transition"
                     >
-                        <Plus size={16} />
+                        <Plus size={15} />
                         Thêm tủ mới
                     </Link>
                 </div>
             </div>
 
             {/* Filter & Search Bar */}
-            <div className="bg-white p-4 rounded-xl shadow-xs border border-gray-200 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+            <div className="bg-white p-4 rounded-lg shadow-2xs border border-slate-200 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
                 <form onSubmit={handleSearchSubmit} className="flex relative w-full sm:w-80">
                     <input
                         type="text"
                         name="search"
                         defaultValue={searchTerm}
                         placeholder="Tìm theo mã tủ, tên, vị trí..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] w-full text-sm"
+                        className="pl-10 pr-4 py-2 border border-slate-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 w-full text-sm transition"
                     />
-                    <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                    <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
                 </form>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Trạng thái:</label>
+                    <label className="text-xs sm:text-sm font-semibold text-slate-700 whitespace-nowrap">Trạng thái:</label>
                     <select
                         value={statusFilter}
                         onChange={(e) => {
                             setStatusFilter(e.target.value);
                             setPage(0);
                         }}
-                        className="py-2 px-3 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-[#eb6e34] bg-white"
+                        className="py-2 px-3 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 bg-white"
                     >
                         <option value="">Tất cả trạng thái</option>
                         <option value="ACTIVE">Hoạt động (Active)</option>
@@ -104,8 +104,8 @@ export const LockerList = () => {
 
             {/* States: Loading / Error / Empty / Table */}
             {isLoading ? (
-                <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-                    <RefreshCw className="animate-spin mx-auto text-[#eb6e34] mb-2" size={32} />
+                <div className="text-center py-20 bg-white rounded-lg border border-slate-200">
+                    <RefreshCw className="animate-spin mx-auto text-emerald-600 mb-2" size={32} />
                     <p className="text-gray-500">Đang tải dữ liệu tủ đồ...</p>
                 </div>
             ) : isError ? (
@@ -171,7 +171,7 @@ export const LockerList = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                                        <Link to={`/admin/lockers/${locker.id}`} className="text-[#eb6e34] hover:text-[#d85d26] font-medium">
+                                        <Link to={`/admin/lockers/${locker.id}`} className="text-emerald-700 hover:text-emerald-800 font-bold">
                                             Chi tiết
                                         </Link>
                                         <Link to={`/admin/lockers/edit/${locker.id}`} className="text-gray-600 hover:text-gray-900">
