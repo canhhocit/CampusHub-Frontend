@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { NotificationBell } from './NotificationBell';
 import {
   ShoppingBag,
   Package,
@@ -173,6 +174,9 @@ export const Navbar = () => {
               )
             )}
 
+            {/* Notification Bell */}
+            {isAuthenticated && <NotificationBell />}
+
             {/* User Profile & Logout */}
             {isAuthenticated ? (
               <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200 shrink-0">
@@ -216,6 +220,7 @@ export const Navbar = () => {
 
           {/* Mobile Hamburger Button */}
           <div className="md:hidden flex items-center gap-2">
+            {isAuthenticated && <NotificationBell />}
             <Link
               to="/marketplace/new"
               className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs"

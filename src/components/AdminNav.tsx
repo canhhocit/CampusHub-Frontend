@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Lock, FileText, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Users, Lock, FileText, ArrowLeft, CreditCard, ShieldAlert } from 'lucide-react';
 
 export const AdminNav = () => {
   const location = useLocation();
@@ -10,6 +10,18 @@ export const AdminNav = () => {
       label: 'Tổng quan',
       icon: LayoutDashboard,
       active: location.pathname === '/admin/dashboard',
+    },
+    {
+      to: '/admin/payouts',
+      label: 'Rút tiền',
+      icon: CreditCard,
+      active: location.pathname.startsWith('/admin/payouts'),
+    },
+    {
+      to: '/admin/disputes',
+      label: 'Khiếu nại',
+      icon: ShieldAlert,
+      active: location.pathname.startsWith('/admin/disputes'),
     },
     {
       to: '/admin/users',

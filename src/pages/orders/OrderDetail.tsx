@@ -26,6 +26,8 @@ import {
   RefreshCw,
   Sparkles,
   CheckCircle,
+  Star,
+  ShieldAlert,
 } from 'lucide-react';
 
 const purchaseStepConfig: { key: OrderStatus; label: string; desc: string }[] = [
@@ -44,6 +46,11 @@ const rentalStepConfig: { key: OrderStatus; label: string; desc: string }[] = [
 ];
 
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { ReviewModal } from '../../components/review/ReviewModal';
+import { DisputeModal } from '../../components/dispute/DisputeModal';
+import type { ReviewResponse } from '../../types/review';
+import type { DisputeResponse } from '../../types/dispute';
+
 
 export const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +65,24 @@ export const OrderDetail = () => {
 
   // Payment states
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'PAYOS' | 'MOCK'>('PAYOS');
+  // Review & Dispute Modal States
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
+
+  // Review query
+  const { data: orderReview, refetch: refetchReview } = useQuery<ReviewResponse | null>({
+    queryKey: ['order-review', id],
+    queryFn: () => axiosInstance.get(`/api/v1/orders/${id}/reviews`).then((res) => res.data).catch(() => null),
+    enabled: !!id,
+  });
+
+  // Dispute query
+  const { data: orderDispute, refetch: refetchDispute } = useQuery<DisputeResponse | null>({
+    queryKey: ['order-dispute', id],
+    queryFn: () => axiosInstance.get(`/api/v1/orders/${id}/disputes`).then((res) => res.data).catch(() => null),
+    enabled: !!id,
+  });
+
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [paymentNotice, setPaymentNotice] = useState<string | null>(null);
 
@@ -1382,17 +1407,84 @@ export const OrderDetail = () => {
               </div>
             )}
 
+            {/* Dispute Status Banner if exists */}
+            {orderDispute && (
+              <div className="bg-rose-50/70 border border-rose-200 rounded-lg p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-rose-800 flex items-center gap-1.5">
+                    <ShieldAlert size={14} />
+                    Khiếu nại đơn hàng
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-white text-rose-700 border border-rose-200">
+                    {orderDispute.status === 'OPEN'
+                      ? 'Đang chờ xử lý'
+                      : orderDispute.status === 'RESOLVED_REFUND_BUYER'
+                      ? 'Đã hoàn tiền Người mua'
+                      : 'Đã giải ngân Người bán'}
+                  </span>
+                </div>
+                <p className="text-xs text-rose-900 font-medium">{orderDispute.description}</p>
+                {orderDispute.adminNote && (
+                  <div className="text-[11px] text-slate-600 bg-white/80 p-2 rounded border border-rose-100">
+                    <strong>Phán quyết Admin:</strong> {orderDispute.adminNote}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Completed State Celebration Card */}
             {order.status === 'COMPLETED' && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 text-center space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 mx-auto flex items-center justify-center">
-                  <CheckCircle2 size={20} />
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 text-center space-y-4">
+                <div className="space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 mx-auto flex items-center justify-center">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900">Giao dịch thành công</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Hàng hóa đã được lấy thành công vào lúc {formatDate(order.pickedUpAt)}. Ngăn tủ đã được giải phóng trở lại trạng thái sẵn sàng.
+                  </p>
                 </div>
-                <h3 className="text-base font-bold text-slate-900">Giao dịch thành công</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Hàng hóa đã được lấy thành công vào lúc {formatDate(order.pickedUpAt)}. Ngăn tủ đã được giải phóng trở lại trạng thái sẵn sàng.
-                </p>
+
+                {/* Buyer Review Section */}
+                {orderReview ? (
+                  <div className="p-3 bg-white rounded-md border border-slate-200 text-left space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-900">Đánh giá của bạn:</span>
+                      <div className="flex text-amber-400">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            size={14}
+                            className={s <= orderReview.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {orderReview.comment && (
+                      <p className="text-xs text-slate-600 italic">"{orderReview.comment}"</p>
+                    )}
+                  </div>
+                ) : isBuyer ? (
+                  <button
+                    onClick={() => setIsReviewModalOpen(true)}
+                    className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-md shadow-2xs flex items-center justify-center gap-1.5 transition"
+                  >
+                    <Star size={14} className="fill-white" />
+                    Đánh giá người bán
+                  </button>
+                ) : null}
               </div>
+            )}
+
+            {/* Dispute Report Button for Buyer */}
+            {isBuyer && !orderDispute && (order.status === 'READY_FOR_PICKUP' || order.status === 'COMPLETED' || order.status === 'EXPIRED') && (
+              <button
+                onClick={() => setIsDisputeModalOpen(true)}
+                className="w-full py-2 px-3 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition"
+              >
+                <ShieldAlert size={14} />
+                Báo cáo sự cố / Khiếu nại đơn này
+              </button>
             )}
 
             {/* Expired State Warning Card */}
@@ -1519,6 +1611,26 @@ export const OrderDetail = () => {
         cancelText="Đóng"
         variant={dialogNotice.variant}
       />
+
+      {/* Review Modal */}
+      {id && (
+        <ReviewModal
+          orderId={Number(id)}
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          onSuccess={() => refetchReview()}
+        />
+      )}
+
+      {/* Dispute Modal */}
+      {id && (
+        <DisputeModal
+          orderId={Number(id)}
+          isOpen={isDisputeModalOpen}
+          onClose={() => setIsDisputeModalOpen(false)}
+          onSuccess={() => refetchDispute()}
+        />
+      )}
     </div>
   );
 };

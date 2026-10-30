@@ -23,6 +23,9 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { UserManagement } from './pages/admin/UserManagement';
 import { AuditLogs } from './pages/admin/AuditLogs';
 import { AdminLayout } from './components/AdminLayout';
+import { AdminPayouts } from './pages/admin/AdminPayouts';
+import { AdminDisputes } from './pages/admin/AdminDisputes';
+import { LockerKiosk } from './pages/kiosk/LockerKiosk';
 
 import { BuyingOrders } from './pages/orders/BuyingOrders';
 import { SellingOrders } from './pages/orders/SellingOrders';
@@ -35,6 +38,9 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Smart Locker Interactive Kiosk */}
+          <Route path="/kiosk" element={<LockerKiosk />} />
+
           {/* Public Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -70,6 +76,8 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/users" element={<UserManagement />} />
               <Route path="/admin/audit" element={<AuditLogs />} />
+              <Route path="/admin/payouts" element={<AdminPayouts />} />
+              <Route path="/admin/disputes" element={<AdminDisputes />} />
               <Route path="/admin/lockers" element={<LockerList />} />
               <Route path="/admin/lockers/new" element={<LockerForm />} />
               <Route path="/admin/lockers/edit/:id" element={<LockerForm />} />

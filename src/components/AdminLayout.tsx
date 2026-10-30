@@ -15,6 +15,8 @@ import {
   ChevronRight,
   ExternalLink,
   ShieldCheck,
+  CreditCard,
+  ShieldAlert,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -84,6 +86,18 @@ export const AdminLayout = () => {
       title: 'QUẢN TRỊ NGHIỆP VỤ',
       items: [
         {
+          to: '/admin/payouts',
+          label: 'Duyệt Rút tiền Ví',
+          icon: CreditCard,
+          active: location.pathname.startsWith('/admin/payouts'),
+        },
+        {
+          to: '/admin/disputes',
+          label: 'Giải quyết Khiếu nại',
+          icon: ShieldAlert,
+          active: location.pathname.startsWith('/admin/disputes'),
+        },
+        {
           to: '/admin/users',
           label: 'Người dùng & CCCD',
           icon: Users,
@@ -124,6 +138,8 @@ export const AdminLayout = () => {
 
   const getPageTitle = () => {
     if (location.pathname === '/admin/dashboard') return 'Báo cáo Vận hành & Giám sát Hệ thống';
+    if (location.pathname.startsWith('/admin/payouts')) return 'Quản trị Yêu cầu Rút tiền Sinh viên';
+    if (location.pathname.startsWith('/admin/disputes')) return 'Giải quyết Khiếu nại & Tranh chấp Đơn hàng';
     if (location.pathname.startsWith('/admin/users')) return 'Quản lý Tài khoản & Định danh CCCD';
     if (location.pathname.startsWith('/admin/lockers')) return 'Quản lý Hệ thống Tủ Thông minh';
     if (location.pathname.startsWith('/admin/audit')) return 'Nhật ký Hoạt động Toàn diện (Audit Logs)';

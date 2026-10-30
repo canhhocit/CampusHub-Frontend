@@ -19,10 +19,13 @@ import {
   Play,
   Film,
   MapPin,
+  Star,
+  MessageSquare,
 } from 'lucide-react';
 import { getMediaUrl } from '../../api/cloudinary';
 
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import type { UserRatingSummaryResponse, ReviewResponse } from '../../types/review';
 
 export const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,6 +50,22 @@ export const ProductDetail = () => {
     queryKey: ['product', id],
     queryFn: () => axiosInstance.get(`/api/v1/products/${id}`).then((res) => res.data),
     retry: false,
+  });
+
+  // Seller rating summary
+  const { data: sellerRating } = useQuery<UserRatingSummaryResponse | null>({
+    queryKey: ['user-rating-summary', product?.owner?.id],
+    queryFn: () =>
+      axiosInstance.get(`/api/v1/users/${product?.owner?.id}/rating-summary`).then((res) => res.data).catch(() => null),
+    enabled: !!product?.owner?.id,
+  });
+
+  // Product reviews
+  const { data: productReviews = [] } = useQuery<ReviewResponse[]>({
+    queryKey: ['product-reviews', id],
+    queryFn: () =>
+      axiosInstance.get(`/api/v1/products/${id}/reviews`).then((res) => res.data).catch(() => []),
+    enabled: !!id,
   });
 
   const isOwner = Boolean(
@@ -448,6 +467,18 @@ export const ProductDetail = () => {
                         <span className="text-xs text-slate-500">
                           @{product.owner?.username || 'member'} • Sinh viên trong trường
                         </span>
+                        {sellerRating && sellerRating.totalReviews > 0 ? (
+                          <div className="flex items-center gap-1.5 mt-1 text-xs">
+                            <span className="flex items-center text-amber-500 font-bold">
+                              <Star size={13} className="fill-amber-400 mr-0.5" />
+                              {sellerRating.averageRating.toFixed(1)} / 5.0
+                            </span>
+                            <span className="text-slate-400">•</span>
+                            <span className="text-slate-500">{sellerRating.totalReviews} đánh giá</span>
+                          </div>
+                        ) : (
+                          <div className="text-[11px] text-slate-400 mt-1">Người bán mới • Chưa có đánh giá</div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -461,6 +492,50 @@ export const ProductDetail = () => {
                   <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap bg-slate-50/50 p-4 rounded-lg border border-slate-200/80 min-h-25">
                     {product.description || 'Người bán chưa cung cấp thêm mô tả chi tiết cho sản phẩm này.'}
                   </div>
+                </div>
+
+                {/* Reviews Section */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <MessageSquare size={16} className="text-emerald-600" />
+                      Đánh giá từ người mua ({productReviews.length})
+                    </h3>
+                  </div>
+
+                  {productReviews.length === 0 ? (
+                    <div className="p-4 bg-slate-50/50 rounded-lg border border-slate-200 text-center text-xs text-slate-400">
+                      Chưa có đánh giá nào cho sản phẩm này.
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {productReviews.map((rev) => (
+                        <div key={rev.id} className="p-3.5 bg-white rounded-lg border border-slate-200/90 shadow-2xs space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center">
+                                {rev.reviewerName?.charAt(0) || 'U'}
+                              </div>
+                              <span className="text-xs font-bold text-slate-900">{rev.reviewerName}</span>
+                            </div>
+                            <div className="flex text-amber-400">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star
+                                  key={s}
+                                  size={12}
+                                  className={s <= rev.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          {rev.comment && <p className="text-xs text-slate-600 pl-8">{rev.comment}</p>}
+                          <div className="text-[10px] text-slate-400 pl-8">
+                            {new Date(rev.createdAt).toLocaleDateString('vi-VN')}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -48,6 +48,9 @@ export type PayoutStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'REJECTED';
 
 export interface PayoutRequestResponse {
   id: number;
+  userId?: number;
+  username?: string;
+  fullName?: string;
   amount: number;
   bankCode: string;
   accountNumber: string;
@@ -55,6 +58,7 @@ export interface PayoutRequestResponse {
   status: PayoutStatus;
   referenceCode?: string | null;
   adminNote?: string | null;
+  processedByName?: string | null;
   processedAt?: string | null;
   createdAt: string;
 }
