@@ -67,3 +67,11 @@ export interface WithdrawalRequestDto {
   amount: number;
   bankAccountId?: number | null;
 }
+
+export interface WalletConfigResponse {
+  minWithdrawalAmount: number;
+}
+
+export interface UpdateWithdrawalConfigRequest {
+  minWithdrawalAmount: number;
+}

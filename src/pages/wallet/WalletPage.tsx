@@ -4,6 +4,7 @@ import { axiosInstance } from '../../api/axios';
 import { UserNavTabs } from '../../components/UserNavTabs';
 import type {
   WalletResponse,
+  WalletConfigResponse,
   WalletTransactionResponse,
   UserBankAccountResponse,
   PayoutRequestResponse,
@@ -64,6 +65,12 @@ export const WalletPage = () => {
     queryKey: ['wallet-me'],
     queryFn: () => axiosInstance.get('/api/v1/wallet/me').then((res) => res.data),
   });
+
+  const { data: walletConfig } = useQuery<WalletConfigResponse>({
+    queryKey: ['wallet-config'],
+    queryFn: () => axiosInstance.get('/api/v1/wallet/config').then((res) => res.data),
+  });
+  const minWithdrawal = walletConfig?.minWithdrawalAmount || 50000;
 
   // 2. Fetch Bank Accounts
   const { data: bankAccounts = [], isLoading: isBanksLoading } = useQuery<UserBankAccountResponse[]>({
@@ -146,8 +153,8 @@ export const WalletPage = () => {
   const handleWithdrawSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const val = Number(withdrawAmount);
-    if (!val || val < 50000) {
-      setErrorMessage('Số tiền rút tối thiểu là 50.000 VNĐ');
+    if (!val || val < minWithdrawal) {
+      setErrorMessage(`Số tiền rút tối thiểu là ${minWithdrawal.toLocaleString('vi-VN')} VNĐ`);
       return;
     }
     if (wallet && val > wallet.balance) {
@@ -587,9 +594,9 @@ export const WalletPage = () => {
                 </div>
                 <input
                   type="number"
-                  min="50000"
+                  min={minWithdrawal}
                   step="10000"
-                  placeholder="Tối thiểu 50.000 VNĐ"
+                  placeholder={`Tối thiểu ${minWithdrawal.toLocaleString('vi-VN')} VNĐ`}
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:border-emerald-500 focus:outline-hidden"
@@ -597,14 +604,14 @@ export const WalletPage = () => {
 
                 {/* Quick Preset Buttons */}
                 <div className="grid grid-cols-4 gap-1.5 mt-2">
-                  {[50000, 100000, 200000].map((amt) => (
+                  {[minWithdrawal, minWithdrawal * 2, minWithdrawal * 4].map((amt) => (
                     <button
                       key={amt}
                       type="button"
                       onClick={() => setWithdrawAmount(amt.toString())}
                       className="py-1 px-2 text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition"
                     >
-                      {amt / 1000}k
+                      {amt >= 1000 ? `${amt / 1000}k` : amt}
                     </button>
                   ))}
                   <button
