@@ -28,6 +28,12 @@ export interface DisputeResponse {
   resolvedByName?: string | null;
   resolvedAt?: string | null;
   createdAt: string;
+  lockerId?: number | null;
+  lockerName?: string | null;
+  compartmentId?: number | null;
+  compartmentCode?: string | null;
+  compartmentStatus?: string | null;
+  isCompartmentIsolated?: boolean;
 }
 
 export interface DisputeCreateRequest {
@@ -39,5 +45,6 @@ export interface DisputeCreateRequest {
 export interface DisputeResolveRequest {
   status: DisputeStatus;
   adminNote?: string;
+  releaseCompartment?: boolean;
 }
 

@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
+  AlertTriangle,
 } from 'lucide-react';
 
 export const AdminDisputes = () => {
@@ -23,6 +24,18 @@ export const AdminDisputes = () => {
   const [resolveModalOpen, setResolveModalOpen] = useState(false);
   const [resolveTargetStatus, setResolveTargetStatus] = useState<DisputeStatus>('RESOLVED_REFUND_BUYER');
   const [adminNote, setAdminNote] = useState('');
+  const [releaseCompartment, setReleaseCompartment] = useState<boolean>(true);
+
+  const releaseCompartmentMutation = useMutation({
+    mutationFn: ({ lockerId, compartmentId }: { lockerId: number; compartmentId: number }) =>
+      axiosInstance.patch(`/api/v1/admin/lockers/${lockerId}/compartments/${compartmentId}/status`, {
+        status: 'AVAILABLE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-disputes'] });
+      queryClient.invalidateQueries({ queryKey: ['lockers'] });
+    },
+  });
 
   const queryClient = useQueryClient();
 
@@ -41,8 +54,22 @@ export const AdminDisputes = () => {
   });
 
   const resolveMutation = useMutation({
-    mutationFn: ({ id, status, adminNote }: { id: number; status: DisputeStatus; adminNote: string }) =>
-      axiosInstance.post(`/api/v1/admin/disputes/${id}/resolve`, { status, adminNote }),
+    mutationFn: ({
+      id,
+      status,
+      adminNote,
+      releaseCompartment,
+    }: {
+      id: number;
+      status: DisputeStatus;
+      adminNote: string;
+      releaseCompartment?: boolean;
+    }) =>
+      axiosInstance.post(`/api/v1/admin/disputes/${id}/resolve`, {
+        status,
+        adminNote,
+        releaseCompartment,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-disputes'] });
       setResolveModalOpen(false);
@@ -54,6 +81,7 @@ export const AdminDisputes = () => {
   const handleOpenResolve = (dispute: DisputeResponse, targetStatus: DisputeStatus) => {
     setSelectedDispute(dispute);
     setResolveTargetStatus(targetStatus);
+    setReleaseCompartment(true);
     setAdminNote(
       targetStatus === 'RESOLVED_REFUND_BUYER'
         ? 'Xác minh có cơ sở: Ngăn tủ không có hàng hoặc hàng bị lỗi. Hoàn tiền 100% cho người mua.'
@@ -241,6 +269,38 @@ export const AdminDisputes = () => {
                         <p className="text-xs text-slate-700 line-clamp-2" title={dispute.description}>
                           {dispute.description}
                         </p>
+                        {dispute.compartmentCode && (
+                          <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                            {dispute.isCompartmentIsolated ? (
+                              <>
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                  <AlertTriangle size={11} /> Đã khóa cách ly: {dispute.lockerName || 'Tủ'} #{dispute.compartmentCode}
+                                </span>
+                                {dispute.lockerId && dispute.compartmentId && (
+                                  <button
+                                    onClick={() =>
+                                      releaseCompartmentMutation.mutate({
+                                        lockerId: dispute.lockerId!,
+                                        compartmentId: dispute.compartmentId!,
+                                      })
+                                    }
+                                    disabled={releaseCompartmentMutation.isPending}
+                                    className="text-[11px] text-emerald-700 hover:text-emerald-800 underline font-semibold"
+                                  >
+                                    Mở lại ngăn
+                                  </button>
+                                )}
+                              </>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-slate-50 text-slate-600 border border-slate-200">
+                                Trạm {dispute.lockerName || 'Locker'} • Ngăn #{dispute.compartmentCode}
+                                {dispute.compartmentStatus === 'AVAILABLE' && (
+                                  <span className="text-emerald-600 font-medium"> (Khả dụng)</span>
+                                )}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3.5">
                         {dispute.proofImageUrl ? (
@@ -356,6 +416,40 @@ export const AdminDisputes = () => {
               </div>
             </div>
 
+            {selectedDispute.compartmentCode && (
+              <div
+                className={`p-3 rounded-md border text-xs space-y-1.5 ${
+                  selectedDispute.isCompartmentIsolated
+                    ? 'bg-amber-50/70 border-amber-200 text-amber-900'
+                    : 'bg-slate-50 border-slate-200 text-slate-700'
+                }`}
+              >
+                <div className="font-semibold flex items-center gap-1.5">
+                  <AlertTriangle
+                    size={14}
+                    className={selectedDispute.isCompartmentIsolated ? 'text-amber-600' : 'text-slate-400'}
+                  />
+                  <span>
+                    Trạng thái ngăn tủ: {selectedDispute.lockerName || 'Tủ'} • Ngăn #{selectedDispute.compartmentCode}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-600">
+                  {selectedDispute.isCompartmentIsolated
+                    ? 'Ngăn tủ đã tự động chuyển sang trạng thái SỰ CỐ / CÁCH LY ngay khi người mua gửi khiếu nại để ngăn chặn phân bổ cho đơn hàng khác.'
+                    : `Trạng thái hiện tại của ngăn: ${selectedDispute.compartmentStatus || 'Bình thường'}`}
+                </p>
+                <label className="flex items-center gap-2 pt-1 font-medium cursor-pointer text-slate-900">
+                  <input
+                    type="checkbox"
+                    checked={releaseCompartment}
+                    onChange={(e) => setReleaseCompartment(e.target.checked)}
+                    className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                  />
+                  <span>Giải phóng và mở lại ngăn tủ về trạng thái Khả dụng (AVAILABLE)</span>
+                </label>
+              </div>
+            )}
+
             <div className="space-y-2 text-sm">
               <label className="block text-xs font-semibold text-slate-700">
                 Ghi chú phán quyết của Quản trị viên <span className="text-rose-500">*</span>
@@ -384,6 +478,7 @@ export const AdminDisputes = () => {
                     id: selectedDispute.id,
                     status: resolveTargetStatus,
                     adminNote: adminNote.trim(),
+                    releaseCompartment: selectedDispute.compartmentCode ? releaseCompartment : undefined,
                   })
                 }
                 className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50 transition shadow-2xs"
