@@ -320,6 +320,8 @@ export const OrderDetail = () => {
 
   const isBuyer = Boolean(order && user && order.buyerUsername === user.username);
   const isSeller = Boolean(order && user && order.sellerUsername === user.username);
+  const isAdmin = Boolean(user && (user.role === 'ROLE_ADMIN' || user.role === 'ADMIN'));
+  const isPrivileged = isSeller || isAdmin;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -640,35 +642,76 @@ export const OrderDetail = () => {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                      <span className="text-slate-500 block">Đơn giá thuê theo ngày</span>
-                      <strong className="text-slate-900 font-bold block text-sm">
-                        {order.rentalDurationDays && order.rentalDurationDays > 0
-                          ? formatPrice(Math.round((order.priceSnapshot || 0) / order.rentalDurationDays))
-                          : formatPrice(order.priceSnapshot || 0)}
-                        /ngày
-                      </strong>
+                  {isBuyer ? (
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <span className="text-slate-500 block">Đơn giá thuê theo ngày</span>
+                        <strong className="text-slate-900 font-bold block text-sm">
+                          {order.rentalDurationDays && order.rentalDurationDays > 0
+                            ? formatPrice(Math.round((order.priceSnapshot || 0) / order.rentalDurationDays))
+                            : formatPrice(order.priceSnapshot || 0)}
+                          /ngày
+                        </strong>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <span className="text-slate-500 block">Tiền cọc bảo đảm (hoàn lại)</span>
+                        <strong className="text-slate-900 font-bold block text-sm">
+                          {formatPrice(order.depositAmount || 0)}
+                        </strong>
+                        <span className="text-[10px] text-emerald-700 font-medium block">
+                          Hoàn trả 100% khi trả đồ đúng hạn
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <span className="text-slate-500 block">Tổng tiền thuê ({order.rentalDurationDays} ngày)</span>
+                        <strong className="text-slate-900 font-bold block text-sm">
+                          {formatPrice(order.priceSnapshot || 0)}
+                        </strong>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <span className="text-slate-500 block">Tổng thanh toán ký quỹ</span>
+                        <strong className="text-slate-900 font-bold block text-sm">
+                          {formatPrice(order.totalAmount || ((order.priceSnapshot || 0) + (order.depositAmount || 0)))}
+                        </strong>
+                        <span className="text-[10px] text-slate-500 block">
+                          Tiền thuê + cọc bảo đảm
+                        </span>
+                      </div>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                      <span className="text-slate-500 block">Tiền cọc bảo đảm (hoàn lại)</span>
-                      <strong className="text-slate-900 font-bold block text-sm">
-                        {formatPrice(order.depositAmount || 0)}
-                      </strong>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <span className="text-slate-500 block">Tổng tiền thuê ({order.rentalDurationDays} ngày)</span>
+                        <strong className="text-slate-900 font-bold block text-sm">
+                          {formatPrice(order.priceSnapshot || 0)}
+                        </strong>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <span className="text-slate-500 block">Tiền cọc khách ký quỹ</span>
+                        <strong className="text-slate-900 font-bold block text-sm">
+                          {formatPrice(order.depositAmount || 0)}
+                        </strong>
+                        <span className="text-[10px] text-slate-500 block">
+                          CampusHub bảo lưu, hoàn trả khách khi xong
+                        </span>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <span className="text-slate-500 block">Phí dịch vụ nền tảng</span>
+                        <strong className="text-slate-700 font-medium block">
+                          {formatPrice(order.platformFee || 0)}
+                        </strong>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <span className="text-slate-500 block">Thực nhận người cho thuê</span>
+                        <strong className="text-slate-900 font-bold block text-sm">
+                          {formatPrice(order.sellerPayout || 0)}
+                        </strong>
+                        <span className="text-[10px] text-emerald-700 font-medium block">
+                          Cộng vào ví khi hoàn tất
+                        </span>
+                      </div>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                      <span className="text-slate-500 block">Phí dịch vụ nền tảng</span>
-                      <strong className="text-slate-700 font-medium block">
-                        {formatPrice(order.platformFee || 0)}
-                      </strong>
-                    </div>
-                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                      <span className="text-slate-500 block">Thực nhận người cho thuê</span>
-                      <strong className="text-slate-900 font-medium block">
-                        {formatPrice(order.sellerPayout || 0)}
-                      </strong>
-                    </div>
-                  </div>
+                  )}
 
                   {(order.pickedUpAt || order.dueReturnAt) && (
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1 text-slate-700">
@@ -703,6 +746,32 @@ export const OrderDetail = () => {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Seller Financial Settlement for Purchase */}
+              {isPrivileged && order.orderType === 'PURCHASE' && (
+                <div className="pt-4 border-t border-slate-100 space-y-3">
+                  <span className="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-slate-500" /> Quyết toán người bán
+                  </span>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                      <span className="text-slate-500 block">Phí dịch vụ nền tảng</span>
+                      <strong className="text-slate-700 font-medium block">
+                        {formatPrice(order.platformFee || 0)}
+                      </strong>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                      <span className="text-slate-500 block">Thực nhận người bán</span>
+                      <strong className="text-slate-900 font-bold block text-sm">
+                        {formatPrice(order.sellerPayout || 0)}
+                      </strong>
+                      <span className="text-[10px] text-emerald-700 font-medium block">
+                        Cộng vào ví khi người mua nhận hàng
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
 
