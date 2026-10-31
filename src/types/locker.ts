@@ -8,6 +8,8 @@ export interface Locker {
     name: string;
     location: string;
     status: LockerStatus;
+    latitude?: number;
+    longitude?: number;
     createdAt: string;
     updatedAt: string;
     totalCompartments: number;
@@ -39,6 +41,8 @@ export interface LockerDetail {
     name: string;
     location: string;
     status: LockerStatus;
+    latitude?: number;
+    longitude?: number;
     createdAt: string;
     updatedAt: string;
     compartmentSummary: CompartmentSummary;

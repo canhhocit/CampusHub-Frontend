@@ -125,9 +125,14 @@ export const LockerDetail = () => {
                                 </span>
                             </div>
                             <h2 className="text-lg text-slate-600 mt-1">{locker.name}</h2>
-                            <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-1.5">
-                                <MapPin size={15} className="text-emerald-600" />
-                                {locker.location}
+                            <p className="text-xs sm:text-sm text-slate-500 mt-1 flex flex-wrap items-center gap-1.5">
+                                <MapPin size={15} className="text-emerald-600 flex-shrink-0" />
+                                <span>{locker.location}</span>
+                                {locker.latitude != null && locker.longitude != null && (
+                                    <span className="font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs border border-emerald-200 font-semibold">
+                                        GPS: {locker.latitude.toFixed(4)}, {locker.longitude.toFixed(4)}
+                                    </span>
+                                )}
                             </p>
                         </div>
 

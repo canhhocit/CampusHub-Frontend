@@ -7,11 +7,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../../api/axios';
 import type { LockerDetail } from '../../../types/locker';
 import { ArrowLeft, Save, Lock } from 'lucide-react';
+import { LockerLocationPicker } from '../../../components/admin/lockers/LockerLocationPicker';
 
 const lockerSchema = z.object({
     code: z.string().min(1, 'Mã tủ không được để trống').max(50, 'Tối đa 50 ký tự'),
     name: z.string().min(1, 'Tên tủ không được để trống').max(100, 'Tối đa 100 ký tự'),
     location: z.string().min(1, 'Vị trí không được để trống').max(255, 'Tối đa 255 ký tự'),
+    latitude: z.number().min(-90).max(90).optional().nullable(),
+    longitude: z.number().min(-180).max(180).optional().nullable(),
 });
 
 type LockerFormData = z.infer<typeof lockerSchema>;
@@ -28,14 +31,19 @@ export const LockerForm = () => {
         enabled: isEditing
     });
 
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<LockerFormData>({
+    const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<LockerFormData>({
         resolver: zodResolver(lockerSchema),
         defaultValues: {
             code: '',
             name: '',
             location: '',
+            latitude: null,
+            longitude: null,
         }
     });
+
+    const currentLat = watch('latitude');
+    const currentLng = watch('longitude');
 
     useEffect(() => {
         if (isEditing && existingLocker) {
@@ -43,6 +51,8 @@ export const LockerForm = () => {
                 code: existingLocker.code,
                 name: existingLocker.name,
                 location: existingLocker.location,
+                latitude: existingLocker.latitude ?? null,
+                longitude: existingLocker.longitude ?? null,
             });
         }
     }, [isEditing, existingLocker, reset]);
@@ -52,7 +62,9 @@ export const LockerForm = () => {
             if (isEditing) {
                 const res = await axiosInstance.put(`/api/v1/lockers/${id}`, {
                     name: data.name,
-                    location: data.location
+                    location: data.location,
+                    latitude: data.latitude,
+                    longitude: data.longitude,
                 });
                 return res.data;
             } else {
@@ -137,6 +149,18 @@ export const LockerForm = () => {
                         className="block w-full border border-slate-300 rounded-md shadow-2xs py-2 px-3 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-sm transition"
                     />
                     {errors.location && <p className="mt-1 text-xs text-red-600">{errors.location.message}</p>}
+                </div>
+
+                {/* Map Location Picker */}
+                <div className="pt-2 border-t border-slate-100">
+                    <LockerLocationPicker
+                        latitude={currentLat}
+                        longitude={currentLng}
+                        onChange={(lat, lng) => {
+                            setValue('latitude', lat, { shouldValidate: true, shouldDirty: true });
+                            setValue('longitude', lng, { shouldValidate: true, shouldDirty: true });
+                        }}
+                    />
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4 border-t border-slate-100">
