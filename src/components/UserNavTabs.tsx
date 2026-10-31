@@ -1,8 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Package, Inbox, Send, Plus, Wallet } from 'lucide-react';
+import { usePendingSellingOrdersCount } from '../hooks/usePendingSellingOrders';
 
 export const UserNavTabs = () => {
   const location = useLocation();
+  const { data: pendingData } = usePendingSellingOrdersCount();
+  const pendingSellingCount = pendingData?.pendingCount || 0;
 
   const tabs = [
     {
@@ -19,6 +22,7 @@ export const UserNavTabs = () => {
       to: '/orders/selling',
       label: 'Đơn bán',
       icon: Send,
+      badge: pendingSellingCount,
     },
     {
       to: '/marketplace/my-listings',
@@ -44,7 +48,19 @@ export const UserNavTabs = () => {
               }`}
             >
               <Icon size={15} />
-              {tab.label}
+              <span>{tab.label}</span>
+              {Boolean(tab.badge && tab.badge > 0) && (
+                <span
+                  className={`flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold leading-none shadow-xs ${
+                    isActive
+                      ? 'bg-white text-emerald-800'
+                      : 'bg-rose-500 text-white'
+                  }`}
+                  title={`${tab.badge} đơn bán chờ xác nhận`}
+                >
+                  {tab.badge! > 99 ? '99+' : tab.badge}
+                </span>
+              )}
             </Link>
           );
         })}

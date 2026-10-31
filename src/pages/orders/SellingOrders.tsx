@@ -149,7 +149,7 @@ export const SellingOrders = () => {
     mutationFn: ({ id, lockerId }: { id: number; lockerId?: number | null }) =>
       axiosInstance.post(`/api/v1/orders/${id}/accept`, { lockerId: lockerId || null }),
     onSuccess: () => {
-      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'selling-pending-count', 'admin-dashboard-stats']) {
         queryClient.invalidateQueries({ queryKey: [key] });
       }
       queryClient.invalidateQueries({ queryKey: ['selling-orders'] });
@@ -170,7 +170,7 @@ export const SellingOrders = () => {
     mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
       axiosInstance.post(`/api/v1/orders/${id}/reject`, { reason }),
     onSuccess: () => {
-      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'selling-pending-count', 'admin-dashboard-stats']) {
         queryClient.invalidateQueries({ queryKey: [key] });
       }
       queryClient.invalidateQueries({ queryKey: ['selling-orders'] });
@@ -190,7 +190,7 @@ export const SellingOrders = () => {
   const depositMutation = useMutation({
     mutationFn: (id: number) => axiosInstance.post(`/api/v1/orders/${id}/deposit`),
     onSuccess: () => {
-      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'admin-dashboard-stats']) {
+      for (const key of ['product', 'products', 'my-products', 'lockers', 'locker', 'active-lockers-dropdown', 'order-detail', 'buying-orders', 'selling-orders', 'selling-pending-count', 'admin-dashboard-stats']) {
         queryClient.invalidateQueries({ queryKey: [key] });
       }
       queryClient.invalidateQueries({ queryKey: ['selling-orders'] });

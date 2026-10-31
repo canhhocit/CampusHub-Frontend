@@ -90,6 +90,7 @@ export const ProductDetail = () => {
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
       queryClient.invalidateQueries({ queryKey: ['selling-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['selling-pending-count'] });
       navigate(`/orders/${data.id}`);
     },
     onError: (err: any) => {

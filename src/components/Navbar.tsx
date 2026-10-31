@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { usePendingSellingOrdersCount } from '../hooks/usePendingSellingOrders';
 import { NotificationBell } from './NotificationBell';
 import {
   ShoppingBag,
@@ -27,6 +28,10 @@ export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navSearch, setNavSearch] = useState('');
 
+  // Real-time pending selling orders count for seller badge
+  const { data: pendingData } = usePendingSellingOrdersCount();
+  const pendingSellingCount = pendingData?.pendingCount || 0;
+
   const isAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN';
 
   const handleLogout = async () => {
@@ -46,7 +51,13 @@ export const Navbar = () => {
   const navLinks = [
     { to: '/marketplace', label: 'Chợ đồ cũ', icon: ShoppingBag },
     { to: '/orders/buying', label: 'Đơn mua', icon: Inbox, authOnly: true },
-    { to: '/orders/selling', label: 'Đơn bán', icon: Send, authOnly: true },
+    {
+      to: '/orders/selling',
+      label: 'Đơn bán',
+      icon: Send,
+      authOnly: true,
+      badge: pendingSellingCount,
+    },
     { to: '/wallet', label: 'Ví tiền', icon: Wallet, authOnly: true },
     { to: '/marketplace/my-listings', label: 'Tin bán', icon: Package, authOnly: true },
     { to: '/about-guide', label: 'Hướng dẫn', icon: BookOpen },
@@ -94,14 +105,22 @@ export const Navbar = () => {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition ${
+                    className={`relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition ${
                       isActive
                         ? 'bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200/80'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
                     <Icon size={14} className={isActive ? 'text-emerald-700' : 'text-slate-500'} />
-                    {link.label}
+                    <span>{link.label}</span>
+                    {Boolean(link.badge && link.badge > 0) && (
+                      <span
+                        className="absolute -top-1 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none shadow-xs ring-2 ring-white"
+                        title={`${link.badge} đơn bán chờ bạn xác nhận`}
+                      >
+                        {link.badge! > 99 ? '99+' : link.badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -273,10 +292,20 @@ export const Navbar = () => {
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
                 >
-                  <Icon size={16} />
-                  {link.label}
+                  <div className="flex items-center gap-2.5">
+                    <Icon size={16} />
+                    <span>{link.label}</span>
+                  </div>
+                  {Boolean(link.badge && link.badge > 0) && (
+                    <span
+                      className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-rose-500 text-white text-xs font-bold leading-none shadow-xs"
+                      title={`${link.badge} đơn bán chờ xác nhận`}
+                    >
+                      {link.badge! > 99 ? '99+' : link.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
