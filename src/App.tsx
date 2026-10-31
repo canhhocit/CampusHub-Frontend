@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 // Core lightweight public pages
 import { Login } from './pages/auth/Login';
@@ -49,59 +50,61 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Suspense fallback={<PageFallback />}>
-          <Routes>
-            {/* Smart Locker Interactive Kiosk */}
-            <Route path="/kiosk" element={<LockerKiosk />} />
+        <ErrorBoundary>
+          <Suspense fallback={<PageFallback />}>
+            <Routes>
+              {/* Smart Locker Interactive Kiosk */}
+              <Route path="/kiosk" element={<LockerKiosk />} />
 
-            {/* Public Auth Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+              {/* Public Auth Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
-            {/* Member & Marketplace Routes with Navbar */}
-            <Route element={<UserLayout />}>
-              <Route path="/" element={<MarketplaceList />} />
-              <Route path="/marketplace" element={<MarketplaceList />} />
-              <Route path="/marketplace/:id" element={<ProductDetail />} />
-              <Route path="/about-guide" element={<AboutGuide />} />
+              {/* Member & Marketplace Routes with Navbar */}
+              <Route element={<UserLayout />}>
+                <Route path="/" element={<MarketplaceList />} />
+                <Route path="/marketplace" element={<MarketplaceList />} />
+                <Route path="/marketplace/:id" element={<ProductDetail />} />
+                <Route path="/about-guide" element={<AboutGuide />} />
 
-              {/* Member Protected Routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/wallet" element={<WalletPage />} />
-                <Route path="/marketplace/new" element={<ProductForm />} />
-                <Route path="/marketplace/edit/:id" element={<ProductForm />} />
-                <Route path="/marketplace/my-listings" element={<MyListings />} />
-                <Route path="/orders/buying" element={<BuyingOrders />} />
-                <Route path="/orders/selling" element={<SellingOrders />} />
-                <Route path="/orders/:id" element={<OrderDetail />} />
-                <Route path="/verify-identity" element={<VerifyIdentity />} />
+                {/* Member Protected Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/wallet" element={<WalletPage />} />
+                  <Route path="/marketplace/new" element={<ProductForm />} />
+                  <Route path="/marketplace/edit/:id" element={<ProductForm />} />
+                  <Route path="/marketplace/my-listings" element={<MyListings />} />
+                  <Route path="/orders/buying" element={<BuyingOrders />} />
+                  <Route path="/orders/selling" element={<SellingOrders />} />
+                  <Route path="/orders/:id" element={<OrderDetail />} />
+                  <Route path="/verify-identity" element={<VerifyIdentity />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Admin Protected Routes */}
-            <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
-              <Route element={<AdminLayout />}>
-                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/users" element={<UserManagement />} />
-                <Route path="/admin/audit" element={<AuditLogs />} />
-                <Route path="/admin/payouts" element={<AdminPayouts />} />
-                <Route path="/admin/disputes" element={<AdminDisputes />} />
-                <Route path="/admin/lockers" element={<LockerList />} />
-                <Route path="/admin/lockers/new" element={<LockerForm />} />
-                <Route path="/admin/lockers/edit/:id" element={<LockerForm />} />
-                <Route path="/admin/lockers/:id" element={<LockerDetail />} />
+              {/* Admin Protected Routes */}
+              <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
+                <Route element={<AdminLayout />}>
+                  <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/users" element={<UserManagement />} />
+                  <Route path="/admin/audit" element={<AuditLogs />} />
+                  <Route path="/admin/payouts" element={<AdminPayouts />} />
+                  <Route path="/admin/disputes" element={<AdminDisputes />} />
+                  <Route path="/admin/lockers" element={<LockerList />} />
+                  <Route path="/admin/lockers/new" element={<LockerForm />} />
+                  <Route path="/admin/lockers/edit/:id" element={<LockerForm />} />
+                  <Route path="/admin/lockers/:id" element={<LockerDetail />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Catch all */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+              {/* Catch all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
   );

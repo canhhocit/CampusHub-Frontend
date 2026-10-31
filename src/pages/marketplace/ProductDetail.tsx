@@ -61,12 +61,18 @@ export const ProductDetail = () => {
   });
 
   // Product reviews
-  const { data: productReviews = [] } = useQuery<ReviewResponse[]>({
+  const { data: rawReviews } = useQuery<any>({
     queryKey: ['product-reviews', id],
     queryFn: () =>
       axiosInstance.get(`/api/v1/products/${id}/reviews`).then((res) => res.data).catch(() => []),
     enabled: !!id,
   });
+
+  const productReviews: ReviewResponse[] = Array.isArray(rawReviews)
+    ? rawReviews
+    : (rawReviews && Array.isArray((rawReviews as any)?.content))
+    ? (rawReviews as any).content
+    : [];
 
   const isOwner = Boolean(
     user?.username && product?.owner?.username && user.username === product.owner.username
@@ -408,7 +414,7 @@ export const ProductDetail = () => {
                           {product.listingType === 'BOTH' ? 'Giá mua đứt:' : 'Giá chuyển nhượng:'}
                         </span>
                         <span className="text-3xl font-extrabold text-emerald-700 tracking-tight">
-                          {formatPrice(product.price)}
+                          {formatPrice(product.price || 0)}
                         </span>
                       </div>
                       <span className="text-xs font-semibold px-2.5 py-1 bg-white text-emerald-800 rounded-md border border-emerald-200/80">
@@ -471,7 +477,7 @@ export const ProductDetail = () => {
                           <div className="flex items-center gap-1.5 mt-1 text-xs">
                             <span className="flex items-center text-amber-500 font-bold">
                               <Star size={13} className="fill-amber-400 mr-0.5" />
-                              {sellerRating.averageRating.toFixed(1)} / 5.0
+                              {Number(sellerRating.averageRating ?? 0).toFixed(1)} / 5.0
                             </span>
                             <span className="text-slate-400">•</span>
                             <span className="text-slate-500">{sellerRating.totalReviews} đánh giá</span>
