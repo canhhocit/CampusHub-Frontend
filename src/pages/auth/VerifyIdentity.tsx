@@ -922,7 +922,7 @@ export const VerifyIdentity = () => {
                   {selfieBlob && selfiePreviewUrl ? (
                     /* Side-by-side comparison preview */
                     <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="border border-slate-300 rounded-lg p-2.5 bg-slate-50 text-center">
                           <span className="block text-[11px] font-semibold text-slate-600 mb-1.5">
                             Ảnh thẻ CCCD gốc (Bước 1)
@@ -947,7 +947,7 @@ export const VerifyIdentity = () => {
                         </div>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex flex-col-reverse sm:flex-row gap-2">
                         <button
                           type="button"
                           onClick={handleRetakeSelfie}

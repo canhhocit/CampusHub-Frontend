@@ -349,7 +349,7 @@ export const AdminPayouts = () => {
       {/* Modal Duyệt Chuyển Tiền */}
       {approveModalOpen && selectedPayout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
                 <CheckCircle2 className="text-emerald-600" size={20} />
@@ -442,7 +442,7 @@ export const AdminPayouts = () => {
       {/* Modal Cấu hình Hạn Mức Rút Tiền */}
       {configModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
                 <Settings className="text-emerald-600" size={20} />
@@ -518,7 +518,7 @@ export const AdminPayouts = () => {
       {/* Modal Từ Chối */}
       {rejectModalOpen && selectedPayout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
                 <XCircle className="text-rose-600" size={20} />

@@ -126,7 +126,8 @@ export const LockerList = () => {
                 </div>
             ) : (
                 <div className="bg-white shadow-xs border border-gray-200 rounded-xl overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Mã & Tên tủ</th>
@@ -197,6 +198,7 @@ export const LockerList = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
 
                     {/* Pagination */}
                     {pageData && pageData.totalPages > 1 && (

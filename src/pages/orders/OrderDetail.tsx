@@ -525,7 +525,13 @@ export const OrderDetail = () => {
           {/* Stepper / Timeline */}
           {order.status !== 'CANCELLED' && order.status !== 'REJECTED' && order.status !== 'EXPIRED' ? (
             <div className="pt-6 border-t border-slate-100">
-              <div className={`grid grid-cols-2 sm:grid-cols-${order.orderType === 'RENTAL' ? '5' : '4'} gap-4`}>
+              <div
+                className={
+                  order.orderType === 'RENTAL'
+                    ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4'
+                    : 'grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4'
+                }
+              >
                 {(order.orderType === 'RENTAL' ? rentalStepConfig : purchaseStepConfig).map((s, idx) => {
                   const status = getStepStatus(s.key);
                   return (

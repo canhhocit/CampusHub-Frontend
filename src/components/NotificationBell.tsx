@@ -142,7 +142,7 @@ export const NotificationBell = () => {
 
       {/* Popover Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute -right-8 sm:right-0 mt-2 w-[calc(100vw-2.5rem)] max-w-sm sm:w-96 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
           {/* Header */}
           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
             <div className="flex items-center gap-1.5 font-bold text-slate-900 text-sm">

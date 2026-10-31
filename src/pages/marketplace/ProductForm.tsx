@@ -427,7 +427,7 @@ export const ProductForm = () => {
               <label className="text-xs font-bold text-slate-700 block mb-2">
                 Hình thức giao dịch <span className="text-rose-500">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {[
                   { value: 'SALE', label: 'Bán đứt', desc: 'Chuyển nhượng vĩnh viễn' },
                   { value: 'RENT', label: 'Cho thuê', desc: 'Tính theo ngày & có cọc' },
@@ -770,17 +770,17 @@ export const ProductForm = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
             <Link
               to="/marketplace/my-listings"
-              className="px-5 py-2.5 border border-slate-300 rounded-md text-xs font-bold text-slate-700 hover:bg-slate-100 transition"
+              className="px-5 py-2.5 border border-slate-300 rounded-md text-xs font-bold text-slate-700 hover:bg-slate-100 transition text-center"
             >
               Hủy bỏ
             </Link>
             <button
               type="submit"
               disabled={mutation.isPending || isSubmitting}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-bold shadow-2xs transition disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-bold shadow-2xs transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {mutation.isPending ? (
                 <>

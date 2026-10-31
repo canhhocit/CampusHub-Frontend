@@ -322,14 +322,24 @@ export const MarketplaceList = () => {
                 <Filter size={15} className="text-emerald-600" />
                 Bộ lọc tìm kiếm
               </h2>
-              {hasActiveFilters && (
+              <div className="flex items-center gap-2">
+                {hasActiveFilters && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="text-[11px] text-emerald-700 hover:underline font-semibold flex items-center gap-1"
+                  >
+                    <RotateCcw size={11} /> Xóa
+                  </button>
+                )}
                 <button
-                  onClick={handleResetFilters}
-                  className="text-[11px] text-emerald-700 hover:underline font-semibold flex items-center gap-1"
+                  type="button"
+                  onClick={() => setMobileFilterOpen(false)}
+                  className="md:hidden text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100"
+                  aria-label="Đóng bộ lọc"
                 >
-                  <RotateCcw size={11} /> Xóa tất cả
+                  <X size={16} />
                 </button>
-              )}
+              </div>
             </div>
 
             {/* Filter 1: Danh mục sản phẩm */}

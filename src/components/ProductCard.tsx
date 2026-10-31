@@ -81,20 +81,20 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </div>
 
       {/* Product Information */}
-      <div className="p-3.5 flex-1 flex flex-col justify-between gap-3">
+      <div className="p-2.5 sm:p-3.5 flex-1 flex flex-col justify-between gap-2.5 sm:gap-3">
         <div>
           {/* Title with line clamp */}
-          <h3 className="font-semibold text-slate-900 text-sm sm:text-base line-clamp-2 group-hover:text-emerald-700 transition-colors leading-snug">
+          <h3 className="font-semibold text-slate-900 text-xs sm:text-sm line-clamp-2 group-hover:text-emerald-700 transition-colors leading-snug">
             {product.title}
           </h3>
 
           {/* Price (Oreka fresh green prominent price) */}
           <div className="mt-1.5 flex flex-wrap items-baseline gap-1.5">
-            <span className="text-base sm:text-lg font-bold text-emerald-700 tracking-tight">
+            <span className="text-sm sm:text-base font-bold text-emerald-700 tracking-tight">
               {formatPrice(product.price)}
             </span>
             {product.listingType === 'BOTH' && product.rentPricePerDay && (
-              <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded">
                 Thuê: {formatPrice(product.rentPricePerDay)}/ngày
               </span>
             )}
@@ -102,8 +102,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         </div>
 
         {/* Seller Info & Meta */}
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600 gap-2">
-          <div className="flex items-center gap-1.5 truncate max-w-35">
+        <div className="pt-2.5 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] sm:text-xs text-slate-600 gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5 truncate max-w-24 xs:max-w-35">
             <div className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-[9px] shrink-0">
               {product.owner?.fullName?.charAt(0) || product.owner?.username?.charAt(0) || 'U'}
             </div>
@@ -117,7 +117,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             )}
           </div>
 
-          <div className="flex items-center gap-1 text-slate-400 shrink-0">
+          <div className="hidden xs:flex items-center gap-1 text-slate-400 shrink-0 text-[10px] sm:text-[11px]">
             <Clock size={11} />
             <span>{formatDate(product.createdAt)}</span>
           </div>

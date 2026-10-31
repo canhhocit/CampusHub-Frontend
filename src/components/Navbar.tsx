@@ -219,17 +219,18 @@ export const Navbar = () => {
           </div>
 
           {/* Mobile Hamburger Button */}
-          <div className="md:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-1.5 sm:gap-2">
             {isAuthenticated && <NotificationBell />}
             <Link
-              to="/marketplace/new"
-              className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs"
+              to={isAuthenticated ? "/marketplace/new" : "/login"}
+              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs shrink-0"
             >
-              <Plus size={15} /> Đăng bán
+              <Plus size={14} />
+              <span className="hidden xs:inline">Đăng bán</span>
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-600 hover:text-slate-900 rounded-lg"
+              className="p-1.5 text-slate-600 hover:text-slate-900 rounded-lg shrink-0"
               aria-label="Menu"
             >
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -279,15 +280,32 @@ export const Navbar = () => {
                 </Link>
               );
             })}
-            {isAuthenticated && (
-              <Link
-                to="/marketplace/new"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-900 bg-slate-100"
-              >
-                <Plus size={16} />
-                Đăng tin bán sản phẩm
-              </Link>
+            <Link
+              to={isAuthenticated ? "/marketplace/new" : "/login"}
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-900 bg-slate-100"
+            >
+              <Plus size={16} />
+              Đăng tin bán sản phẩm
+            </Link>
+            {isAuthenticated && !isAdmin && (
+              <div className="pt-1">
+                {user?.identityVerified ? (
+                  <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                    <span>Tài khoản đã duyệt CCCD</span>
+                  </div>
+                ) : (
+                  <Link
+                    to="/verify-identity"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition"
+                  >
+                    <ShieldAlert size={15} className="text-amber-600 shrink-0" />
+                    <span>Xác minh CCCD để mở toàn quyền</span>
+                  </Link>
+                )}
+              </div>
             )}
             {isAdmin && (
               <Link
