@@ -33,11 +33,10 @@ export const LockerMap = ({ lockers, selectedLockerId, onSelectLocker, className
                 zoomControl: false, // Custom placed zoom control
             });
 
-            // CartoDB Positron - Clean, professional, free map tile layer
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            // Standard OpenStreetMap - 100% Free, No API key required
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 maxZoom: 19,
-                subdomains: 'abcd',
             }).addTo(map);
 
             // Add standard zoom control at bottom right
