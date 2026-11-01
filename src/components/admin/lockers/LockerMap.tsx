@@ -33,10 +33,11 @@ export const LockerMap = ({ lockers, selectedLockerId, onSelectLocker, className
                 zoomControl: false, // Custom placed zoom control
             });
 
-            // Standard OpenStreetMap - 100% Free, No API key required
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 19,
+            // Google Maps Standard Road Layer - 100% Free, No API key required, high speed & bypasses local OSM DNS blocks
+            L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                attribution: '&copy; Google Maps',
             }).addTo(map);
 
             // Add standard zoom control at bottom right

@@ -63,9 +63,11 @@ export const LockerLocationPicker = ({ latitude, longitude, onChange }: LockerLo
                 zoomControl: true,
             });
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 19,
+            // Google Maps Standard Road Layer - 100% Free, No API key required, high speed & bypasses local OSM DNS blocks
+            L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                attribution: '&copy; Google Maps',
             }).addTo(map);
 
             const marker = L.marker([currentLat, currentLng], {
@@ -106,7 +108,7 @@ export const LockerLocationPicker = ({ latitude, longitude, onChange }: LockerLo
         }
     }, [latitude, longitude]);
 
-    // Free OpenStreetMap Nominatim Geocoding API
+    // Free Geocoding API via Photon (OpenStreetMap data, 100% free, no API key)
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!searchQuery.trim()) return;
@@ -114,20 +116,25 @@ export const LockerLocationPicker = ({ latitude, longitude, onChange }: LockerLo
         setIsSearching(true);
         try {
             const res = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-                    searchQuery + ', Vietnam'
-                )}&limit=5`,
-                {
-                    headers: {
-                        'Accept-Language': 'vi',
-                    },
-                }
+                `https://photon.komoot.io/api/?q=${encodeURIComponent(
+                    searchQuery
+                )}&limit=5&lang=default`
             );
             const data = await res.json();
-            setSearchResults(data);
+            const formatted = (data.features || []).map((f: any) => {
+                const props = f.properties || {};
+                const name = props.name || '';
+                const parts = [name, props.street, props.district, props.city, props.country].filter(Boolean);
+                return {
+                    display_name: parts.join(', '),
+                    lat: String(f.geometry.coordinates[1]),
+                    lon: String(f.geometry.coordinates[0]),
+                };
+            });
+            setSearchResults(formatted);
             setShowResults(true);
         } catch (err) {
-            console.error('Nominatim search error:', err);
+            console.error('Geocoding search error:', err);
         } finally {
             setIsSearching(false);
         }
