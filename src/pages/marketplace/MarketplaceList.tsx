@@ -21,6 +21,8 @@ import {
   Layers,
 } from 'lucide-react';
 import { ProductCard } from '../../components/ProductCard';
+import { ProductCardSkeleton } from '../../components/common/Skeleton';
+import { EmptyState } from '../../components/common/EmptyState';
 
 export const MarketplaceList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -66,6 +68,16 @@ export const MarketplaceList = () => {
   });
 
   const lockers = lockersPage?.content || [];
+  const [lockerSearchTerm, setLockerSearchTerm] = useState('');
+
+  const filteredLockers = lockers.filter((lk) => {
+    if (!lockerSearchTerm.trim()) return true;
+    const term = lockerSearchTerm.toLowerCase();
+    return (
+      lk.name?.toLowerCase().includes(term) ||
+      lk.location?.toLowerCase().includes(term)
+    );
+  });
 
   // Fetch public active products with all filters
   const { data: productsPage, isLoading, isError, refetch } = useQuery<PageResponse<Product>>({
@@ -226,7 +238,7 @@ export const MarketplaceList = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] py-4 sm:py-6 font-sans">
+    <div className="min-h-screen bg-slate-50 py-4 sm:py-6 font-sans">
       <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-4">
         {/* 1. Shopee-style Search Header & Quick Chips */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
@@ -392,8 +404,36 @@ export const MarketplaceList = () => {
                 <MapPin size={13} className="text-emerald-600" />
                 Địa điểm tủ Locker
               </span>
-              <div className="space-y-1.5 text-xs">
+
+              {/* Search Filter for Lockers when > 4 lockers */}
+              {lockers.length > 4 && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={lockerSearchTerm}
+                    onChange={(e) => setLockerSearchTerm(e.target.value)}
+                    placeholder="Tìm trạm tủ..."
+                    className="w-full pl-7 pr-7 py-1 text-xs border border-slate-200 rounded-md bg-slate-50 focus:bg-white focus:outline-hidden focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    aria-label="Tìm kiếm trạm tủ locker"
+                  />
+                  <Search size={12} className="absolute left-2 top-2 text-slate-400" />
+                  {lockerSearchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setLockerSearchTerm('')}
+                      className="absolute right-1.5 top-1.5 text-slate-400 hover:text-slate-600 p-0.5"
+                      aria-label="Xóa tìm kiếm trạm tủ"
+                    >
+                      <X size={11} />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Bounded Scrollable Locker List */}
+              <div className="max-h-52 overflow-y-auto pr-1 space-y-1.5 text-xs scrollbar-thin">
                 <button
+                  type="button"
                   onClick={() => handleLockerSelect('')}
                   className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition ${
                     !lockerId
@@ -405,26 +445,33 @@ export const MarketplaceList = () => {
                   {!lockerId && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
                 </button>
 
-                {lockers.map((lk) => {
-                  const isSelected = lockerId === lk.id.toString();
-                  return (
-                    <button
-                      key={lk.id}
-                      onClick={() => handleLockerSelect(lk.id.toString())}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg transition ${
-                        isSelected
-                          ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
-                          : 'text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="truncate">{lk.name}</span>
-                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
-                      </div>
-                      <p className="text-[10px] text-slate-400 truncate mt-0.5">{lk.location}</p>
-                    </button>
-                  );
-                })}
+                {filteredLockers.length === 0 ? (
+                  <p className="text-[11px] text-slate-400 italic py-2 text-center">
+                    Không tìm thấy trạm tủ
+                  </p>
+                ) : (
+                  filteredLockers.map((lk) => {
+                    const isSelected = lockerId === lk.id.toString();
+                    return (
+                      <button
+                        type="button"
+                        key={lk.id}
+                        onClick={() => handleLockerSelect(lk.id.toString())}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-lg transition ${
+                          isSelected
+                            ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80'
+                            : 'text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="truncate">{lk.name}</span>
+                          {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>}
+                        </div>
+                        <p className="text-[10px] text-slate-400 truncate mt-0.5">{lk.location}</p>
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </div>
 
@@ -567,7 +614,7 @@ export const MarketplaceList = () => {
           {/* Right Column: Product Results & Shopee Sort Toolbar */}
           <main className="col-span-1 md:col-span-8 lg:col-span-9 space-y-3.5">
             {/* Shopee-style Sort Toolbar */}
-            <div className="bg-[#ededed] p-3 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="bg-slate-100 border border-slate-200/80 p-3 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-slate-700 font-semibold">Sắp xếp theo:</span>
 
@@ -699,17 +746,9 @@ export const MarketplaceList = () => {
             {/* Product Grid Area */}
             <div>
               {isLoading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
-                  {Array.from({ length: 8 }).map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-white rounded-xl border border-slate-200 p-3 space-y-3 animate-pulse"
-                    >
-                      <div className="aspect-square bg-slate-200 rounded-lg" />
-                      <div className="h-4 bg-slate-200 rounded w-3/4" />
-                      <div className="h-4 bg-slate-200 rounded w-1/2" />
-                      <div className="h-3 bg-slate-100 rounded w-full pt-2" />
-                    </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+                  {Array.from({ length: 12 }).map((_, idx) => (
+                    <ProductCardSkeleton key={idx} />
                   ))}
                 </div>
               ) : isError ? (
@@ -725,33 +764,16 @@ export const MarketplaceList = () => {
                   </button>
                 </div>
               ) : productsPage?.content.length === 0 ? (
-                <div className="bg-white rounded-lg border border-slate-200 p-12 text-center space-y-3 shadow-2xs">
-                  <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
-                    <Search size={26} />
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900">
-                    Không tìm thấy sản phẩm phù hợp
-                  </h3>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Hãy thử xóa bớt bộ lọc khoảng giá, địa điểm tủ hoặc thử tìm với từ khóa chung hơn.
-                  </p>
-                  <div className="pt-2 flex justify-center gap-2.5">
-                    {hasActiveFilters && (
-                      <button
-                        onClick={handleResetFilters}
-                        className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                      >
-                        Xóa toàn bộ bộ lọc
-                      </button>
-                    )}
-                    <Link
-                      to="/marketplace/new"
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-2xs"
-                    >
-                      Đăng bán ngay
-                    </Link>
-                  </div>
-                </div>
+                <EmptyState
+                  icon={<Search size={24} className="text-emerald-600" />}
+                  title="Không tìm thấy sản phẩm phù hợp"
+                  description="Hãy thử xóa bớt bộ lọc khoảng giá, địa điểm tủ hoặc thử tìm với từ khóa chung hơn."
+                  action={
+                    hasActiveFilters
+                      ? { label: 'Xóa toàn bộ bộ lọc', onClick: handleResetFilters }
+                      : undefined
+                  }
+                />
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
                   {productsPage?.content.map((product) => (

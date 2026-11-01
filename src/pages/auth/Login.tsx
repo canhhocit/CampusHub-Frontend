@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { PasswordInput } from '../../components/common/PasswordInput';
 import { AlertCircle, User, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
@@ -9,8 +9,19 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // UP-02: Preserve deep link or default to '/'
+  const from = (location.state as any)?.from?.pathname || '/';
+
+  // UP-02: Redirect already authenticated users away from login
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +29,7 @@ export const Login = () => {
     setLoading(true);
     try {
       await login({ usernameOrEmail, password });
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err: any) {
       if (err.response?.data?.message) {
         setError(err.response.data.message);

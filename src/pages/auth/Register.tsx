@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { PasswordInput } from '../../components/common/PasswordInput';
 import { AlertCircle, CheckCircle, User, Mail, UserCheck, Calendar, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
@@ -16,7 +16,15 @@ export const Register = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { user, register } = useAuth();
+  const navigate = useNavigate();
+
+  // UP-02: Redirect already authenticated user
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   // Max birthdate for 13 years old (memoized for render purity)
   const maxBirthDate = useMemo(() => {
@@ -24,6 +32,22 @@ export const Register = () => {
       .toISOString()
       .split('T')[0];
   }, []);
+
+  // UP-02: Password strength meter matching WCAG
+  const passwordStrength = useMemo(() => {
+    const pwd = formData.password;
+    if (!pwd) return { score: 0, label: '', color: '', text: '' };
+    let score = 0;
+    if (pwd.length >= 6) score++;
+    if (pwd.length >= 10) score++;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) score++;
+
+    if (score <= 1) return { score: 1, label: 'Yếu', color: 'bg-rose-500', text: 'text-rose-600' };
+    if (score === 2) return { score: 2, label: 'Trung bình', color: 'bg-amber-500', text: 'text-amber-600' };
+    if (score === 3) return { score: 3, label: 'Khá', color: 'bg-blue-500', text: 'text-blue-600' };
+    return { score: 4, label: 'Mạnh', color: 'bg-emerald-500', text: 'text-emerald-600' };
+  }, [formData.password]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -252,6 +276,26 @@ export const Register = () => {
                 }
               />
             </div>
+
+            {/* UP-02: Password Strength Indicator */}
+            {formData.password && (
+              <div className="space-y-1.5 p-3 bg-slate-50 rounded-xl border border-slate-200/80" aria-live="polite">
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-slate-600 font-medium">Độ mạnh mật khẩu:</span>
+                  <span className={`font-bold ${passwordStrength.text}`}>{passwordStrength.label}</span>
+                </div>
+                <div className="w-full grid grid-cols-4 gap-1.5 h-1.5">
+                  {[1, 2, 3, 4].map((level) => (
+                    <div
+                      key={level}
+                      className={`rounded-full h-full transition-colors ${
+                        level <= passwordStrength.score ? passwordStrength.color : 'bg-slate-200'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"

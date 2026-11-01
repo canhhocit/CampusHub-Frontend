@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Locker } from '../../../types/locker';
-import { Layers, Crosshair } from 'lucide-react';
+import { Layers, Crosshair, AlertTriangle } from 'lucide-react';
 
 interface LockerMapProps {
     lockers: Locker[];
@@ -124,12 +124,16 @@ export const LockerMap = ({ lockers, selectedLockerId, onSelectLocker, className
             return l.status === statusFilter;
         });
 
+        // Separate lockers with real GPS vs lockers without GPS
+        const lockersWithCoords = filteredLockers.filter(
+            (l) => l.latitude != null && l.longitude != null && !isNaN(l.latitude) && !isNaN(l.longitude)
+        );
+
         const validCoords: [number, number][] = [];
 
-        filteredLockers.forEach((locker) => {
-            // If locker has no coordinates, assign sample offset based on ID for demo visual
-            const lat = locker.latitude ?? (DEFAULT_CENTER[0] + (locker.id % 5 - 2) * 0.002);
-            const lng = locker.longitude ?? (DEFAULT_CENTER[1] + (locker.id % 4 - 1.5) * 0.0025);
+        lockersWithCoords.forEach((locker) => {
+            const lat = locker.latitude!;
+            const lng = locker.longitude!;
 
             validCoords.push([lat, lng]);
 
@@ -173,8 +177,9 @@ export const LockerMap = ({ lockers, selectedLockerId, onSelectLocker, className
                         ${locker.name}
                     </h4>
 
-                    <p style="font-size: 11px; color: #64748b; margin: 0 0 10px 0; line-height: 1.4;">
-                        📍 ${locker.location}
+                    <p style="font-size: 11px; color: #64748b; margin: 0 0 10px 0; line-height: 1.4; display: flex; align-items: flex-start; gap: 4px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>${locker.location}</span>
                     </p>
 
                     <!-- Compartment Capacity Bar -->
@@ -189,13 +194,14 @@ export const LockerMap = ({ lockers, selectedLockerId, onSelectLocker, className
                     </div>
 
                     <a href="/admin/lockers/${locker.id}" style="
-                        display: block; width: 100%; text-align: center;
+                        display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; text-align: center;
                         background-color: #059669; color: white;
                         font-size: 11px; font-weight: 700;
                         padding: 6px 0; border-radius: 6px;
                         text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
                     ">
-                        Xem chi tiết & Quản lý ngăn ➔
+                        <span>Xem chi tiết & Quản lý ngăn</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     </a>
                 </div>
             `;
@@ -255,7 +261,7 @@ export const LockerMap = ({ lockers, selectedLockerId, onSelectLocker, className
                         fillOpacity: 0.9,
                     })
                         .addTo(mapInstanceRef.current)
-                        .bindPopup('📍 Bạn đang ở đây!')
+                        .bindPopup('<div style="font-size: 11px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/></svg> Vị trí của bạn</div>')
                         .openPopup();
                 }
             },
@@ -271,11 +277,8 @@ export const LockerMap = ({ lockers, selectedLockerId, onSelectLocker, className
     const handleResetView = () => {
         if (!mapInstanceRef.current) return;
         const validCoords: [number, number][] = lockers
-            .map((l) => {
-                const lat = l.latitude ?? (DEFAULT_CENTER[0] + (l.id % 5 - 2) * 0.002);
-                const lng = l.longitude ?? (DEFAULT_CENTER[1] + (l.id % 4 - 1.5) * 0.0025);
-                return [lat, lng] as [number, number];
-            });
+            .filter((l) => l.latitude != null && l.longitude != null)
+            .map((l) => [l.latitude!, l.longitude!] as [number, number]);
 
         if (validCoords.length > 0) {
             mapInstanceRef.current.fitBounds(L.latLngBounds(validCoords), { padding: [40, 40], maxZoom: 17 });
@@ -349,6 +352,21 @@ export const LockerMap = ({ lockers, selectedLockerId, onSelectLocker, className
                     <Layers size={14} className="text-emerald-600" />
                     <span>Toàn cảnh</span>
                 </button>
+
+                {/* Lockers Without GPS Indicator */}
+                {(() => {
+                    const withoutGpsCount = lockers.filter((l) => l.latitude == null || l.longitude == null).length;
+                    if (withoutGpsCount === 0) return null;
+                    return (
+                        <div
+                            className="bg-amber-50/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-amber-300/80 shadow-xs text-xs font-semibold text-amber-800 flex items-center gap-1.5"
+                            title="Các trạm tủ này chưa được thiết lập tọa độ nên chưa thể hiển thị vị trí trên bản đồ."
+                        >
+                            <AlertTriangle size={13} className="text-amber-600 shrink-0" />
+                            <span>{withoutGpsCount} tủ chưa có GPS</span>
+                        </div>
+                    );
+                })()}
             </div>
 
             {/* Locate Me Floating Button */}

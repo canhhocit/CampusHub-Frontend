@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Search, Crosshair, Loader2 } from 'lucide-react';
+import { MapPin, Search, Crosshair, Loader2, Info } from 'lucide-react';
 
 interface LockerLocationPickerProps {
     latitude?: number | null;
@@ -241,8 +241,9 @@ export const LockerLocationPicker = ({ latitude, longitude, onChange }: LockerLo
             {/* Map Picker Canvas */}
             <div className="relative rounded-lg overflow-hidden border border-slate-300 shadow-2xs h-64 bg-slate-100">
                 <div ref={mapContainerRef} className="w-full h-full" />
-                <div className="absolute bottom-2 left-2 z-[1000] bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded text-[11px] font-medium text-slate-600 border border-slate-200">
-                    💡 Click hoặc kéo ghim để chọn vị trí tủ
+                <div className="absolute bottom-2 left-2 z-[1000] bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-700 border border-slate-200 shadow-2xs flex items-center gap-1.5">
+                    <Info size={13} className="text-amber-600 shrink-0" />
+                    <span>Click hoặc kéo ghim để chọn vị trí tủ</span>
                 </div>
             </div>
 

@@ -4,7 +4,7 @@ import { axiosInstance } from '../../../api/axios';
 import type { Locker, LockerStatus } from '../../../types/locker';
 import type { PageResponse } from '../../../types/marketplace';
 import { Link } from 'react-router-dom';
-import { Search, RefreshCw, Plus, ShieldAlert, List, Map as MapIcon, Columns } from 'lucide-react';
+import { Search, RefreshCw, Plus, ShieldAlert, List, Map as MapIcon, Columns, MapPin } from 'lucide-react';
 import { LockerMap } from '../../../components/admin/lockers/LockerMap';
 
 export const LockerList = () => {
@@ -177,9 +177,23 @@ export const LockerList = () => {
                                     </h3>
                                     <p className="text-xs text-slate-500 mt-0.5">Click vào biểu tượng trạm tủ trên bản đồ để xem chi tiết sức chứa và vị trí chính xác.</p>
                                 </div>
-                                <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
-                                    {pageData?.content.length} trạm hiển thị
-                                </span>
+                                {(() => {
+                                    const lockers = pageData?.content || [];
+                                    const withGps = lockers.filter(l => l.latitude != null && l.longitude != null).length;
+                                    const withoutGps = lockers.length - withGps;
+                                    return (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                                                {withGps} trạm có GPS
+                                            </span>
+                                            {withoutGps > 0 && (
+                                                <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                                                    {withoutGps} chưa ghim vị trí
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
                             </div>
                             <LockerMap
                                 lockers={pageData?.content || []}
@@ -220,7 +234,8 @@ export const LockerList = () => {
                                                 <div>{locker.location}</div>
                                                 {locker.latitude != null && locker.longitude != null ? (
                                                     <div className="text-xs text-emerald-700 font-mono mt-0.5 flex items-center gap-1">
-                                                        <span>📍 {locker.latitude.toFixed(4)}, {locker.longitude.toFixed(4)}</span>
+                                                        <MapPin size={12} className="text-emerald-600 shrink-0" />
+                                                        <span>{locker.latitude.toFixed(4)}, {locker.longitude.toFixed(4)}</span>
                                                     </div>
                                                 ) : (
                                                     <div className="text-[11px] text-slate-400 italic mt-0.5">Chưa có tọa độ GPS</div>

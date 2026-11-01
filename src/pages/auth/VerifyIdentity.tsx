@@ -28,6 +28,7 @@ import {
   RotateCcw,
   Eye,
   Check,
+  Info,
 } from 'lucide-react';
 
 export const VerifyIdentity = () => {
@@ -832,15 +833,26 @@ export const VerifyIdentity = () => {
                   </div>
 
                   {/* Camera Viewport with Face Oval Overlay */}
-                  <div className="relative bg-black rounded-xl overflow-hidden aspect-4/3 flex items-center justify-center border border-slate-300 shadow-inner">
+                  <div className="relative bg-black rounded-xl overflow-hidden aspect-4/3 max-h-[50vh] w-full max-w-md mx-auto flex items-center justify-center border border-slate-300 shadow-inner">
                     {cameraError ? (
-                      <div className="p-6 text-center text-rose-300 space-y-2">
+                      <div className="p-4 sm:p-6 text-center text-rose-200 space-y-3 max-w-sm">
                         <CameraOff size={32} className="mx-auto text-rose-400" />
-                        <p className="text-xs">{cameraError}</p>
+                        <p className="text-xs font-semibold text-rose-300">{cameraError}</p>
+
+                        {/* Step-by-step recovery guide for mobile & desktop */}
+                        <div className="p-3 bg-slate-900/90 rounded-lg text-left text-[11px] text-slate-300 space-y-1.5 border border-white/10">
+                          <p className="font-bold text-white flex items-center gap-1.5">
+                            <Info size={13} className="text-amber-400" />
+                            Cách gỡ chặn quyền Camera:
+                          </p>
+                          <p>• <strong>Chrome / Android:</strong> Nhấn biểu tượng Cài đặt trang/Ổ khóa trên thanh địa chỉ &gt; Quyền &gt; Camera &gt; Cho phép.</p>
+                          <p>• <strong>Safari / iOS:</strong> Vào Cài đặt &gt; Safari &gt; Camera &gt; Cho phép (hoặc chạm vào chữ 'aA' trên thanh địa chỉ).</p>
+                        </div>
+
                         <button
                           type="button"
                           onClick={startCamera}
-                          className="mt-2 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-md shadow-xs"
+                          className="mt-1 px-4 py-2 bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold rounded-lg shadow-xs transition"
                         >
                           Thử mở lại Camera
                         </button>
@@ -855,16 +867,19 @@ export const VerifyIdentity = () => {
                           className="w-full h-full object-cover scale-x-[-1]"
                         />
 
-                        {/* Oval Face Guide Overlay */}
-                        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                          <div
-                            className={`w-48 sm:w-56 h-64 sm:h-72 rounded-[50%] border-2 transition-all duration-300 ${
-                              isCapturingFrames
-                                ? 'border-emerald-500 border-dashed shadow-[0_0_20px_rgba(16,185,129,0.6)]'
-                                : 'border-white/60'
-                            }`}
+                        {/* Responsive Vector SVG Face Guide Overlay */}
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                          <ellipse
+                            cx="50"
+                            cy="48"
+                            rx="28"
+                            ry="38"
+                            fill="none"
+                            stroke={isCapturingFrames ? '#10b981' : 'rgba(255,255,255,0.7)'}
+                            strokeWidth="1.5"
+                            strokeDasharray={isCapturingFrames ? '3 2' : 'none'}
                           />
-                        </div>
+                        </svg>
 
                         {/* Recording Progress Indicator */}
                         {isCapturingFrames && (
@@ -979,15 +994,26 @@ export const VerifyIdentity = () => {
                   ) : (
                     /* Selfie Camera Viewport */
                     <div className="space-y-4">
-                      <div className="relative bg-black rounded-xl overflow-hidden aspect-4/3 flex items-center justify-center border border-slate-300 shadow-inner">
+                      <div className="relative bg-black rounded-xl overflow-hidden aspect-4/3 max-h-[50vh] w-full max-w-md mx-auto flex items-center justify-center border border-slate-300 shadow-inner">
                         {cameraError ? (
-                          <div className="p-6 text-center text-rose-300 space-y-2">
+                          <div className="p-4 sm:p-6 text-center text-rose-200 space-y-3 max-w-sm">
                             <CameraOff size={32} className="mx-auto text-rose-400" />
-                            <p className="text-xs">{cameraError}</p>
+                            <p className="text-xs font-semibold text-rose-300">{cameraError}</p>
+
+                            {/* Step-by-step recovery guide */}
+                            <div className="p-3 bg-slate-900/90 rounded-lg text-left text-[11px] text-slate-300 space-y-1.5 border border-white/10">
+                              <p className="font-bold text-white flex items-center gap-1.5">
+                                <Info size={13} className="text-amber-400" />
+                                Cách gỡ chặn quyền Camera:
+                              </p>
+                              <p>• <strong>Chrome / Android:</strong> Nhấn biểu tượng Cài đặt trang/Ổ khóa trên thanh địa chỉ &gt; Quyền &gt; Camera &gt; Cho phép.</p>
+                              <p>• <strong>Safari / iOS:</strong> Vào Cài đặt &gt; Safari &gt; Camera &gt; Cho phép (hoặc chạm vào chữ 'aA' trên thanh địa chỉ).</p>
+                            </div>
+
                             <button
                               type="button"
                               onClick={startCamera}
-                              className="mt-2 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-md shadow-xs"
+                              className="mt-1 px-4 py-2 bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold rounded-lg shadow-xs transition"
                             >
                               Thử mở lại Camera
                             </button>
@@ -1001,10 +1027,18 @@ export const VerifyIdentity = () => {
                               muted
                               className="w-full h-full object-cover scale-x-[-1]"
                             />
-                            {/* Oval Face Guideline */}
-                            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                              <div className="w-48 sm:w-56 h-64 sm:h-72 rounded-[50%] border-2 border-white/70" />
-                            </div>
+                            {/* Responsive Vector SVG Face Guideline */}
+                            <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                              <ellipse
+                                cx="50"
+                                cy="48"
+                                rx="28"
+                                ry="38"
+                                fill="none"
+                                stroke="rgba(255,255,255,0.75)"
+                                strokeWidth="1.5"
+                              />
+                            </svg>
                           </>
                         )}
                       </div>

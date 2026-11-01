@@ -45,7 +45,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Top Badges */}
         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
-          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-900/70 backdrop-blur-xs text-white shadow-2xs truncate max-w-30">
+          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-900/70 backdrop-blur-xs text-white shadow-2xs truncate max-w-[120px]">
             {product.category?.name || 'Khác'}
           </span>
           {product.listingType === 'BOTH' && (
@@ -103,7 +103,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Seller Info & Meta */}
         <div className="pt-2.5 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] sm:text-xs text-slate-600 gap-1.5 sm:gap-2">
-          <div className="flex items-center gap-1.5 truncate max-w-24 xs:max-w-35">
+          <div className="flex items-center gap-1.5 min-w-0 truncate max-w-[100px] sm:max-w-[140px]">
             <div className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-[9px] shrink-0">
               {product.owner?.fullName?.charAt(0) || product.owner?.username?.charAt(0) || 'U'}
             </div>
@@ -117,7 +117,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             )}
           </div>
 
-          <div className="hidden xs:flex items-center gap-1 text-slate-400 shrink-0 text-[10px] sm:text-[11px]">
+          <div className="flex items-center gap-1 text-slate-400 shrink-0 text-[10px] sm:text-[11px]">
             <Clock size={11} />
             <span>{formatDate(product.createdAt)}</span>
           </div>

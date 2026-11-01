@@ -526,44 +526,83 @@ export const OrderDetail = () => {
 
           {/* Stepper / Timeline */}
           {order.status !== 'CANCELLED' && order.status !== 'REJECTED' && order.status !== 'EXPIRED' ? (
-            <div className="pt-6 border-t border-slate-100">
-              <div
-                className={
-                  order.orderType === 'RENTAL'
-                    ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4'
-                    : 'grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4'
-                }
-              >
-                {(order.orderType === 'RENTAL' ? rentalStepConfig : purchaseStepConfig).map((s, idx) => {
-                  const status = getStepStatus(s.key);
-                  return (
-                    <div key={s.key} className="flex flex-col items-center text-center relative">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs mb-2 transition-all ${
-                          status === 'completed'
-                            ? 'bg-slate-900 text-white'
-                            : status === 'current'
-                            ? 'border-2 border-slate-900 text-slate-900 bg-white'
-                            : 'bg-slate-100 text-slate-400'
-                        }`}
-                      >
-                        {status === 'completed' ? <Check size={14} /> : idx + 1}
-                      </div>
-                      <span
-                        className={`text-xs ${
-                          status === 'current'
-                            ? 'font-bold text-slate-900'
-                            : status === 'completed'
-                            ? 'font-medium text-slate-800'
-                            : 'text-slate-400'
-                        }`}
-                      >
-                        {s.label}
+            <div className="pt-6 border-t border-slate-100 space-y-3">
+              {/* Mobile Current Step Summary Banner */}
+              {(() => {
+                const steps = order.orderType === 'RENTAL' ? rentalStepConfig : purchaseStepConfig;
+                const orderSteps: OrderStatus[] = order.orderType === 'RENTAL'
+                  ? ['PENDING_SELLER', 'READY_FOR_PICKUP', 'RENTING', 'AWAITING_RETURN_DEPOSIT', 'COMPLETED']
+                  : ['PENDING_SELLER', 'AWAITING_DEPOSIT', 'READY_FOR_PICKUP', 'COMPLETED'];
+                const activeIdx = order.status === 'COMPLETED' ? steps.length - 1 : Math.max(0, orderSteps.indexOf(order.status));
+                const activeStep = steps[activeIdx] || steps[0];
+
+                return (
+                  <div className="sm:hidden p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-6 h-6 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                        {activeIdx + 1}
                       </span>
-                      <span className="text-[11px] text-slate-500 mt-0.5">{s.desc}</span>
+                      <div>
+                        <span className="font-bold text-slate-900 block leading-tight">
+                          {activeStep.label}
+                        </span>
+                        <span className="text-[11px] text-slate-500">{activeStep.desc}</span>
+                      </div>
                     </div>
-                  );
-                })}
+                    <span className="text-[10px] text-slate-500 font-semibold px-2 py-0.5 rounded-full bg-white border border-slate-200 shrink-0">
+                      Bước {activeIdx + 1}/{steps.length}
+                    </span>
+                  </div>
+                );
+              })()}
+
+              {/* Smooth Horizontal Track with Connecting Lines */}
+              <div className="overflow-x-auto no-scrollbar py-2">
+                <div className="flex items-start min-w-[500px] sm:min-w-0 justify-between relative px-2">
+                  {(order.orderType === 'RENTAL' ? rentalStepConfig : purchaseStepConfig).map((s, idx, arr) => {
+                    const status = getStepStatus(s.key);
+                    const isLast = idx === arr.length - 1;
+                    return (
+                      <div key={s.key} className="flex-1 flex flex-col items-center text-center relative group">
+                        {/* Connecting Line between steps */}
+                        {!isLast && (
+                          <div
+                            className={`absolute top-4 left-1/2 w-full h-0.5 -z-0 transition-colors ${
+                              status === 'completed' ? 'bg-slate-900' : 'bg-slate-200'
+                            }`}
+                          />
+                        )}
+
+                        {/* Step Circle Node */}
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs mb-2 relative z-10 transition-all ${
+                            status === 'completed'
+                              ? 'bg-slate-900 text-white shadow-2xs'
+                              : status === 'current'
+                              ? 'border-2 border-slate-900 text-slate-900 bg-white ring-4 ring-slate-100 shadow-2xs'
+                              : 'bg-slate-100 text-slate-400 border border-slate-200'
+                          }`}
+                        >
+                          {status === 'completed' ? <Check size={14} /> : idx + 1}
+                        </div>
+
+                        {/* Step Label & Subtitle */}
+                        <span
+                          className={`text-xs ${
+                            status === 'current'
+                              ? 'font-bold text-slate-900'
+                              : status === 'completed'
+                              ? 'font-medium text-slate-800'
+                              : 'text-slate-400'
+                          }`}
+                        >
+                          {s.label}
+                        </span>
+                        <span className="text-[11px] text-slate-500 mt-0.5 max-w-[110px] sm:max-w-none">{s.desc}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           ) : order.status === 'EXPIRED' ? (
@@ -592,10 +631,10 @@ export const OrderDetail = () => {
           )}
         </div>
 
-        {/* 2-Column Layout */}
+        {/* 2-Column Layout (Action-first on Mobile: Right column has order-1, Left column has order-2) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Product & Transaction Snapshot (7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* Left Column: Product & Transaction Snapshot (order-2 on mobile, lg:order-1 on desktop) */}
+          <div className="order-2 lg:order-1 lg:col-span-7 space-y-6">
             {/* Product Card */}
             <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-xs space-y-4">
               <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
@@ -829,8 +868,8 @@ export const OrderDetail = () => {
             </div>
           </div>
 
-          {/* Right Column: Keypad Terminal, Actions & Secret PIN (5 cols) */}
-          <div className="lg:col-span-5 space-y-6">
+          {/* Right Column: Keypad Terminal, Actions & Secret PIN (order-1 on mobile, lg:order-2 on desktop) */}
+          <div className="order-1 lg:order-2 lg:col-span-5 space-y-6">
             {/* ESCROW & PAYMENT CARD */}
             {order.paymentStatus === 'PAID' ? (
               <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-2xs space-y-4">
@@ -1095,29 +1134,51 @@ export const OrderDetail = () => {
                   </span>
                 </div>
 
-                {/* Secret Pickup PIN for Buyer */}
+                {/* Smart Locker Pickup Hero Pass */}
                 {isBuyer && order.pickupCode && (
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center space-y-2">
-                    <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
-                      Mã PIN lấy đồ (6 chữ số)
-                    </span>
-                    <div className="flex items-center justify-center gap-3">
-                      <span className="font-mono text-3xl font-bold text-white tracking-widest">
-                        {order.pickupCode}
-                      </span>
-                      <button
-                        onClick={handleCopyCode}
-                        className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white transition flex items-center gap-1"
-                        title="Sao chép mã"
-                      >
-                        {isCopied ? <Check size={14} /> : <Copy size={14} />}
-                      </button>
+                  <div className="bg-slate-950/90 rounded-2xl p-5 border-2 border-emerald-500/50 shadow-lg text-center space-y-3">
+                    {/* Header Info */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-400 font-bold uppercase tracking-wider pb-2 border-b border-emerald-500/20">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <Lock size={14} className="text-emerald-400 shrink-0" />
+                        <span className="truncate">
+                          {order.lockerName ? `${order.lockerName.toUpperCase()} • NGĂN ${order.compartmentCode || 'CHỈ ĐỊNH'}` : 'THẺ NHẬN ĐỒ SMART LOCKER'}
+                        </span>
+                      </div>
+                      {order.pickupDeadline && (
+                        <span className="text-[10px] text-slate-400 font-normal shrink-0">
+                          Hạn chót: {formatDate(order.pickupDeadline)}
+                        </span>
+                      )}
                     </div>
-                    {order.pickupDeadline && (
-                      <span className="text-[11px] text-slate-400 block">
-                        Hạn lấy đồ: {formatDate(order.pickupDeadline)}
+
+                    {/* PIN Hero Display */}
+                    <div className="py-1">
+                      <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wider block mb-1">
+                        Mã PIN lấy đồ bảo mật
                       </span>
-                    )}
+                      <div className="flex items-center justify-center gap-3">
+                        <span className="text-4xl font-mono tracking-widest font-extrabold text-emerald-400 select-all">
+                          {order.pickupCode}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleCopyCode}
+                          className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 min-h-[38px] active:scale-95"
+                          title="Sao chép mã PIN"
+                          aria-label="Sao chép mã PIN"
+                        >
+                          {isCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                          <span>{isCopied ? 'Đã sao chép' : 'Sao chép'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Instructions */}
+                    <div className="bg-white/5 rounded-xl p-2.5 text-[11px] text-slate-300 flex items-center justify-center gap-2 border border-white/5">
+                      <KeyRound size={13} className="text-emerald-400 shrink-0" />
+                      <span>Đến trước màn hình trạm tủ, chọn <strong>"Lấy đồ"</strong> và nhập mã PIN 6 số này.</span>
+                    </div>
                   </div>
                 )}
 
@@ -1144,37 +1205,47 @@ export const OrderDetail = () => {
                     {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
                       <button
                         key={digit}
+                        type="button"
                         onClick={() => handleKeypadPress(digit)}
                         className="py-2.5 bg-white/10 hover:bg-white/15 active:bg-white/25 rounded-xl font-mono text-base font-semibold transition text-white"
+                        aria-label={`Phím số ${digit}`}
                       >
                         {digit}
                       </button>
                     ))}
                     <button
+                      type="button"
                       onClick={handleKeypadClear}
                       className="py-2.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl text-xs font-medium transition"
+                      aria-label="Xóa mã PIN đã nhập"
                     >
                       Xóa
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleKeypadPress('0')}
                       className="py-2.5 bg-white/10 hover:bg-white/15 rounded-xl font-mono text-base font-semibold text-white transition"
+                      aria-label="Phím số 0"
                     >
                       0
                     </button>
                     <button
+                      type="button"
                       disabled={pickupCodeInput.length !== 6 || pickupMutation.isPending}
                       onClick={() => pickupMutation.mutate(pickupCodeInput)}
                       className="py-2.5 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-semibold disabled:opacity-30 transition"
+                      aria-label="Xác nhận mở tủ bằng mã PIN"
                     >
                       {pickupMutation.isPending ? '...' : 'OK'}
                     </button>
                   </div>
 
                   <button
+                    type="button"
                     disabled={pickupCodeInput.length !== 6 || pickupMutation.isPending}
                     onClick={() => pickupMutation.mutate(pickupCodeInput)}
                     className="w-full py-3 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-xl transition text-xs sm:text-sm disabled:opacity-30 flex items-center justify-center gap-2"
+                    aria-label="Xác nhận mở tủ lấy hàng"
                   >
                     {pickupMutation.isPending ? (
                       <span>Đang mở chốt khóa ngăn tủ...</span>
@@ -1325,34 +1396,56 @@ export const OrderDetail = () => {
                   </span>
                 </div>
 
-                {/* Secret Return Pickup PIN for Seller */}
+                {/* Smart Locker Return Pickup Hero Pass for Seller */}
                 {isSeller && (order.pickupCode || order.returnPickupCode) && (
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center space-y-2">
-                    <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
-                      Mã PIN lấy lại đồ (6 chữ số)
-                    </span>
-                    <div className="flex items-center justify-center gap-3">
-                      <span className="font-mono text-3xl font-bold text-white tracking-widest">
-                        {order.pickupCode || order.returnPickupCode}
+                  <div className="bg-slate-950/90 rounded-2xl p-5 border-2 border-emerald-500/50 shadow-lg text-center space-y-3">
+                    {/* Header Info */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-400 font-bold uppercase tracking-wider pb-2 border-b border-emerald-500/20">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <Lock size={14} className="text-emerald-400 shrink-0" />
+                        <span className="truncate">
+                          {order.returnLockerName ? `${order.returnLockerName.toUpperCase()} • NGĂN ${order.returnCompartmentCode || 'CHỈ ĐỊNH'}` : 'THẺ NHẬN LẠI ĐỒ'}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-normal shrink-0">
+                        Đồ đã được hoàn trả
                       </span>
-                      <button
-                        onClick={() => {
-                          const code = order.pickupCode || order.returnPickupCode;
-                          if (code) {
-                            navigator.clipboard.writeText(code);
-                            setIsCopied(true);
-                            setTimeout(() => setIsCopied(false), 2000);
-                          }
-                        }}
-                        className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white transition flex items-center gap-1"
-                        title="Sao chép mã"
-                      >
-                        {isCopied ? <Check size={14} /> : <Copy size={14} />}
-                      </button>
                     </div>
-                    <span className="text-[11px] text-slate-400 block">
-                      Tủ: {order.returnLockerName} • Ngăn: {order.returnCompartmentCode}
-                    </span>
+
+                    {/* PIN Hero Display */}
+                    <div className="py-1">
+                      <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wider block mb-1">
+                        Mã PIN lấy lại đồ (6 chữ số)
+                      </span>
+                      <div className="flex items-center justify-center gap-3">
+                        <span className="text-4xl font-mono tracking-widest font-extrabold text-emerald-400 select-all">
+                          {order.pickupCode || order.returnPickupCode}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const code = order.pickupCode || order.returnPickupCode;
+                            if (code) {
+                              navigator.clipboard.writeText(code);
+                              setIsCopied(true);
+                              setTimeout(() => setIsCopied(false), 2000);
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 min-h-[38px] active:scale-95"
+                          title="Sao chép mã PIN"
+                          aria-label="Sao chép mã PIN"
+                        >
+                          {isCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                          <span>{isCopied ? 'Đã sao chép' : 'Sao chép'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Instructions */}
+                    <div className="bg-white/5 rounded-xl p-2.5 text-[11px] text-slate-300 flex items-center justify-center gap-2 border border-white/5">
+                      <KeyRound size={13} className="text-emerald-400 shrink-0" />
+                      <span>Đến trước màn hình trạm tủ, chọn <strong>"Lấy đồ"</strong> và nhập mã PIN 6 số này để nhận lại sản phẩm.</span>
+                    </div>
                   </div>
                 )}
 
@@ -1392,37 +1485,47 @@ export const OrderDetail = () => {
                       {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
                         <button
                           key={digit}
+                          type="button"
                           onClick={() => handleKeypadPress(digit)}
                           className="py-2.5 bg-white/10 hover:bg-white/15 active:bg-white/25 rounded-xl font-mono text-base font-semibold transition text-white"
+                          aria-label={`Phím số ${digit}`}
                         >
                           {digit}
                         </button>
                       ))}
                       <button
+                        type="button"
                         onClick={handleKeypadClear}
                         className="py-2.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl text-xs font-medium transition"
+                        aria-label="Xóa mã PIN đã nhập"
                       >
                         Xóa
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleKeypadPress('0')}
                         className="py-2.5 bg-white/10 hover:bg-white/15 rounded-xl font-mono text-base font-semibold text-white transition"
+                        aria-label="Phím số 0"
                       >
                         0
                       </button>
                       <button
+                        type="button"
                         disabled={pickupCodeInput.length !== 6 || pickupReturnMutation.isPending}
                         onClick={() => pickupReturnMutation.mutate(pickupCodeInput)}
                         className="py-2.5 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-semibold disabled:opacity-30 transition"
+                        aria-label="Xác nhận mở tủ bằng mã PIN"
                       >
                         {pickupReturnMutation.isPending ? '...' : 'OK'}
                       </button>
                     </div>
 
                     <button
+                      type="button"
                       disabled={pickupCodeInput.length !== 6 || pickupReturnMutation.isPending}
                       onClick={() => pickupReturnMutation.mutate(pickupCodeInput)}
                       className="w-full py-3 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-xl transition text-xs sm:text-sm disabled:opacity-30 flex items-center justify-center gap-2"
+                      aria-label="Xác nhận mở ngăn nhận lại đồ & hoàn tất đơn"
                     >
                       {pickupReturnMutation.isPending ? (
                         <span>Đang kích hoạt chốt khóa mở ngăn...</span>

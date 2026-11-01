@@ -62,6 +62,15 @@ export const LockerKiosk = () => {
     enabled: !!selectedLockerId,
   });
 
+  const handleReset = () => {
+    setActiveMode('IDLE');
+    setPinCode('');
+    setOrderNumber('');
+    setActionResult(null);
+    setErrorMessage('');
+    setCountdown(30);
+  };
+
   // Auto return to IDLE countdown
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -103,15 +112,6 @@ export const LockerKiosk = () => {
     },
   });
 
-  const handleReset = () => {
-    setActiveMode('IDLE');
-    setPinCode('');
-    setOrderNumber('');
-    setActionResult(null);
-    setErrorMessage('');
-    setCountdown(30);
-  };
-
   const handleKeypadPress = (key: string) => {
     setErrorMessage('');
     if (key === 'BACK') {
@@ -145,6 +145,14 @@ export const LockerKiosk = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans select-none overflow-x-hidden">
+      {/* Persistent Simulation Disclaimer Banner (Rule 7 AGENTS.md) */}
+      <div className="bg-amber-500/10 border-b border-amber-500/30 py-2 px-4 text-center text-xs font-semibold text-amber-300 flex items-center justify-center gap-2">
+        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-[10px] font-bold border border-amber-500/30 text-amber-200 tracking-wider">
+          MÔ PHỎNG PHẦN MỀM (SIMULATED)
+        </span>
+        <span>Màn hình Kiosk đang chạy ở chế độ mô phỏng web. Thao tác mở chốt điện tử không điều khiển phần cứng thật.</span>
+      </div>
+
       {/* Kiosk Top Bar */}
       <header className="bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="flex items-center gap-4">
@@ -154,6 +162,9 @@ export const LockerKiosk = () => {
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
               CampusHub <span className="text-emerald-400 font-semibold text-sm">SMART LOCKER KIOSK</span>
+              <span className="text-[10px] bg-amber-500/20 border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded font-mono font-bold">
+                MÔ PHỎNG
+              </span>
             </h1>
             <p className="text-xs text-slate-400 flex items-center gap-1.5">
               <Building2 size={12} className="text-emerald-500" />
@@ -184,7 +195,7 @@ export const LockerKiosk = () => {
 
           <div className="text-right hidden sm:block">
             <div className="text-xs font-mono text-emerald-400 font-semibold">{currentTime}</div>
-            <div className="text-[10px] text-slate-400">Trạng thái: Hoạt động bình thường</div>
+            <div className="text-[10px] text-slate-400">Trạng thái: Hoạt động bình thường (Mô phỏng)</div>
           </div>
         </div>
       </header>
@@ -323,11 +334,13 @@ export const LockerKiosk = () => {
               {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'CLEAR', '0', 'BACK'].map((key) => {
                 const isClear = key === 'CLEAR';
                 const isBack = key === 'BACK';
+                const ariaLabel = isBack ? 'Xóa một chữ số' : isClear ? 'Xóa toàn bộ mã PIN' : `Chữ số ${key}`;
                 return (
                   <button
                     key={key}
                     type="button"
                     onClick={() => handleKeypadPress(key)}
+                    aria-label={ariaLabel}
                     className={`h-16 rounded-xl font-bold text-xl flex items-center justify-center transition active:scale-95 shadow-md ${
                       isClear
                         ? 'bg-slate-800 hover:bg-slate-700 text-slate-400 text-sm'
@@ -349,11 +362,11 @@ export const LockerKiosk = () => {
               className="w-full h-14 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base flex items-center justify-center gap-2 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-emerald-600/30 active:scale-98"
             >
               {pickupMutation.isPending ? (
-                <span>Đang kiểm tra mã và mở tủ...</span>
+                <span>Đang gửi lệnh mở ngăn mô phỏng...</span>
               ) : (
                 <>
                   <Unlock size={20} />
-                  XÁC NHẬN MỞ TỦ
+                  XÁC NHẬN MỞ TỦ (MÔ PHỎNG)
                 </>
               )}
             </button>
@@ -406,11 +419,11 @@ export const LockerKiosk = () => {
               className="w-full h-14 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-base flex items-center justify-center gap-2 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-600/30 active:scale-98"
             >
               {depositMutation.isPending ? (
-                <span>Đang xử lý phân bổ ngăn tủ...</span>
+                <span>Đang gửi lệnh cấp ngăn mô phỏng...</span>
               ) : (
                 <>
                   <Unlock size={20} />
-                  MỞ NGĂN GỬI ĐỒ
+                  MỞ NGĂN GỬI ĐỒ (MÔ PHỎNG)
                 </>
               )}
             </button>
@@ -425,24 +438,24 @@ export const LockerKiosk = () => {
             </div>
 
             <div className="space-y-1">
-              <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase">
-                MỞ KHÓA THÀNH CÔNG
+              <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider">
+                LỆNH MỞ NGĂN ĐÃ KÍCH HOẠT (MÔ PHỎNG)
               </span>
               <h2 className="text-3xl font-extrabold text-white">
-                Cửa Ngăn Tủ <span className="text-emerald-400 underline">{actionResult.compartmentCode}</span> Đã Mở!
+                Lệnh Mở Ngăn <span className="text-emerald-400 underline">{actionResult.compartmentCode}</span> Đã Kích Hoạt (Mô phỏng)
               </h2>
               <p className="text-sm text-slate-300 max-w-md mx-auto">
-                {actionResult.message || 'Vui lòng nhận/gửi hàng vào ngăn tủ và đóng chặt cửa lại.'}
+                {actionResult.message || 'Hệ thống đã ghi nhận trạng thái và cập nhật thành công trên máy chủ.'}
               </p>
             </div>
 
             {/* Visual Compartment Grid Simulation */}
             <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-4">
               <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-3">
-                <span>Mô phỏng mặt tủ: {actionResult.lockerName}</span>
-                <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  Ngăn {actionResult.compartmentCode} đang mở
+                <span>Mô phỏng phần mềm mặt tủ: {actionResult.lockerName}</span>
+                <span className="text-amber-400 font-semibold flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                  Tín hiệu mở ngăn {actionResult.compartmentCode} (Mô phỏng)
                 </span>
               </div>
 
@@ -462,7 +475,7 @@ export const LockerKiosk = () => {
                     >
                       <div className="text-sm font-bold">{comp.code}</div>
                       <div className="text-[10px] uppercase font-sans mt-1">
-                        {isTarget ? 'ĐANG MỞ' : comp.status === 'AVAILABLE' ? 'Trống' : 'Khóa'}
+                        {isTarget ? 'MÔ PHỎNG MỞ' : comp.status === 'AVAILABLE' ? 'Trống' : 'Khóa'}
                       </div>
                     </div>
                   );
@@ -477,7 +490,7 @@ export const LockerKiosk = () => {
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/20 active:scale-98"
               >
                 <CheckCircle2 size={18} />
-                TÔI ĐÃ ĐÓNG CỬA TỦ
+                XÁC NHẬN HOÀN TẤT (MÔ PHỎNG)
               </button>
 
               <div className="text-xs text-slate-400 flex items-center gap-1.5 py-1">

@@ -11,6 +11,8 @@ import {
   Clock,
   ExternalLink,
   AlertTriangle,
+  X,
+  Loader2,
 } from 'lucide-react';
 
 export const AdminDisputes = () => {
@@ -379,20 +381,27 @@ export const AdminDisputes = () => {
         </div>
       )}
 
-      {/* Resolution Confirmation Modal */}
+      {/* UP-13: Resolution Confirmation Modal with Accessibility and 8-State Feedback */}
       {resolveModalOpen && selectedDispute && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-2xs">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dispute-modal-title"
+            className="bg-white rounded-xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+              <h3 id="dispute-modal-title" className="font-bold text-slate-900 text-lg flex items-center gap-2">
                 <ShieldAlert className="text-emerald-600" size={20} />
                 Phán quyết tranh chấp đơn {selectedDispute.orderNumber}
               </h3>
               <button
+                type="button"
+                aria-label="Đóng cửa sổ phán quyết"
                 onClick={() => setResolveModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition focus:outline-hidden focus:ring-2 focus:ring-slate-400"
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
 
@@ -462,11 +471,11 @@ export const AdminDisputes = () => {
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setResolveModalOpen(false)}
-                className="px-3.5 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 rounded-md hover:bg-slate-200"
+                className="min-h-[40px] px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition focus:outline-hidden focus:ring-2 focus:ring-slate-400"
               >
                 Hủy
               </button>
@@ -481,9 +490,16 @@ export const AdminDisputes = () => {
                     releaseCompartment: selectedDispute.compartmentCode ? releaseCompartment : undefined,
                   })
                 }
-                className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50 transition shadow-2xs"
+                className="min-h-[40px] px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition shadow-xs flex items-center gap-1.5 focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
               >
-                {resolveMutation.isPending ? 'Đang cập nhật...' : 'Xác nhận Phán Quyết'}
+                {resolveMutation.isPending ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin text-white" />
+                    <span>Đang cập nhật...</span>
+                  </>
+                ) : (
+                  <span>Xác nhận Phán Quyết</span>
+                )}
               </button>
             </div>
           </div>

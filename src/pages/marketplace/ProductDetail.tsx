@@ -15,17 +15,18 @@ import {
   Tag,
   AlertCircle,
   Calendar,
-  X,
   Play,
-  Film,
   MapPin,
   Star,
   MessageSquare,
+  Loader2,
 } from 'lucide-react';
 import { getMediaUrl } from '../../api/cloudinary';
 
+import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import type { UserRatingSummaryResponse, ReviewResponse } from '../../types/review';
+import type { Locker } from '../../types/locker';
 
 export const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +46,22 @@ export const ProductDetail = () => {
   const [isConfirmPurchaseOpen, setIsConfirmPurchaseOpen] = useState(false);
   const [isVerifyPromptOpen, setIsVerifyPromptOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  // Action Mode State for Segmented Control (UP-04)
+  const [actionMode, setActionMode] = useState<'PURCHASE' | 'RENTAL'>('PURCHASE');
+
+  // Preferred Locker Selection State (UP-05)
+  const [preferredLockerId, setPreferredLockerId] = useState<number | null>(null);
+
+  // Active Lockers Query for Checkout (UP-05)
+  const { data: activeLockers } = useQuery<Locker[]>({
+    queryKey: ['active-lockers-dropdown'],
+    queryFn: () =>
+      axiosInstance
+        .get('/api/v1/lockers', { params: { status: 'ACTIVE', size: 50 } })
+        .then((res) => res.data.content || []),
+    enabled: isConfirmPurchaseOpen || isRentalModalOpen,
+  });
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ['product', id],
@@ -79,18 +96,25 @@ export const ProductDetail = () => {
   );
 
   const createOrderMutation = useMutation({
-    mutationFn: (variables?: { orderType?: 'PURCHASE' | 'RENTAL'; rentalDurationDays?: number }) =>
+    mutationFn: (variables?: {
+      orderType?: 'PURCHASE' | 'RENTAL';
+      rentalDurationDays?: number;
+      preferredLockerId?: number | null;
+    }) =>
       axiosInstance
         .post('/api/v1/orders', {
           productId: Number(id),
           orderType: variables?.orderType || 'PURCHASE',
           rentalDurationDays: variables?.rentalDurationDays,
+          preferredLockerId: variables?.preferredLockerId ?? null,
         })
         .then((res) => res.data),
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['buying-orders'] });
       queryClient.invalidateQueries({ queryKey: ['selling-orders'] });
       queryClient.invalidateQueries({ queryKey: ['selling-pending-count'] });
+      setIsConfirmPurchaseOpen(false);
+      setIsRentalModalOpen(false);
       navigate(`/orders/${data.id}`);
     },
     onError: (err: any) => {
@@ -119,16 +143,25 @@ export const ProductDetail = () => {
   const handlePurchaseClick = () => {
     if (createOrderMutation.isPending) return;
     if (!checkIdentityAndAuth()) return;
+    if (product?.locker?.id && preferredLockerId === null) {
+      setPreferredLockerId(product.locker.id);
+    }
     setIsConfirmPurchaseOpen(true);
   };
 
   const handleConfirmPurchase = () => {
-    createOrderMutation.mutate({ orderType: 'PURCHASE' });
+    createOrderMutation.mutate({
+      orderType: 'PURCHASE',
+      preferredLockerId: preferredLockerId ?? null,
+    });
   };
 
   const handleOpenRentalModal = () => {
     if (createOrderMutation.isPending) return;
     if (!checkIdentityAndAuth()) return;
+    if (product?.locker?.id && preferredLockerId === null) {
+      setPreferredLockerId(product.locker.id);
+    }
     setIsRentalModalOpen(true);
   };
 
@@ -142,7 +175,23 @@ export const ProductDetail = () => {
     createOrderMutation.mutate({
       orderType: 'RENTAL',
       rentalDurationDays: effectiveRentalDays,
+      preferredLockerId: preferredLockerId ?? null,
     });
+  };
+
+  const effectiveMode: 'PURCHASE' | 'RENTAL' =
+    product?.listingType === 'RENT'
+      ? 'RENTAL'
+      : product?.listingType === 'BOTH'
+      ? actionMode
+      : 'PURCHASE';
+
+  const handlePrimaryAction = () => {
+    if (effectiveMode === 'PURCHASE') {
+      handlePurchaseClick();
+    } else {
+      handleOpenRentalModal();
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -201,7 +250,7 @@ export const ProductDetail = () => {
   const hasMultipleMedia = allImages.length > 1 || Boolean(product.videoUrl && allImages.length > 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 py-6 sm:py-8 font-sans">
+    <div className="min-h-screen bg-slate-50 pt-6 pb-24 sm:py-8 font-sans">
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
@@ -344,32 +393,6 @@ export const ProductDetail = () => {
                   </div>
                 )}
               </div>
-
-              {/* Video Player Section beneath Left Column if video exists */}
-              {product.videoUrl && (
-                <div className="pt-4 border-t border-slate-200/80">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                      <Film size={14} className="text-slate-700" />
-                      Video giới thiệu sản phẩm
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMedia({ type: 'VIDEO', url: product.videoUrl! })}
-                      className="text-xs font-semibold text-slate-700 hover:text-slate-950 flex items-center gap-1"
-                    >
-                      <Play size={11} className="fill-slate-700" /> Xem trên khung lớn
-                    </button>
-                  </div>
-                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-black aspect-video max-h-48">
-                    <video
-                      src={getMediaUrl(product.videoUrl)}
-                      controls
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Right Column: Information, Pricing, Seller & CTAs (lg:col-span-6) */}
@@ -574,50 +597,71 @@ export const ProductDetail = () => {
                     </div>
                   </div>
                 ) : product.status === 'ACTIVE' ? (
-                  <div className="space-y-2">
-                    {/* If both selling & renting supported */}
-                    {product.listingType === 'BOTH' ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-3">
+                    {/* Segmented Control when listingType === 'BOTH' */}
+                    {product.listingType === 'BOTH' && (
+                      <div className="p-1 bg-slate-100 rounded-xl grid grid-cols-2 gap-1 border border-slate-200/80">
                         <button
-                          onClick={handlePurchaseClick}
-                          disabled={createOrderMutation.isPending}
-                          className="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                          type="button"
+                          onClick={() => setActionMode('PURCHASE')}
+                          className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[44px] ${
+                            actionMode === 'PURCHASE'
+                              ? 'bg-white text-emerald-800 shadow-xs border border-slate-200/50'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
                         >
-                          <ShoppingBag size={16} /> Mua đứt ({formatPrice(product.price)})
+                          <ShoppingBag size={15} />
+                          <span>Mua đứt ({formatPrice(product.price)})</span>
                         </button>
                         <button
-                          onClick={handleOpenRentalModal}
-                          disabled={createOrderMutation.isPending}
-                          className="py-3 px-4 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                          type="button"
+                          onClick={() => setActionMode('RENTAL')}
+                          className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[44px] ${
+                            actionMode === 'RENTAL'
+                              ? 'bg-white text-blue-800 shadow-xs border border-slate-200/50'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
                         >
-                          <Calendar size={16} /> Thuê đồ ({formatPrice(product.rentPricePerDay || 0)}/ngày)
+                          <Calendar size={15} />
+                          <span>Thuê ({formatPrice(product.rentPricePerDay || 0)}/ngày)</span>
                         </button>
                       </div>
-                    ) : product.listingType === 'RENT' ? (
+                    )}
+
+                    {/* Single Primary CTA Button */}
+                    {effectiveMode === 'PURCHASE' ? (
                       <button
-                        onClick={handleOpenRentalModal}
-                        disabled={createOrderMutation.isPending}
-                        className="w-full py-3 px-6 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
-                      >
-                        <Calendar size={18} /> Thuê sản phẩm qua Tủ Locker ({formatPrice(product.rentPricePerDay || 0)}/ngày)
-                      </button>
-                    ) : (
-                      <button
+                        type="button"
                         onClick={handlePurchaseClick}
                         disabled={createOrderMutation.isPending}
-                        className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base disabled:opacity-50"
+                        className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px] disabled:opacity-50"
                       >
                         {createOrderMutation.isPending ? (
-                          <span>Đang khởi tạo đơn hàng qua Locker...</span>
+                          <>
+                            <Loader2 size={18} className="animate-spin" />
+                            <span>Đang khởi tạo đơn hàng qua Locker...</span>
+                          </>
                         ) : (
                           <>
-                            <ShoppingBag size={18} /> Đặt mua qua Tủ Locker Thông Minh
+                            <ShoppingBag size={18} />
+                            <span>Đặt mua qua Tủ Locker Thông Minh</span>
                           </>
                         )}
                       </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleOpenRentalModal}
+                        disabled={createOrderMutation.isPending}
+                        className="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px] disabled:opacity-50"
+                      >
+                        <Calendar size={18} />
+                        <span>Chọn thời hạn & Thuê qua Locker</span>
+                      </button>
                     )}
+
                     <p className="text-xs text-slate-500 text-center">
-                      Miễn phí giao dịch • Hàng hóa được bảo quản an toàn tại ngăn tủ thông minh
+                      Miễn phí giao dịch • Bảo vệ Escrow 100% • Hàng hóa được bảo quản an toàn tại Smart Locker
                     </p>
                   </div>
                 ) : (
@@ -643,140 +687,406 @@ export const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Rental Duration Picker Modal */}
-      {isRentalModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-100 text-blue-700 rounded-lg">
-                  <Calendar size={18} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base">Chọn thời gian thuê</h3>
-                  <p className="text-xs text-slate-500">Tính từ khi bạn nhập PIN lấy đồ tại tủ</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsRentalModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition"
-              >
-                <X size={18} />
-              </button>
+      {/* Standardized Rental Modal (UP-04 & UP-05) */}
+      <Modal
+        isOpen={isRentalModalOpen}
+        onClose={() => setIsRentalModalOpen(false)}
+        title="Chọn thời hạn thuê qua Smart Locker"
+        description="Tính từ thời điểm bạn nhập mã PIN mở tủ lấy hàng"
+        maxWidth="md"
+      >
+        <div className="space-y-4">
+          {/* Duration Presets */}
+          <div className="space-y-2.5">
+            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+              Gói số ngày thuê:
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {[1, 3, 7, 14].map((days) => (
+                <button
+                  key={days}
+                  type="button"
+                  onClick={() => {
+                    setSelectedRentalDays(days);
+                    setCustomDays('');
+                  }}
+                  className={`py-2 px-1 text-xs font-bold rounded-xl border transition min-h-[44px] ${
+                    !customDays && selectedRentalDays === days
+                      ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
+                      : 'border-slate-200 text-slate-700 hover:border-blue-300'
+                  }`}
+                >
+                  {days} ngày
+                </button>
+              ))}
             </div>
 
-            {/* Duration Presets */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                Chọn gói số ngày thuê:
-              </label>
-
-              <div className="grid grid-cols-4 gap-2">
-                {[1, 3, 7, 14].map((days) => (
-                  <button
-                    key={days}
-                    type="button"
-                    onClick={() => {
-                      setSelectedRentalDays(days);
-                      setCustomDays('');
-                    }}
-                    className={`py-2 px-1 text-xs font-bold rounded-xl border transition ${
-                      !customDays && selectedRentalDays === days
-                        ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                        : 'border-slate-200 text-slate-700 hover:border-blue-300'
-                    }`}
-                  >
-                    {days} ngày
-                  </button>
-                ))}
-              </div>
-
-              {/* Custom days input */}
-              <div className="pt-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500 shrink-0">Hoặc tùy chọn:</span>
-                  <input
-                    type="number"
-                    min="1"
-                    max="90"
-                    placeholder="Ví dụ: 5"
-                    value={customDays}
-                    onChange={(e) => setCustomDays(e.target.value)}
-                    className="w-24 px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-xs text-slate-500">ngày</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Cost Breakdown */}
-            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-2 text-xs">
-              <div className="flex justify-between text-slate-600">
-                <span>Đơn giá theo ngày:</span>
-                <span className="font-semibold text-slate-900">
-                  {formatPrice(product.rentPricePerDay || 0)}/ngày
-                </span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Số ngày thuê:</span>
-                <span className="font-semibold text-slate-900">{effectiveRentalDays} ngày</span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Tiền thuê dự tính:</span>
-                <span className="font-bold text-blue-700">
-                  {formatPrice((product.rentPricePerDay || 0) * effectiveRentalDays)}
-                </span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Tiền cọc bảo đảm:</span>
-                <span className="font-bold text-emerald-700">
-                  {formatPrice(product.depositAmount || 0)}
-                </span>
-              </div>
-              <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                <span className="font-bold text-slate-900">Tổng tạm giữ:</span>
-                <span className="text-base font-black text-emerald-700">
-                  {formatPrice(
-                    (product.rentPricePerDay || 0) * effectiveRentalDays + (product.depositAmount || 0)
-                  )}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 pt-1 leading-relaxed">
-                * Tiền cọc sẽ được hoàn lại 100% khi người cho thuê nhận lại đồ tại trạm tủ Smart Locker.
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setIsRentalModalOpen(false)}
-                className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                type="button"
-                disabled={createOrderMutation.isPending}
-                onClick={handleConfirmRental}
-                className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-slate-900/20"
-              >
-                {createOrderMutation.isPending ? 'Đang tạo đơn...' : 'Xác nhận thuê qua Locker'}
-              </button>
+            {/* Custom Days Input */}
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-xs text-slate-500 shrink-0">Hoặc tùy chọn:</span>
+              <input
+                type="number"
+                min="1"
+                max="90"
+                placeholder="Ví dụ: 5"
+                value={customDays}
+                onChange={(e) => setCustomDays(e.target.value)}
+                className="w-24 px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-xs text-slate-500">ngày</span>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Confirmation Dialog for Purchase Order */}
-      <ConfirmDialog
+          {/* Preferred Locker Selector */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800 block">
+                Trạm tủ nhận hàng ưu tiên
+              </label>
+              <span className="text-[11px] text-slate-500">
+                {activeLockers?.length || 0} trạm khả dụng
+              </span>
+            </div>
+
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              <div
+                onClick={() => setPreferredLockerId(null)}
+                className={`p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between ${
+                  preferredLockerId === null
+                    ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-600'
+                    : 'border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <div>
+                  <div className="font-bold text-slate-900">Tự động phân bổ ngăn trống</div>
+                  <div className="text-[10px] text-slate-500">Hệ thống chọn ngăn trống phù hợp nhất</div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 shrink-0">
+                  Khuyến nghị
+                </span>
+              </div>
+
+              {activeLockers?.map((l) => {
+                const available = l.availableCompartments ?? 0;
+                const total = l.totalCompartments ?? 0;
+                const isFull = available === 0;
+                const isSelected = preferredLockerId === l.id;
+
+                return (
+                  <div
+                    key={l.id}
+                    onClick={() => {
+                      if (!isFull) setPreferredLockerId(l.id);
+                    }}
+                    className={`p-2.5 rounded-xl border text-xs transition flex items-center justify-between gap-2 ${
+                      isFull
+                        ? 'opacity-50 cursor-not-allowed bg-slate-50 border-slate-200'
+                        : isSelected
+                        ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-600 cursor-pointer'
+                        : 'border-slate-200 hover:bg-slate-50 cursor-pointer'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-slate-900 truncate">{l.name}</span>
+                        <span className="font-mono text-[10px] text-slate-500">({l.code})</span>
+                        {product.locker?.id === l.id && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-emerald-100 text-emerald-800">
+                            Gợi ý
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-500 flex items-center gap-1 truncate mt-0.5">
+                        <MapPin size={10} className="text-blue-600 shrink-0" />
+                        <span className="truncate">{l.location}</span>
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      {isFull ? (
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                          Hết ngăn
+                        </span>
+                      ) : (
+                        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                          available <= 2
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        }`}>
+                          {available}/{total} trống
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Cost Breakdown */}
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 text-xs">
+            <div className="flex justify-between text-slate-600">
+              <span>Đơn giá theo ngày:</span>
+              <span className="font-semibold text-slate-900">
+                {formatPrice(product.rentPricePerDay || 0)}/ngày
+              </span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>Thời gian thuê:</span>
+              <span className="font-semibold text-slate-900">{effectiveRentalDays} ngày</span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>Tiền thuê dự tính:</span>
+              <span className="font-bold text-blue-700">
+                {formatPrice((product.rentPricePerDay || 0) * effectiveRentalDays)}
+              </span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>Tiền cọc bảo đảm:</span>
+              <span className="font-bold text-emerald-700">
+                {formatPrice(product.depositAmount || 0)}
+              </span>
+            </div>
+            <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
+              <span className="font-bold text-slate-900">Tổng tạm giữ Escrow:</span>
+              <span className="text-base font-black text-emerald-700">
+                {formatPrice(
+                  (product.rentPricePerDay || 0) * effectiveRentalDays + (product.depositAmount || 0)
+                )}
+              </span>
+            </div>
+          </div>
+
+          {/* Escrow Guarantee */}
+          <div className="bg-blue-50/70 border border-blue-200/80 rounded-xl p-2.5 flex items-start gap-2">
+            <ShieldCheck size={16} className="text-blue-700 shrink-0 mt-0.5" />
+            <p className="text-[11px] text-blue-900 leading-relaxed">
+              Tiền cọc bảo đảm sẽ được hoàn lại 100% sau khi bạn gửi trả sản phẩm vào tủ Smart Locker thành công.
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2.5 pt-1">
+            <button
+              type="button"
+              onClick={() => setIsRentalModalOpen(false)}
+              className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition min-h-[44px]"
+            >
+              Hủy bỏ
+            </button>
+            <button
+              type="button"
+              disabled={createOrderMutation.isPending}
+              onClick={handleConfirmRental}
+              className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-slate-900/20 min-h-[44px]"
+            >
+              {createOrderMutation.isPending ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  <span>Đang tạo đơn...</span>
+                </>
+              ) : (
+                <span>Xác nhận thuê qua Locker</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Purchase Checkout Modal (UP-05) */}
+      <Modal
         isOpen={isConfirmPurchaseOpen}
         onClose={() => setIsConfirmPurchaseOpen(false)}
-        onConfirm={handleConfirmPurchase}
         title="Xác nhận đặt mua qua Smart Locker"
-        message={`Bạn có chắc chắn muốn tạo đơn mua "${product.title}" với số tiền ${formatPrice(product.price)}? Giao dịch sẽ được giữ an toàn trong Escrow và bàn giao qua trạm tủ Locker.`}
-        confirmText="Tạo đơn mua hàng"
-        isLoading={createOrderMutation.isPending}
-      />
+        description="Giao dịch bảo đảm an toàn qua tài khoản ký quỹ Escrow CampusHub"
+        maxWidth="md"
+      >
+        <div className="space-y-4">
+          {/* Product Summary Item */}
+          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <div className="w-14 h-14 rounded-lg overflow-hidden bg-white border border-slate-200 shrink-0">
+              {product.imageUrl ? (
+                <img
+                  src={getMediaUrl(product.imageUrl)}
+                  alt={product.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-400">
+                  <ImageOff size={18} />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h4 className="font-bold text-slate-900 text-sm truncate">{product.title}</h4>
+              <div className="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
+                <span>Người bán: {product.owner?.fullName || product.owner?.username}</span>
+                {product.owner?.identityVerified && (
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                    <ShieldCheck size={10} className="text-emerald-700" /> Đã xác thực
+                  </span>
+                )}
+              </div>
+              <span className="text-xs font-extrabold text-emerald-700 mt-0.5 block">
+                {formatPrice(product.price)}
+              </span>
+            </div>
+          </div>
+
+          {/* Preferred Locker Station Selector */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800 block">
+                Chọn trạm tủ nhận hàng ưu tiên
+              </label>
+              <span className="text-[11px] text-slate-500">
+                {activeLockers?.length || 0} trạm khả dụng
+              </span>
+            </div>
+
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              {/* Default Auto Option */}
+              <div
+                onClick={() => setPreferredLockerId(null)}
+                className={`p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between ${
+                  preferredLockerId === null
+                    ? 'border-emerald-600 bg-emerald-50/60 ring-1 ring-emerald-600'
+                    : 'border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <div>
+                  <div className="font-bold text-slate-900">Tự động phân bổ ngăn trống</div>
+                  <div className="text-[10px] text-slate-500">
+                    Hệ thống ưu tiên chỉ định ngăn tủ thuận tiện nhất
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 shrink-0">
+                  Khuyến nghị
+                </span>
+              </div>
+
+              {/* Locker station cards */}
+              {activeLockers?.map((l) => {
+                const available = l.availableCompartments ?? 0;
+                const total = l.totalCompartments ?? 0;
+                const isFull = available === 0;
+                const isSelected = preferredLockerId === l.id;
+
+                return (
+                  <div
+                    key={l.id}
+                    onClick={() => {
+                      if (!isFull) setPreferredLockerId(l.id);
+                    }}
+                    className={`p-2.5 rounded-xl border text-xs transition flex items-center justify-between gap-2 ${
+                      isFull
+                        ? 'opacity-50 cursor-not-allowed bg-slate-50 border-slate-200'
+                        : isSelected
+                        ? 'border-emerald-600 bg-emerald-50/60 ring-1 ring-emerald-600 cursor-pointer'
+                        : 'border-slate-200 hover:bg-slate-50 cursor-pointer'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-slate-900 truncate">{l.name}</span>
+                        <span className="font-mono text-[10px] text-slate-500">({l.code})</span>
+                        {product.locker?.id === l.id && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-emerald-100 text-emerald-800">
+                            Gợi ý
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-500 flex items-center gap-1 truncate mt-0.5">
+                        <MapPin size={10} className="text-emerald-600 shrink-0" />
+                        <span className="truncate">{l.location}</span>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 text-right">
+                      {isFull ? (
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                          Hết ngăn
+                        </span>
+                      ) : (
+                        <span
+                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            available <= 2
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}
+                        >
+                          {available}/{total} trống
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Escrow Financial Transparency Breakdown */}
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 text-xs">
+            <div className="flex justify-between text-slate-600">
+              <span>Giá sản phẩm niêm yết:</span>
+              <span className="font-semibold text-slate-900">{formatPrice(product.price)}</span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>Phí ký quỹ bảo vệ giao dịch:</span>
+              <span className="font-semibold text-emerald-700">0 ₫ (Miễn phí sinh viên)</span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>Phí lưu trữ & giao nhận tủ:</span>
+              <span className="font-semibold text-emerald-700">0 ₫ (Miễn phí)</span>
+            </div>
+            <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
+              <span className="font-bold text-slate-900">Tổng thanh toán ký quỹ:</span>
+              <span className="text-base font-black text-emerald-700">
+                {formatPrice(product.price)}
+              </span>
+            </div>
+          </div>
+
+          {/* Escrow 100% Protection Reassurance Banner */}
+          <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-3 flex items-start gap-2.5">
+            <ShieldCheck size={18} className="text-emerald-700 shrink-0 mt-0.5" />
+            <div className="text-[11px] text-emerald-900 leading-relaxed">
+              <strong className="font-bold block text-emerald-950 mb-0.5">
+                Cam kết hoàn tiền 100% qua ký quỹ Escrow
+              </strong>
+              Khoản thanh toán được tạm giữ an toàn trong tài khoản trung gian của CampusHub. Người bán chỉ nhận được tiền sau khi bạn nhập mã PIN mở tủ lấy hàng thành công hoặc hết thời hạn khiếu nại.
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2.5 pt-1">
+            <button
+              type="button"
+              onClick={() => setIsConfirmPurchaseOpen(false)}
+              className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition min-h-[44px]"
+            >
+              Hủy bỏ
+            </button>
+            <button
+              type="button"
+              disabled={createOrderMutation.isPending}
+              onClick={handleConfirmPurchase}
+              className="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 min-h-[44px]"
+            >
+              {createOrderMutation.isPending ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  <span>Đang tạo đơn...</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingBag size={15} />
+                  <span>Xác nhận tạo đơn mua</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Identity Verification Prompt Dialog */}
       <ConfirmDialog
@@ -805,6 +1115,61 @@ export const ProductDetail = () => {
           cancelText="Đóng"
           variant="danger"
         />
+      )}
+
+      {/* Sticky Bottom Action Bar for Mobile (lg:hidden) */}
+      {product?.status === 'ACTIVE' && !isOwner && (
+        <div className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 z-30 flex items-center justify-between gap-3 shadow-lg">
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] text-slate-500 block leading-tight font-medium">
+              {effectiveMode === 'PURCHASE' ? 'Giá mua đứt' : 'Giá thuê theo ngày'}
+            </span>
+            <span
+              className={`text-base font-extrabold truncate block ${
+                effectiveMode === 'PURCHASE' ? 'text-emerald-700' : 'text-blue-700'
+              }`}
+            >
+              {effectiveMode === 'PURCHASE'
+                ? formatPrice(product.price)
+                : `${formatPrice(product.rentPricePerDay || 0)}/ngày`}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {product.listingType === 'BOTH' && (
+              <button
+                type="button"
+                onClick={() => setActionMode((prev) => (prev === 'PURCHASE' ? 'RENTAL' : 'PURCHASE'))}
+                className="px-2.5 py-2 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-semibold text-slate-700 min-h-[44px] transition"
+              >
+                {actionMode === 'PURCHASE' ? 'Đổi: Thuê' : 'Đổi: Mua'}
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handlePrimaryAction}
+              disabled={createOrderMutation.isPending}
+              className={`px-4 py-2.5 active:scale-[0.98] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 min-h-[44px] ${
+                effectiveMode === 'PURCHASE'
+                  ? 'bg-emerald-600 hover:bg-emerald-700'
+                  : 'bg-slate-900 hover:bg-slate-800'
+              }`}
+            >
+              {effectiveMode === 'PURCHASE' ? (
+                <>
+                  <ShoppingBag size={15} />
+                  <span>Đặt mua ngay</span>
+                </>
+              ) : (
+                <>
+                  <Calendar size={15} />
+                  <span>Thuê ngay</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

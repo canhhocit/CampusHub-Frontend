@@ -518,24 +518,93 @@ export const SellingOrders = () => {
                 Hệ thống sẽ giữ ngăn tủ sẵn sàng để bạn đến gửi hàng.
               </p>
 
-              <div className="mb-6 space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 block">
-                  Chọn tủ đồ gửi hàng (Tùy chọn)
-                </label>
-                <select
-                  value={selectedLockerId}
-                  onChange={(e) => setSelectedLockerId(e.target.value ? Number(e.target.value) : '')}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-slate-900 focus:border-slate-900 bg-white"
-                >
-                  <option value="">-- Tự động tìm ngăn trống tại tủ gần nhất --</option>
-                  {activeLockers?.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.name} ({l.code}) - {l.location}
-                    </option>
-                  ))}
-                </select>
+              <div className="mb-6 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 block">
+                    Chọn trạm tủ gửi hàng
+                  </label>
+                  <span className="text-[11px] text-slate-500">
+                    {activeLockers?.length || 0} trạm đang hoạt động
+                  </span>
+                </div>
+
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  {/* Default Auto Option */}
+                  <div
+                    onClick={() => setSelectedLockerId('')}
+                    className={`p-3 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between ${
+                      selectedLockerId === ''
+                        ? 'border-emerald-600 bg-emerald-50/60 ring-1 ring-emerald-600'
+                        : 'border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>
+                      <div className="font-bold text-slate-900">Tự động phân bổ ngăn trống</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        Hệ thống tự động chọn ngăn trống phù hợp nhất tại trạm gần người mua
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 shrink-0">
+                      Khuyến nghị
+                    </span>
+                  </div>
+
+                  {/* Explicit Locker Station Cards */}
+                  {activeLockers?.map((l) => {
+                    const available = l.availableCompartments ?? 0;
+                    const total = l.totalCompartments ?? 0;
+                    const isFull = available === 0;
+                    const isSelected = selectedLockerId === l.id;
+
+                    return (
+                      <div
+                        key={l.id}
+                        onClick={() => {
+                          if (!isFull) setSelectedLockerId(l.id);
+                        }}
+                        className={`p-3 rounded-xl border text-xs transition flex items-center justify-between gap-3 ${
+                          isFull
+                            ? 'opacity-50 cursor-not-allowed bg-slate-50 border-slate-200'
+                            : isSelected
+                            ? 'border-emerald-600 bg-emerald-50/60 ring-1 ring-emerald-600 cursor-pointer'
+                            : 'border-slate-200 hover:bg-slate-50 cursor-pointer'
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-900 truncate">{l.name}</span>
+                            <span className="font-mono text-[10px] text-slate-500">({l.code})</span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+                            <MapPin size={11} className="text-emerald-600 shrink-0" />
+                            <span className="truncate">{l.location}</span>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          {isFull ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                              Hết ngăn (0/{total})
+                            </span>
+                          ) : (
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              available <= 2
+                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            }`}>
+                              {available}/{total} ngăn trống
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
                 <p className="text-[11px] text-slate-400">
-                  Nếu để trống, hệ thống sẽ tự động chỉ định một ngăn tủ trống phù hợp nhất.
+                  {selectedLockerId === ''
+                    ? 'Bạn đang để hệ thống tự động chỉ định ngăn tủ trống khi gửi đồ.'
+                    : 'Đã chọn trạm tủ cụ thể. Chỉ những trạm còn ngăn trống mới có thể chọn.'}
                 </p>
               </div>
 
