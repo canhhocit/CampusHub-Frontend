@@ -24,6 +24,7 @@ const BuyingOrders = lazy(() => import('./pages/orders/BuyingOrders').then(m => 
 const SellingOrders = lazy(() => import('./pages/orders/SellingOrders').then(m => ({ default: m.SellingOrders })));
 const OrderDetail = lazy(() => import('./pages/orders/OrderDetail').then(m => ({ default: m.OrderDetail })));
 const WalletPage = lazy(() => import('./pages/wallet/WalletPage').then(m => ({ default: m.WalletPage })));
+const ProfilePage = lazy(() => import('./pages/profile/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const VerifyIdentity = lazy(() => import('./pages/auth/VerifyIdentity').then(m => ({ default: m.VerifyIdentity })));
 
 // Admin lazy pages
@@ -73,6 +74,7 @@ function App() {
                 {/* Member Protected Routes */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/wallet" element={<WalletPage />} />
                   <Route path="/marketplace/new" element={<ProductForm />} />
                   <Route path="/marketplace/edit/:id" element={<ProductForm />} />

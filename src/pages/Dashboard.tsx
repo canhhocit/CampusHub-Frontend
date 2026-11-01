@@ -11,6 +11,9 @@ import {
   ArrowRight,
   Plus,
   Lock,
+  Clock,
+  XCircle,
+  User,
 } from 'lucide-react';
 import { UserNavTabs } from '../components/UserNavTabs';
 
@@ -81,13 +84,21 @@ export const Dashboard = () => {
                   <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
                     Xin chào, {user?.fullName || user?.username}!
                   </h1>
-                  {user?.identityVerified ? (
+                  {user?.identityReviewStatus === 'APPROVED' || user?.identityVerified ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                       <CheckCircle2 size={13} className="text-emerald-600" /> Đã duyệt CCCD
                     </span>
-                  ) : (
+                  ) : user?.identityReviewStatus === 'PENDING' ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                      <ShieldAlert size={13} className="text-amber-600" /> Chưa xác minh CCCD
+                      <Clock size={13} className="text-amber-600" /> Đang chờ duyệt CCCD
+                    </span>
+                  ) : user?.identityReviewStatus === 'REJECTED' ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                      <XCircle size={13} className="text-rose-600" /> CCCD bị từ chối
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                      <ShieldAlert size={13} className="text-slate-500" /> Chưa nộp CCCD
                     </span>
                   )}
                 </div>
@@ -97,7 +108,14 @@ export const Dashboard = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 self-start sm:self-auto">
+            <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+              <Link
+                to="/profile"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-xs font-semibold transition"
+              >
+                <User size={15} />
+                Hồ sơ &amp; Đổi mật khẩu
+              </Link>
               <Link
                 to="/marketplace/new"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-bold shadow-2xs transition"

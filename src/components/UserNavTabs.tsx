@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Package, Inbox, Send, Plus, Wallet } from 'lucide-react';
+import { Package, Inbox, Send, Plus, Wallet, User } from 'lucide-react';
 import { usePendingSellingOrdersCount } from '../hooks/usePendingSellingOrders';
 
 export const UserNavTabs = () => {
@@ -28,6 +28,11 @@ export const UserNavTabs = () => {
       to: '/marketplace/my-listings',
       label: 'Tin đăng bán',
       icon: Package,
+    },
+    {
+      to: '/profile',
+      label: 'Hồ sơ & Bảo mật',
+      icon: User,
     },
   ];
 

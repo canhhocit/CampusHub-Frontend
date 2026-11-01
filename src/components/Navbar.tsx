@@ -200,9 +200,9 @@ export const Navbar = () => {
             {isAuthenticated ? (
               <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200 shrink-0">
                 <Link
-                  to="/dashboard"
+                  to="/profile"
                   className="flex items-center gap-1.5 hover:bg-slate-50 p-1 rounded-lg transition"
-                  title={user?.fullName || user?.username}
+                  title="Hồ sơ cá nhân & Bảo mật"
                 >
                   <div className="w-7 h-7 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shrink-0">
                     {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'U'}
@@ -350,7 +350,11 @@ export const Navbar = () => {
 
           {isAuthenticated ? (
             <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <Link
+                to="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 hover:opacity-80 transition"
+              >
                 <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs">
                   {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'U'}
                 </div>
@@ -358,7 +362,7 @@ export const Navbar = () => {
                   <strong className="block text-slate-900">{user?.fullName || user?.username}</strong>
                   <span className="text-slate-500">{user?.email}</span>
                 </div>
-              </div>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold flex items-center gap-1"

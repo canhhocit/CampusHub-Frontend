@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { AlertCircle, CheckCircle, User, Mail, Lock, UserCheck, Calendar, ArrowRight } from 'lucide-react';
+import { PasswordInput } from '../../components/common/PasswordInput';
+import { AlertCircle, CheckCircle, User, Mail, UserCheck, Calendar, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
 
 export const Register = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ export const Register = () => {
     email: '',
     fullName: '',
     password: '',
+    confirmPassword: '',
     dateOfBirth: '',
   });
   const [error, setError] = useState('');
@@ -16,10 +18,12 @@ export const Register = () => {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
 
-  // Max birthdate for 13 years old
-  const maxBirthDate = new Date(Date.now() - 13 * 365.25 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split('T')[0];
+  // Max birthdate for 13 years old (memoized for render purity)
+  const maxBirthDate = useMemo(() => {
+    return new Date(Date.now() - 13 * 365.25 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0];
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,20 +56,41 @@ export const Register = () => {
       return;
     }
 
+    if (formData.password.length < 6) {
+      setError('Mật khẩu phải có tối thiểu 6 ký tự.');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Mật khẩu xác nhận không trùng khớp.');
+      return;
+    }
+
     setLoading(true);
     try {
-      await register(formData);
+      await register({
+        username: formData.username,
+        email: formData.email,
+        fullName: formData.fullName,
+        password: formData.password,
+        dateOfBirth: formData.dateOfBirth,
+      });
       setSuccess(true);
     } catch (err: any) {
       if (err.response?.data) {
-        const d = err.response.data;
-        if (d.message) setError(d.message);
-        else if (typeof d === 'object') {
-          const msgs = Object.values(d).join(', ');
-          setError(msgs || 'Đăng ký không thành công.');
+        const errorData = err.response.data;
+        if (typeof errorData === 'string') {
+          setError(errorData);
+        } else if (errorData.message) {
+          setError(errorData.message);
+        } else if (typeof errorData === 'object') {
+          const firstError = Object.values(errorData)[0];
+          setError(String(firstError) || 'Đăng ký không thành công.');
+        } else {
+          setError('Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.');
         }
       } else {
-        setError('Đăng ký không thành công. Vui lòng thử lại sau.');
+        setError('Lỗi kết nối máy chủ. Vui lòng thử lại sau.');
       }
     } finally {
       setLoading(false);
@@ -73,144 +98,193 @@ export const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="w-full max-w-md space-y-7 bg-white p-7 sm:p-8 rounded-lg shadow-2xs border border-slate-200">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-lg mx-auto flex items-center justify-center font-black text-xl mb-3 border border-emerald-200/60 shadow-2xs">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-50 py-10 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="w-full max-w-lg space-y-6 bg-white p-7 sm:p-9 rounded-2xl shadow-xs border border-slate-200/90">
+        <div className="text-center space-y-2">
+          <div className="w-12 h-12 bg-emerald-600 text-white rounded-xl mx-auto flex items-center justify-center font-bold text-lg shadow-sm">
             CH
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-            Đăng ký thành viên
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Mạng lưới tủ locker thông minh & chợ đồ dùng sinh viên (Từ đủ 13 tuổi trở lên)
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+            Tạo tài khoản CampusHub
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            Đăng ký để tham gia cộng đồng mua bán &amp; giao nhận qua Smart Locker
           </p>
         </div>
 
         {success ? (
-          <div className="bg-emerald-50 text-emerald-800 p-6 rounded-lg border border-emerald-200 flex flex-col items-center gap-3 text-center">
-            <CheckCircle size={36} className="text-emerald-600" />
-            <h3 className="text-base font-bold text-emerald-900">Đăng ký thành công!</h3>
-            <p className="text-xs sm:text-sm text-emerald-700">
-              Vui lòng kiểm tra email của bạn để nhấn vào liên kết xác thực tài khoản.
-            </p>
+          <div className="bg-emerald-50 text-emerald-900 p-6 sm:p-7 rounded-2xl border border-emerald-200/80 flex flex-col items-center gap-3.5 text-center animate-in fade-in duration-200">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              <CheckCircle size={28} />
+            </div>
+            <div className="space-y-1">
+              <h2 className="text-base sm:text-lg font-bold text-emerald-900">Đăng ký tài khoản thành công!</h2>
+              <p className="text-xs sm:text-sm text-emerald-700 max-w-sm">
+                Chúng tôi đã gửi email xác thực tài khoản. Vui lòng kiểm tra hộp thư (bao gồm hòm thư rác/spam) và nhấp vào liên kết để kích hoạt tài khoản.
+              </p>
+            </div>
             <Link
               to="/login"
-              className="mt-3 px-5 py-2.5 bg-emerald-600 text-white rounded-md text-sm font-bold hover:bg-emerald-700 transition shadow-2xs"
+              className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-semibold hover:bg-emerald-800 transition shadow-xs"
             >
-              Đến trang Đăng nhập
+              <span>Đi đến trang Đăng nhập</span>
+              <ArrowRight size={16} />
             </Link>
           </div>
         ) : (
-          <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4 pt-1" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 text-red-700 p-3.5 rounded-md border border-red-200 flex items-center gap-2 text-xs sm:text-sm">
-                <AlertCircle size={16} className="shrink-0" />
-                <span>{error}</span>
+              <div className="bg-rose-50 text-rose-800 p-3.5 rounded-xl border border-rose-200/80 flex items-start gap-2.5 text-xs sm:text-sm animate-in fade-in duration-150">
+                <AlertCircle size={16} className="text-rose-600 shrink-0 mt-0.5" />
+                <span className="leading-snug">{error}</span>
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Tên đăng nhập</label>
-              <div className="relative">
-                <input
-                  name="username"
-                  type="text"
-                  required
-                  className="block w-full rounded-md border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 text-sm transition"
-                  placeholder="VD: nguyenvanan"
-                  value={formData.username}
-                  onChange={handleChange}
-                />
-                <User size={18} className="absolute left-3 top-3 text-slate-400" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label htmlFor="username" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Tên đăng nhập <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    required
+                    autoComplete="username"
+                    className="block w-full rounded-xl border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-100 text-xs sm:text-sm transition hover:border-slate-400"
+                    placeholder="VD: sinhvien_k64"
+                    value={formData.username}
+                    onChange={handleChange}
+                  />
+                  <User size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="fullName" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Họ và tên <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    required
+                    autoComplete="name"
+                    className="block w-full rounded-xl border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-100 text-xs sm:text-sm transition hover:border-slate-400"
+                    placeholder="VD: Nguyễn Văn A"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                  />
+                  <UserCheck size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Email cá nhân</label>
-              <div className="relative">
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  className="block w-full rounded-md border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 text-sm transition"
-                  placeholder="VD: an.nguyen@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-                <Mail size={18} className="absolute left-3 top-3 text-slate-400" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Họ và tên đầy đủ</label>
-              <div className="relative">
-                <input
-                  name="fullName"
-                  type="text"
-                  required
-                  className="block w-full rounded-md border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 text-sm transition"
-                  placeholder="VD: Nguyễn Văn An"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                />
-                <UserCheck size={18} className="absolute left-3 top-3 text-slate-400" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Ngày sinh <span className="text-emerald-700 font-normal">(Yêu cầu từ đủ 13 tuổi trở lên)</span>
+              <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Email sinh viên hoặc cá nhân <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  className="block w-full rounded-xl border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-100 text-xs sm:text-sm transition hover:border-slate-400"
+                  placeholder="VD: sinhvien@school.edu.vn"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+                <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="dateOfBirth" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Ngày sinh <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  id="dateOfBirth"
                   name="dateOfBirth"
                   type="date"
                   max={maxBirthDate}
                   required
-                  className="block w-full rounded-md border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 text-sm transition"
+                  className="block w-full rounded-xl border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-100 text-xs sm:text-sm transition hover:border-slate-400"
                   value={formData.dateOfBirth}
                   onChange={handleChange}
                 />
-                <Calendar size={18} className="absolute left-3 top-3 text-slate-400" />
+                <Calendar size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               </div>
               <p className="text-[11px] text-slate-400 mt-1">
-                Người dùng hệ thống phải từ đủ 13 tuổi trở lên theo quy định.
+                Yêu cầu thành viên từ đủ 13 tuổi trở lên theo quy định bảo đảm an toàn.
               </p>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Mật khẩu</label>
-              <div className="relative">
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  className="block w-full rounded-md border border-slate-300 pl-10 pr-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 text-sm transition"
-                  placeholder="Tối thiểu 6 ký tự..."
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-                <Lock size={18} className="absolute left-3 top-3 text-slate-400" />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <PasswordInput
+                id="password"
+                name="password"
+                label="Mật khẩu"
+                required
+                autoComplete="new-password"
+                placeholder="Tối thiểu 6 ký tự..."
+                value={formData.password}
+                onChange={handleChange}
+              />
+
+              <PasswordInput
+                id="confirmPassword"
+                name="confirmPassword"
+                label="Xác nhận mật khẩu"
+                required
+                autoComplete="new-password"
+                placeholder="Nhập lại mật khẩu..."
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                error={
+                  formData.confirmPassword && formData.password !== formData.confirmPassword
+                    ? 'Mật khẩu xác nhận không khớp'
+                    : undefined
+                }
+              />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center gap-2 rounded-md bg-emerald-600 py-2.5 sm:py-3 px-4 text-sm font-bold text-white hover:bg-emerald-700 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-70 transition shadow-2xs mt-2"
+              className="w-full flex justify-center items-center gap-2 rounded-xl bg-slate-900 py-2.5 sm:py-3 px-4 text-xs sm:text-sm font-semibold text-white hover:bg-slate-800 focus:outline-hidden focus:ring-2 focus:ring-slate-900/20 disabled:opacity-60 transition shadow-xs cursor-pointer mt-2"
             >
-              {loading ? 'Đang đăng ký...' : 'Đăng ký tài khoản'}
-              <ArrowRight size={16} />
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin text-white" />
+                  <span>Đang xử lý đăng ký...</span>
+                </>
+              ) : (
+                <>
+                  <span>Đăng ký tài khoản</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
             </button>
           </form>
         )}
 
-        <div className="text-center text-xs sm:text-sm text-slate-600 pt-3 border-t border-slate-100">
-          Đã có tài khoản?{' '}
-          <Link to="/login" className="font-bold text-emerald-700 hover:text-emerald-800">
-            Đăng nhập ngay
-          </Link>
+        <div className="pt-4 border-t border-slate-100 text-center space-y-3">
+          <p className="text-xs sm:text-sm text-slate-600">
+            Đã có tài khoản?{' '}
+            <Link to="/login" className="font-semibold text-emerald-700 hover:text-emerald-800 transition">
+              Đăng nhập ngay
+            </Link>
+          </p>
+
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+            <ShieldCheck size={13} className="text-emerald-600" />
+            <span>Thông tin cá nhân được bảo vệ theo tiêu chuẩn an toàn</span>
+          </div>
         </div>
       </div>
     </div>
