@@ -37,7 +37,7 @@ export const UserNavTabs = () => {
   ];
 
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/90">
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -46,17 +46,17 @@ export const UserNavTabs = () => {
             <Link
               key={tab.to}
               to={tab.to}
-              className={`shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+              className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
                 isActive
-                  ? 'bg-emerald-600 text-white shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
               }`}
             >
               <Icon size={15} />
               <span>{tab.label}</span>
               {Boolean(tab.badge && tab.badge > 0) && (
                 <span
-                  className={`flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold leading-none shadow-xs ${
+                  className={`flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black leading-none shadow-xs ${
                     isActive
                       ? 'bg-white text-emerald-800'
                       : 'bg-rose-500 text-white'
@@ -73,7 +73,7 @@ export const UserNavTabs = () => {
 
       <Link
         to="/marketplace/new"
-        className="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/80 transition shadow-2xs"
+        className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 hover:bg-slate-800 text-white transition-all shadow-xs active:scale-95"
       >
         <Plus size={15} />
         Đăng tin bán mới

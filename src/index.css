@@ -9,11 +9,12 @@
   --color-brand-900: #064e3b;
 
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 20px 25px -5px rgba(16, 185, 129, 0.1), 0 8px 10px -6px rgba(16, 185, 129, 0.06);
 }
 
 :root {
   font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #172033;
+  color: #0f172a;
   background: #f8fafc;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -38,6 +39,11 @@ body {
   margin: 0;
   font-size: 15px;
   line-height: 1.55;
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.03) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.03) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
 button,
@@ -63,13 +69,108 @@ button:disabled {
 }
 
 ::selection {
-  color: #312e81;
-  background: #e0e7ff;
+  color: #064e3b;
+  background: #a7f3d0;
 }
 
 :focus-visible {
   outline: 2px solid #059669;
   outline-offset: 2px;
+}
+
+/* UI/UX Pro Max Animations & Micro-Interactions */
+@keyframes livePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.35;
+  }
+}
+
+.animate-live-pulse {
+  animation: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+@keyframes shimmerGlow {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.glass-panel-dark {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dilum Sanjaya-inspired Send & Action Button Animations */
+@keyframes planeTakeoff {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(-3px, 2px) scale(0.95) rotate(-12deg);
+    opacity: 1;
+  }
+  60% {
+    transform: translate(14px, -8px) scale(1.1) rotate(25deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(45px, -32px) scale(0.4) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+.animate-plane-takeoff {
+  animation: planeTakeoff 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes popCheck {
+  0% {
+    transform: scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.3) rotate(5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-pop-check {
+  animation: popCheck 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

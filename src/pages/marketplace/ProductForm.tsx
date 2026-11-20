@@ -24,6 +24,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { ImageUpload } from '../../components/ImageUpload';
+import { AnimatedSendButton } from '../../components/common/AnimatedSendButton';
 import { useAuth } from '../../contexts/AuthContext';
 import { uploadImageToCloudinary, uploadVideoToCloudinary, getMediaUrl } from '../../api/cloudinary';
 
@@ -773,27 +774,20 @@ export const ProductForm = () => {
           <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
             <Link
               to="/marketplace/my-listings"
-              className="px-5 py-2.5 border border-slate-300 rounded-md text-xs font-bold text-slate-700 hover:bg-slate-100 transition text-center"
+              className="px-5 py-2.5 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition text-center"
             >
               Hủy bỏ
             </Link>
-            <button
+            <AnimatedSendButton
               type="submit"
               disabled={mutation.isPending || isSubmitting}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-bold shadow-2xs transition disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {mutation.isPending ? (
-                <>
-                  <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent" />
-                  <span>Đang lưu tin đăng...</span>
-                </>
-              ) : (
-                <>
-                  <Save size={15} />
-                  <span>{isEditing ? 'Lưu cập nhật' : 'Đăng tin ngay'}</span>
-                </>
-              )}
-            </button>
+              isPending={mutation.isPending}
+              isSuccess={mutation.isSuccess}
+              defaultText={isEditing ? 'Lưu cập nhật' : 'Đăng tin ngay'}
+              loadingText="Đang đăng tin lên Chợ..."
+              successText={isEditing ? 'Đã lưu cập nhật!' : 'Đã đăng thành công!'}
+              variant="emerald"
+            />
           </div>
         </form>
       </div>

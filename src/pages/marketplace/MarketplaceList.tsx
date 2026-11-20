@@ -19,6 +19,10 @@ import {
   Shirt,
   Package,
   Layers,
+  Lock,
+  ShieldCheck,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import { ProductCard } from '../../components/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton';
@@ -239,9 +243,71 @@ export const MarketplaceList = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 py-4 sm:py-6 font-sans">
-      <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-4">
+      <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-5">
+        {/* CampusHub Hero Spotlight Banner */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white p-6 sm:p-8 lg:p-10 border border-slate-800 shadow-xl">
+          <div className="absolute -right-12 -top-12 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -left-12 -bottom-12 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="space-y-3.5 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <Sparkles size={13} className="text-emerald-400" />
+                <span>Hệ Thống Trao Đổi Đồ &amp; Smart Locker KTX 24/7</span>
+              </div>
+
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+                Mua Bán &amp; Thuê Đồ Ký Túc Xá{' '}
+                <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+                  Tiết Kiệm &amp; An Tâm
+                </span>
+              </h1>
+
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
+                Giao nhận tự động qua trạm tủ thông minh không cần hẹn gặp. Tiền được bảo vệ 100% bằng cơ chế ký quỹ Escrow và tài khoản xác minh CCCD.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs text-slate-300 font-medium">
+                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
+                  <Lock size={13} className="text-emerald-400" />
+                  <span>Mở tủ nhận đồ 24/7</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
+                  <ShieldCheck size={13} className="text-cyan-400" />
+                  <span>Bảo đảm Escrow</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
+                  <Tag size={13} className="text-amber-400" />
+                  <span>Giá sinh viên</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
+              <Link
+                to="/marketplace/new"
+                className="px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <Plus size={17} />
+                <span>Đăng tin thanh lý</span>
+              </Link>
+              <Link
+                to="/about-guide"
+                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/15 font-semibold text-xs transition flex items-center justify-center gap-1.5"
+              >
+                <span>Xem cẩm nang giao nhận</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* 1. Shopee-style Search Header & Quick Chips */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs">
           <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
             {/* Search Bar */}
             <form onSubmit={handleSearchSubmit} className="flex-1 relative flex items-center">
@@ -251,21 +317,21 @@ export const MarketplaceList = () => {
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder="Tìm kiếm sản phẩm, giáo trình, máy tính Casio, bàn phím, đồ KTX..."
-                  className="w-full pl-10 pr-24 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 focus:border-emerald-500 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-500 transition"
+                  className="w-full pl-10 pr-26 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 focus:border-emerald-500 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 transition shadow-2xs"
                 />
                 <Search className="absolute left-3.5 text-slate-400" size={17} />
                 {searchInput && (
                   <button
                     type="button"
                     onClick={handleClearSearch}
-                    className="absolute right-22 text-slate-400 hover:text-slate-600 p-1"
+                    className="absolute right-24 text-slate-400 hover:text-slate-600 p-1"
                   >
                     <X size={15} />
                   </button>
                 )}
                 <button
                   type="submit"
-                  className="absolute right-1 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold transition flex items-center gap-1 shadow-2xs"
+                  className="absolute right-1 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
                 >
                   <Search size={13} />
                   <span>Tìm kiếm</span>
@@ -278,7 +344,7 @@ export const MarketplaceList = () => {
               <button
                 type="button"
                 onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-                className="md:hidden flex items-center gap-1.5 px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 bg-white"
+                className="md:hidden flex items-center gap-1.5 px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 bg-white"
               >
                 <Filter size={14} className="text-emerald-600" />
                 <span>Bộ lọc {hasActiveFilters && '•'}</span>
@@ -286,7 +352,7 @@ export const MarketplaceList = () => {
 
               <Link
                 to="/marketplace/new"
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-2xs shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs shrink-0"
               >
                 <Plus size={16} />
                 <span>Đăng bán đồ cũ</span>
@@ -308,9 +374,9 @@ export const MarketplaceList = () => {
                     return prev;
                   });
                 }}
-                className={`px-2.5 py-1 rounded-md text-xs transition shrink-0 ${
+                className={`px-3 py-1 rounded-full text-xs transition shrink-0 ${
                   search === kw
-                    ? 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200/80'
+                    ? 'bg-emerald-600 text-white font-bold shadow-2xs'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                 }`}
               >
@@ -326,7 +392,7 @@ export const MarketplaceList = () => {
           <aside
             className={`${
               mobileFilterOpen ? 'block' : 'hidden'
-            } md:block md:col-span-4 lg:col-span-3 bg-white rounded-xl border border-slate-200 p-4 shadow-2xs space-y-5`}
+            } md:block md:col-span-4 lg:col-span-3 bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs space-y-5`}
           >
             {/* Sidebar Title */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">

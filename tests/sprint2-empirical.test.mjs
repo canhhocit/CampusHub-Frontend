@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const FRONTEND_ROOT = path.resolve('d:/code/DA2/sourcecode/CampusHub-Frontend');
+const FRONTEND_ROOT = path.resolve('.');
 
 // ---------------------------------------------------------------------------
 // UP-04: ProductDetail Purchase/Rental Hierarchy & Mobile Sticky Bar

@@ -48,6 +48,7 @@ const rentalStepConfig: { key: OrderStatus; label: string; desc: string }[] = [
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { ReviewModal } from '../../components/review/ReviewModal';
 import { DisputeModal } from '../../components/dispute/DisputeModal';
+import { AnimatedSendButton } from '../../components/common/AnimatedSendButton';
 import type { ReviewResponse } from '../../types/review';
 import type { DisputeResponse } from '../../types/dispute';
 
@@ -1565,19 +1566,19 @@ export const OrderDetail = () => {
                   </div>
                 </div>
 
-                <button
+                <AnimatedSendButton
+                  type="button"
                   disabled={depositMutation.isPending}
                   onClick={() => depositMutation.mutate()}
-                  className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-xs sm:text-sm transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-2xs"
-                >
-                  {depositMutation.isPending ? (
-                    <span>Đang mở tủ và xác nhận cảm biến...</span>
-                  ) : (
-                    <>
-                      <Lock size={15} /> Xác nhận đã đặt đồ vào ngăn {order.compartmentCode}
-                    </>
-                  )}
-                </button>
+                  isPending={depositMutation.isPending}
+                  isSuccess={depositMutation.isSuccess}
+                  defaultText={`Xác nhận đã đặt đồ vào ngăn ${order.compartmentCode}`}
+                  loadingText="Đang mở tủ và xác nhận cảm biến..."
+                  successText="Đã khóa tủ & hoàn tất gửi đồ!"
+                  icon={Lock}
+                  variant="slate"
+                  className="w-full py-3 text-xs sm:text-sm font-semibold rounded-xl"
+                />
               </div>
             )}
 

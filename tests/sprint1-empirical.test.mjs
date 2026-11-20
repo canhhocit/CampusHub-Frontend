@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const FRONTEND_ROOT = path.resolve('d:/code/DA2/sourcecode/CampusHub-Frontend');
+const FRONTEND_ROOT = path.resolve('.');
 
 test('UP-01: Navbar responsive breakpoints and tablet menu visibility', () => {
   const navbarPath = path.join(FRONTEND_ROOT, 'src/components/Navbar.tsx');

@@ -112,33 +112,37 @@ export const Navbar = () => {
   ];
 
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 font-sans shadow-2xs">
-      {/* Top Value Proposition Banner (Fresh Oreka Eco Style) */}
-      <div className="bg-emerald-50/80 border-b border-emerald-100/70 text-slate-700 text-xs py-1 px-4 text-center font-normal flex items-center justify-center gap-2">
-        <span className="inline-flex items-center gap-1 font-semibold text-emerald-800">
-          <Lock size={12} className="text-emerald-700" /> Smart Locker Campus:
+    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 font-sans shadow-xs">
+      {/* Top Value Proposition Banner */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950 text-white text-xs py-1.5 px-4 text-center font-normal flex items-center justify-center gap-2 border-b border-white/10">
+        <span className="inline-flex items-center gap-1.5 font-bold text-emerald-400">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <Lock size={12} className="text-emerald-400" /> Smart Locker Campus:
         </span>
-        <span className="hidden sm:inline">Nền tảng mua bán đồ cũ sinh viên & Giao nhận qua tủ thông minh</span>
-        <span className="hidden sm:inline text-emerald-300">•</span>
-        <span>Bảo đảm an toàn 100%</span>
-        <span className="hidden md:inline text-emerald-300">•</span>
-        <span className="hidden md:inline">Không cần gặp mặt</span>
+        <span className="hidden sm:inline text-slate-300">Nền tảng mua bán đồ cũ sinh viên & Giao nhận qua tủ thông minh</span>
+        <span className="hidden sm:inline text-slate-600">•</span>
+        <span className="text-emerald-300 font-semibold">Bảo đảm an toàn 100% qua Escrow</span>
+        <span className="hidden md:inline text-slate-600">•</span>
+        <span className="hidden md:inline text-slate-300">Giao nhận 24/7 không cần gặp</span>
       </div>
 
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-15 gap-4">
+        <div className="flex justify-between items-center h-16 gap-4">
           {/* Logo & Brand */}
-          <div className="flex items-center gap-3 xl:gap-5 shrink-0">
-            <Link to={isAdmin ? '/admin/dashboard' : '/'} className="flex items-center gap-2 group shrink-0">
-              <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-2xs group-hover:bg-emerald-700 transition shrink-0">
-                <Package size={18} />
+          <div className="flex items-center gap-3 xl:gap-6 shrink-0">
+            <Link to={isAdmin ? '/admin/dashboard' : '/'} className="flex items-center gap-2.5 group shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-transform shrink-0">
+                <Package size={19} />
               </div>
               <div>
-                <span className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight flex items-center gap-1.5 leading-none">
-                  CampusHub
+                <span className="font-black text-slate-900 text-lg tracking-tight flex items-center gap-1.5 leading-none">
+                  Campus<span className="text-emerald-600">Hub</span>
                 </span>
-                <span className="hidden xl:block text-[10px] text-slate-500 font-medium mt-0.5">
-                  Mua bán đồ cũ & Smart Locker
+                <span className="hidden xl:block text-[10px] text-slate-400 font-medium mt-0.5 tracking-wide">
+                  Chợ Sinh Viên &amp; Smart Locker
                 </span>
               </div>
             </Link>
@@ -153,17 +157,19 @@ export const Navbar = () => {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium transition ${
+                    className={`relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs xl:text-sm font-semibold transition-all ${
                       isActive
-                        ? 'bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200/80'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <Icon size={14} className={isActive ? 'text-emerald-700' : 'text-slate-500'} />
+                    <Icon size={14} className={isActive ? 'text-white' : 'text-slate-400'} />
                     <span>{link.label}</span>
                     {Boolean(link.badge && link.badge > 0) && (
                       <span
-                        className="absolute -top-1 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none shadow-xs ring-2 ring-white"
+                        className={`absolute -top-1 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black leading-none shadow-xs ring-2 ring-white ${
+                          isActive ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white'
+                        }`}
                         title={`${link.badge} đơn bán chờ bạn xác nhận`}
                       >
                         {link.badge! > 99 ? '99+' : link.badge}
@@ -175,13 +181,13 @@ export const Navbar = () => {
             </nav>
           </div>
 
-          {/* Center Global Search (Oreka Pattern - Clean Input Group) */}
+          {/* Center Global Search (Pill Style) */}
           <form
             onSubmit={handleGlobalSearch}
             className="hidden md:flex flex-1 min-w-40 max-w-md items-center"
           >
-            <div className="flex w-full items-center bg-slate-50 hover:bg-white focus-within:bg-white border border-slate-300 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 rounded-lg overflow-hidden transition shadow-2xs">
-              <div className="pl-3 text-slate-400 shrink-0">
+            <div className="flex w-full items-center bg-slate-100/80 hover:bg-white focus-within:bg-white border border-slate-300/80 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 rounded-full overflow-hidden transition shadow-2xs">
+              <div className="pl-3.5 text-slate-400 shrink-0">
                 <Search size={15} />
               </div>
               <input
@@ -193,7 +199,7 @@ export const Navbar = () => {
               />
               <button
                 type="submit"
-                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0 transition"
+                className="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold shrink-0 transition"
               >
                 Tìm
               </button>
@@ -206,17 +212,17 @@ export const Navbar = () => {
             {isAdmin && (
               <Link
                 to="/admin/dashboard"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-900 transition shrink-0 min-h-[44px]"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-900 transition shrink-0 min-h-[40px]"
               >
                 <LayoutDashboard size={14} />
                 <span className="hidden xl:inline">Quản trị</span> Admin
               </Link>
             )}
 
-            {/* Post Listing Action (Fresh Green Button) */}
+            {/* Post Listing Action (Pro Gradient Button) */}
             <Link
               to={isAuthenticated ? "/marketplace/new" : "/login"}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs shrink-0 transition min-h-[44px]"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xs hover:shadow-md active:scale-95 shrink-0 transition min-h-[40px]"
             >
               <Plus size={15} />
               <span>Đăng bán</span>

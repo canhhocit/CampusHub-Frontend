@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
 import { Star, X, AlertCircle } from 'lucide-react';
+import { AnimatedSendButton } from '../common/AnimatedSendButton';
 
 interface ReviewModalProps {
   orderId: number;
@@ -125,22 +126,26 @@ export const ReviewModal = ({ orderId, isOpen, onClose, onSuccess }: ReviewModal
         )}
 
         {/* Actions */}
-        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+        <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 rounded-md hover:bg-slate-200"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition"
           >
             Đóng
           </button>
-          <button
+          <AnimatedSendButton
             type="button"
             disabled={reviewMutation.isPending}
             onClick={() => reviewMutation.mutate()}
-            className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50 transition shadow-2xs"
-          >
-            {reviewMutation.isPending ? 'Đang gửi...' : 'Gửi Đánh Giá'}
-          </button>
+            isPending={reviewMutation.isPending}
+            isSuccess={reviewMutation.isSuccess}
+            defaultText="Gửi Đánh Giá"
+            loadingText="Đang gửi đánh giá..."
+            successText="Đã gửi đánh giá!"
+            variant="emerald"
+            className="px-5 py-2 text-xs"
+          />
         </div>
       </div>
     </div>

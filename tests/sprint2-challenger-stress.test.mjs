@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const FRONTEND_ROOT = path.resolve('d:/code/DA2/sourcecode/CampusHub-Frontend');
+const FRONTEND_ROOT = path.resolve('.');
 
 // ============================================================================
 // STRESS SUITE 1: Mobile OrderDetail Layout & Action Card Reordering
