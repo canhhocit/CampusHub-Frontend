@@ -244,44 +244,38 @@ export const MarketplaceList = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-4 sm:py-6 font-sans">
       <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-5">
-        {/* CampusHub Hero Spotlight Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white p-6 sm:p-8 lg:p-10 border border-slate-800 shadow-xl">
-          <div className="absolute -right-12 -top-12 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -left-12 -bottom-12 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        {/* CampusHub Hero Spotlight Banner - World-Class Editorial Style */}
+        <div className="rounded-3xl bg-gradient-to-b from-white via-white to-emerald-50/30 border border-slate-200/90 p-6 sm:p-8 lg:p-10 shadow-xs">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="space-y-3.5 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <Sparkles size={13} className="text-emerald-400" />
-                <span>Hệ Thống Trao Đổi Đồ &amp; Smart Locker KTX 24/7</span>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                <Sparkles size={13} className="text-emerald-600" />
+                <span>Nền Tảng Trao Đổi Đồ &amp; Smart Locker KTX 24/7</span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
-                Mua Bán &amp; Thuê Đồ Ký Túc Xá{' '}
-                <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-                  Tiết Kiệm &amp; An Tâm
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                Mua Bán &amp; Cho Thuê Đồ Ký Túc Xá{' '}
+                <span className="text-emerald-700">
+                  Tiện Lợi &amp; An Tâm
                 </span>
               </h1>
 
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
-                Giao nhận tự động qua trạm tủ thông minh không cần hẹn gặp. Tiền được bảo vệ 100% bằng cơ chế ký quỹ Escrow và tài khoản xác minh CCCD.
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
+                Giao nhận tự động qua trạm tủ thông minh không cần hẹn gặp. Tiền thanh toán được bảo vệ 100% bằng cơ chế ký quỹ Escrow và tài khoản xác minh CCCD.
               </p>
 
-              <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs text-slate-300 font-medium">
-                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
-                  <Lock size={13} className="text-emerald-400" />
+              <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs text-slate-700 font-medium">
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-2xs">
+                  <Lock size={13} className="text-emerald-600" />
                   <span>Mở tủ nhận đồ 24/7</span>
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
-                  <ShieldCheck size={13} className="text-cyan-400" />
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-2xs">
+                  <ShieldCheck size={13} className="text-emerald-600" />
                   <span>Bảo đảm Escrow</span>
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
-                  <Tag size={13} className="text-amber-400" />
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-2xs">
+                  <Tag size={13} className="text-emerald-600" />
                   <span>Giá sinh viên</span>
                 </div>
               </div>
@@ -290,14 +284,14 @@ export const MarketplaceList = () => {
             <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
               <Link
                 to="/marketplace/new"
-                className="px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs hover:shadow-md active:scale-98 transition-all flex items-center justify-center gap-2"
               >
                 <Plus size={17} />
                 <span>Đăng tin thanh lý</span>
               </Link>
               <Link
                 to="/about-guide"
-                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/15 font-semibold text-xs transition flex items-center justify-center gap-1.5"
+                className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs"
               >
                 <span>Xem cẩm nang giao nhận</span>
                 <ArrowRight size={13} />
@@ -331,7 +325,7 @@ export const MarketplaceList = () => {
                 )}
                 <button
                   type="submit"
-                  className="absolute right-1 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+                  className="absolute right-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
                 >
                   <Search size={13} />
                   <span>Tìm kiếm</span>

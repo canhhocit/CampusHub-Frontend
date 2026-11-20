@@ -40,10 +40,6 @@ body {
   font-size: 15px;
   line-height: 1.55;
   background-color: #f8fafc;
-  background-image: 
-    radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.03) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.03) 0px, transparent 50%);
-  background-attachment: fixed;
 }
 
 button,
@@ -171,6 +167,92 @@ button:disabled {
 
 .animate-pop-check {
   animation: popCheck 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Saransh Agarwal / Squareboat-inspired Liquid Spring Physics Animations */
+:root {
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-liquid: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.ease-spring {
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes liquidSquash {
+  0% {
+    transform: scale(0.92, 0.92);
+  }
+  35% {
+    transform: scale(1.18, 0.84) translateY(-3px);
+  }
+  65% {
+    transform: scale(0.94, 1.08) translateY(1px);
+  }
+  85% {
+    transform: scale(1.04, 0.98);
+  }
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+}
+
+.animate-liquid-squash {
+  animation: liquidSquash 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes liquidPill {
+  0% {
+    transform: scaleX(0.75) scaleY(1.25);
+    opacity: 0.7;
+  }
+  45% {
+    transform: scaleX(1.15) scaleY(0.92);
+    opacity: 1;
+  }
+  75% {
+    transform: scaleX(0.96) scaleY(1.04);
+  }
+  100% {
+    transform: scaleX(1) scaleY(1);
+    opacity: 1;
+  }
+}
+
+.animate-liquid-pill {
+  animation: liquidPill 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes liquidDot {
+  0% {
+    transform: scale(0) translateY(4px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.4) translateY(-1px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-liquid-dot {
+  animation: liquidDot 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes liquidPulseGlow {
+  0%, 100% {
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28), 0 0 0 0 rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4), 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+}
+
+.animate-liquid-pulse {
+  animation: liquidPulseGlow 3s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
