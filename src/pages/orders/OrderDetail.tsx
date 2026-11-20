@@ -24,7 +24,7 @@ import {
   ShieldCheck,
   ExternalLink,
   RefreshCw,
-  Sparkles,
+  Zap,
   CheckCircle,
   Star,
   ShieldAlert,
@@ -977,7 +977,7 @@ export const OrderDetail = () => {
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    <Sparkles size={14} /> Giả lập tức thì
+                    <Zap size={14} /> Giả lập tức thì
                   </button>
                 </div>
 

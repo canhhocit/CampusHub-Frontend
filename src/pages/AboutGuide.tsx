@@ -6,7 +6,7 @@ import {
   CheckCircle2,
   HelpCircle,
   ChevronDown,
-  Sparkles,
+  Cpu,
   UserCheck,
   ShoppingBag,
   Send,
@@ -49,7 +49,7 @@ export const AboutGuide = () => {
       <section className="bg-gradient-to-b from-emerald-50/80 via-slate-50/30 to-transparent border-b border-emerald-100/70 py-12 sm:py-16">
         <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-200">
-            <Sparkles size={14} className="text-emerald-600" />
+            <Cpu size={14} className="text-emerald-600" />
             Nền tảng Công nghệ & Tiện ích Thông minh Sinh viên
           </div>
 

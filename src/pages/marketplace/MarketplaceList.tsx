@@ -21,8 +21,7 @@ import {
   Layers,
   Lock,
   ShieldCheck,
-  Sparkles,
-  ArrowRight,
+  Clock,
 } from 'lucide-react';
 import { ProductCard } from '../../components/ProductCard';
 import { ProductCardSkeleton } from '../../components/common/Skeleton';
@@ -244,60 +243,103 @@ export const MarketplaceList = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-4 sm:py-6 font-sans">
       <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 space-y-5">
-        {/* CampusHub Hero Spotlight Banner - World-Class Editorial Style */}
-        <div className="rounded-3xl bg-gradient-to-b from-white via-white to-emerald-50/30 border border-slate-200/90 p-6 sm:p-8 lg:p-10 shadow-xs">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-3.5 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                <Sparkles size={13} className="text-emerald-600" />
-                <span>Nền Tảng Trao Đổi Đồ &amp; Smart Locker KTX 24/7</span>
-              </div>
-
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                Mua Bán &amp; Cho Thuê Đồ Ký Túc Xá{' '}
-                <span className="text-emerald-700">
-                  Tiện Lợi &amp; An Tâm
+        {/* CampusHub Telemetry & Command Center Header - UI/UX Pro Max */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-live-pulse" />
+                  Mạng Lưới KTX 24/7
                 </span>
-              </h1>
-
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
-                Giao nhận tự động qua trạm tủ thông minh không cần hẹn gặp. Tiền thanh toán được bảo vệ 100% bằng cơ chế ký quỹ Escrow và tài khoản xác minh CCCD.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs text-slate-700 font-medium">
-                <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-2xs">
-                  <Lock size={13} className="text-emerald-600" />
-                  <span>Mở tủ nhận đồ 24/7</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-2xs">
-                  <ShieldCheck size={13} className="text-emerald-600" />
-                  <span>Bảo đảm Escrow</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-2xs">
-                  <Tag size={13} className="text-emerald-600" />
-                  <span>Giá sinh viên</span>
-                </div>
+                <span className="text-xs text-slate-400 font-mono">•</span>
+                <span className="text-xs font-medium text-slate-500 font-mono">CAMPUS LOCKER COMMERCE</span>
               </div>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Chợ Đồ Cũ Sinh Viên &amp; Smart Locker KTX
+              </h1>
             </div>
 
-            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
-              <Link
-                to="/marketplace/new"
-                className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs hover:shadow-md active:scale-98 transition-all flex items-center justify-center gap-2"
-              >
-                <Plus size={17} />
-                <span>Đăng tin thanh lý</span>
-              </Link>
-              <Link
-                to="/about-guide"
-                className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs"
-              >
-                <span>Xem cẩm nang giao nhận</span>
-                <ArrowRight size={13} />
-              </Link>
+            {/* Live Telemetry Metric Chips (Intuitive & Grounded) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 flex items-center gap-2.5 shadow-2xs hover:border-slate-300 transition">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                  <Lock size={15} />
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Trạm Tủ</div>
+                  <div className="text-xs font-black text-slate-800 font-mono">12 Điểm Online</div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 flex items-center gap-2.5 shadow-2xs hover:border-slate-300 transition">
+                <div className="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                  <ShieldCheck size={15} />
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Bảo Chứng</div>
+                  <div className="text-xs font-black text-slate-800 font-mono">100% Escrow</div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 flex items-center gap-2.5 shadow-2xs hover:border-slate-300 transition">
+                <div className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center shrink-0">
+                  <Clock size={15} />
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Giao Nhận</div>
+                  <div className="text-xs font-black text-slate-800 font-mono">&lt; 3 Phút Mở Tủ</div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 flex items-center gap-2.5 shadow-2xs hover:border-slate-300 transition">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                  <Tag size={15} />
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Giao Dịch</div>
+                  <div className="text-xs font-black text-slate-800 font-mono">Bán &amp; Cho Thuê</div>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Quick Category Carousel Strip (UI/UX Pro Max Visual Discovery) */}
+          {categories && categories.length > 0 && (
+            <div className="pt-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              <button
+                type="button"
+                onClick={() => handleCategorySelect('')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 ${
+                  !categoryId
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:-translate-y-0.5'
+                }`}
+              >
+                <Layers size={13} />
+                <span>Tất Cả Danh Mục</span>
+              </button>
+              {categories.map((cat) => {
+                const CatIcon = getCategoryIcon(cat.name);
+                const isSelected = categoryId === cat.id.toString();
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => handleCategorySelect(cat.id.toString())}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-emerald-700 text-white shadow-xs font-bold'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:-translate-y-0.5'
+                    }`}
+                  >
+                    <CatIcon size={13} />
+                    <span>{cat.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* 1. Shopee-style Search Header & Quick Chips */}

@@ -48,7 +48,7 @@ export const UserNavTabs = () => {
               to={tab.to}
               className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
                 isActive
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs font-bold'
+                  ? 'bg-slate-900 text-white shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
               }`}
             >
@@ -56,9 +56,9 @@ export const UserNavTabs = () => {
               <span>{tab.label}</span>
               {Boolean(tab.badge && tab.badge > 0) && (
                 <span
-                  className={`flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black leading-none shadow-xs ${
+                  className={`flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-mono font-black leading-none shadow-xs ${
                     isActive
-                      ? 'bg-white text-emerald-800'
+                      ? 'bg-emerald-500 text-slate-900'
                       : 'bg-rose-500 text-white'
                   }`}
                   title={`${tab.badge} đơn bán chờ xác nhận`}

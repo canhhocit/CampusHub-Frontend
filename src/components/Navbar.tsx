@@ -16,7 +16,6 @@ import {
   X,
   LayoutDashboard,
   Search,
-  Lock,
   BookOpen,
   Wallet,
   User,
@@ -113,16 +112,17 @@ export const Navbar = () => {
 
   return (
     <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 font-sans shadow-xs">
-      {/* Top Value Proposition Banner */}
-      <div className="bg-emerald-50/90 border-b border-emerald-100 text-slate-700 text-xs py-1.5 px-4 text-center font-normal flex items-center justify-center gap-2">
-        <span className="inline-flex items-center gap-1.5 font-bold text-emerald-800">
-          <Lock size={12} className="text-emerald-700" /> Smart Locker Campus:
+      {/* Top Value Proposition Banner - UI/UX Pro Max Command Telemetry */}
+      <div className="bg-slate-900 border-b border-slate-800 text-slate-300 text-xs py-1.5 px-4 text-center font-mono flex items-center justify-center gap-2.5">
+        <span className="inline-flex items-center gap-1.5 font-bold text-emerald-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-live-pulse" />
+          SMART LOCKER LIVE:
         </span>
-        <span className="hidden sm:inline text-slate-600">Nền tảng mua bán đồ cũ sinh viên &amp; Giao nhận qua tủ thông minh</span>
-        <span className="hidden sm:inline text-emerald-300">•</span>
-        <span className="text-emerald-800 font-semibold">Bảo đảm an toàn 100% qua Escrow</span>
-        <span className="hidden md:inline text-emerald-300">•</span>
-        <span className="hidden md:inline text-slate-600">Giao nhận 24/7 không cần gặp</span>
+        <span className="hidden sm:inline text-slate-300">Giao nhận tủ thông minh KTX 24/7</span>
+        <span className="hidden sm:inline text-slate-600">•</span>
+        <span className="text-emerald-400 font-semibold">Ký quỹ Escrow bảo vệ 100%</span>
+        <span className="hidden md:inline text-slate-600">•</span>
+        <span className="hidden md:inline text-slate-400">Không cần hẹn gặp trực tiếp</span>
       </div>
 
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
