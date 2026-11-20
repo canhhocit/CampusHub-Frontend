@@ -20,6 +20,7 @@ import {
   Star,
   MessageSquare,
   Loader2,
+  Package,
 } from 'lucide-react';
 import { getMediaUrl } from '../../api/cloudinary';
 
@@ -52,6 +53,19 @@ export const ProductDetail = () => {
 
   // Preferred Locker Selection State (UP-05)
   const [preferredLockerId, setPreferredLockerId] = useState<number | null>(null);
+
+  // Smart Locker Lock-In Interaction State (Squareboat-inspired)
+  const [isLockerLocking, setIsLockerLocking] = useState(false);
+
+  const triggerHaptic = () => {
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([15, 35, 20]);
+      } catch {
+        // Safe fallback
+      }
+    }
+  };
 
   // Active Lockers Query for Checkout (UP-05)
   const { data: activeLockers } = useQuery<Locker[]>({
@@ -141,15 +155,21 @@ export const ProductDetail = () => {
   };
 
   const handlePurchaseClick = () => {
-    if (createOrderMutation.isPending) return;
+    if (createOrderMutation.isPending || isLockerLocking) return;
     if (!checkIdentityAndAuth()) return;
     if (product?.locker?.id && preferredLockerId === null) {
       setPreferredLockerId(product.locker.id);
     }
-    setIsConfirmPurchaseOpen(true);
+    triggerHaptic();
+    setIsLockerLocking(true);
+    setTimeout(() => {
+      setIsLockerLocking(false);
+      setIsConfirmPurchaseOpen(true);
+    }, 400);
   };
 
   const handleConfirmPurchase = () => {
+    triggerHaptic();
     createOrderMutation.mutate({
       orderType: 'PURCHASE',
       preferredLockerId: preferredLockerId ?? null,
@@ -157,12 +177,17 @@ export const ProductDetail = () => {
   };
 
   const handleOpenRentalModal = () => {
-    if (createOrderMutation.isPending) return;
+    if (createOrderMutation.isPending || isLockerLocking) return;
     if (!checkIdentityAndAuth()) return;
     if (product?.locker?.id && preferredLockerId === null) {
       setPreferredLockerId(product.locker.id);
     }
-    setIsRentalModalOpen(true);
+    triggerHaptic();
+    setIsLockerLocking(true);
+    setTimeout(() => {
+      setIsLockerLocking(false);
+      setIsRentalModalOpen(true);
+    }, 400);
   };
 
   const effectiveRentalDays = customDays && Number(customDays) > 0 ? Number(customDays) : selectedRentalDays;
@@ -172,6 +197,7 @@ export const ProductDetail = () => {
       setActionError('Thời hạn thuê phải từ 1 đến 90 ngày.');
       return;
     }
+    triggerHaptic();
     createOrderMutation.mutate({
       orderType: 'RENTAL',
       rentalDurationDays: effectiveRentalDays,
@@ -633,14 +659,21 @@ export const ProductDetail = () => {
                       <button
                         type="button"
                         onClick={handlePurchaseClick}
-                        disabled={createOrderMutation.isPending}
-                        className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px] disabled:opacity-50"
+                        disabled={createOrderMutation.isPending || isLockerLocking}
+                        className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px] disabled:opacity-50"
                       >
                         {createOrderMutation.isPending ? (
                           <>
                             <Loader2 size={18} className="animate-spin" />
                             <span>Đang khởi tạo đơn hàng qua Locker...</span>
                           </>
+                        ) : isLockerLocking ? (
+                          <div className="flex items-center gap-2 py-0.5">
+                            <div className="relative w-7 h-7 rounded-lg bg-white/20 border border-white/40 flex items-center justify-center shadow-inner">
+                              <Package size={15} className="text-white animate-locker-parcel" />
+                            </div>
+                            <span className="text-xs font-mono font-bold tracking-tight">Đang kẹp khóa ngăn tủ...</span>
+                          </div>
                         ) : (
                           <>
                             <ShoppingBag size={18} />
@@ -652,11 +685,22 @@ export const ProductDetail = () => {
                       <button
                         type="button"
                         onClick={handleOpenRentalModal}
-                        disabled={createOrderMutation.isPending}
-                        className="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold rounded-xl shadow-xs transition flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px] disabled:opacity-50"
+                        disabled={createOrderMutation.isPending || isLockerLocking}
+                        className="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px] disabled:opacity-50"
                       >
-                        <Calendar size={18} />
-                        <span>Chọn thời hạn & Thuê qua Locker</span>
+                        {isLockerLocking ? (
+                          <div className="flex items-center gap-2 py-0.5">
+                            <div className="relative w-7 h-7 rounded-lg bg-white/20 border border-white/40 flex items-center justify-center shadow-inner">
+                              <Package size={15} className="text-white animate-locker-parcel" />
+                            </div>
+                            <span className="text-xs font-mono font-bold tracking-tight">Đang kết nối ngăn tủ...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <Calendar size={18} />
+                            <span>Chọn thời hạn & Thuê qua Locker</span>
+                          </>
+                        )}
                       </button>
                     )}
 
@@ -1149,14 +1193,21 @@ export const ProductDetail = () => {
             <button
               type="button"
               onClick={handlePrimaryAction}
-              disabled={createOrderMutation.isPending}
-              className={`px-4 py-2.5 active:scale-[0.98] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 min-h-[44px] ${
+              disabled={createOrderMutation.isPending || isLockerLocking}
+              className={`px-4 py-2.5 active:scale-[0.98] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 min-h-[44px] ${
+                isLockerLocking ? 'animate-locker-morph ring-2 ring-emerald-300' : ''
+              } ${
                 effectiveMode === 'PURCHASE'
                   ? 'bg-emerald-600 hover:bg-emerald-700'
                   : 'bg-slate-900 hover:bg-slate-800'
               }`}
             >
-              {effectiveMode === 'PURCHASE' ? (
+              {isLockerLocking ? (
+                <div className="flex items-center gap-1.5">
+                  <Package size={14} className="animate-locker-parcel text-white" />
+                  <span className="font-mono text-[11px]">Đang giữ chỗ...</span>
+                </div>
+              ) : effectiveMode === 'PURCHASE' ? (
                 <>
                   <ShoppingBag size={15} />
                   <span>Đặt mua ngay</span>
