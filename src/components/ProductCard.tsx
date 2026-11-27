@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Product } from '../types/marketplace';
-import { ImageOff, ShieldCheck, Lock, Clock } from 'lucide-react';
+import { ImageOff, ShieldCheck, MapPin } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -17,7 +17,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
     if (diffInHours < 1) return 'Vừa xong';
-    if (diffInHours < 24) return `${diffInHours}h trước`;
+    if (diffInHours < 24) return `${diffInHours} giờ trước`;
     if (diffInHours < 48) return 'Hôm qua';
     return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
   };
@@ -25,101 +25,101 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Link
       to={`/marketplace/${product.id}`}
-      className="group bg-white rounded-2xl border border-slate-200/90 hover:border-slate-300 overflow-hidden shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative"
+      className="group bg-white rounded-xl border border-slate-200/85 hover:border-slate-300 overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-200 flex flex-col h-full relative"
     >
-      {/* Product Image Area with 1:1 Aspect Ratio (Crisp, Uncluttered) */}
-      <div className="aspect-square bg-slate-100/80 relative overflow-hidden flex items-center justify-center">
+      {/* Product Image — Clean 4:3 Editorial Frame */}
+      <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden flex items-center justify-center">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.title}
-            className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500 ease-out"
+            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
             loading="lazy"
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4 text-center">
-            <div className="w-12 h-12 rounded-xl bg-slate-200/70 flex items-center justify-center">
-              <ImageOff size={22} className="text-slate-400" />
-            </div>
-            <span className="text-[11px] font-medium text-slate-500 font-mono">Chưa có ảnh</span>
+            <ImageOff size={22} className="text-slate-300" />
+            <span className="text-[11px] font-medium text-slate-400">Chưa có hình ảnh</span>
           </div>
         )}
 
-        {/* Minimal Top Badges (UI/UX Pro Max Mono Pills) */}
-        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-white/95 backdrop-blur-md text-slate-800 shadow-xs truncate max-w-[120px] border border-slate-200/90">
-            {product.category?.name || 'Khác'}
-          </span>
-          {product.listingType === 'BOTH' && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold bg-slate-900 text-white shadow-xs">
-              Cho thuê
+        {/* Restrained Rental Indicator Only When Applicable */}
+        {(product.listingType === 'BOTH' || product.listingType === 'RENT') && (
+          <div className="absolute top-2.5 left-2.5 pointer-events-none">
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-900/85 backdrop-blur-xs text-white">
+              {product.listingType === 'RENT' ? 'Cho thuê' : 'Bán & Cho thuê'}
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Status Overlay if not active */}
+        {/* Status Overlay if Inactive */}
         {product.status === 'SOLD' && (
-          <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center">
-            <span className="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider bg-rose-600 text-white shadow-md">
-              ĐÃ BÁN
+          <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center">
+            <span className="px-3 py-1 rounded-md text-xs font-semibold uppercase tracking-wider bg-rose-600 text-white">
+              Đã bán
             </span>
           </div>
         )}
         {product.status === 'HIDDEN' && (
           <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center">
-            <span className="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider bg-slate-800 text-white shadow-md">
-              TẠM ẨN
+            <span className="px-3 py-1 rounded-md text-xs font-semibold uppercase tracking-wider bg-slate-800 text-white">
+              Tạm ẩn
             </span>
           </div>
         )}
       </div>
 
       {/* Product Information */}
-      <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between gap-2.5">
+      <div className="p-3.5 flex-1 flex flex-col justify-between gap-3">
         <div className="space-y-1.5">
-          {/* Smart Locker Location */}
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono font-medium truncate">
-            <Lock size={12} className="text-emerald-600 shrink-0" />
-            <span className="truncate">{product.locker?.name || 'Smart Locker'}</span>
-          </div>
-
-          {/* Title */}
-          <h3 className="font-semibold text-slate-900 text-xs sm:text-sm line-clamp-2 group-hover:text-emerald-700 transition-colors leading-snug">
-            {product.title}
-          </h3>
-
-          {/* Price with High-Contrast Typography */}
-          <div className="pt-0.5 flex flex-wrap items-baseline gap-1.5">
-            <span className="text-base sm:text-lg font-black text-slate-900 font-mono tracking-tight">
+          {/* Price First for Fast Scanning */}
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <span className="text-[15px] sm:text-base font-bold text-slate-950 font-mono tabular-nums tracking-tight">
               {formatPrice(product.price)}
             </span>
             {product.listingType === 'BOTH' && product.rentPricePerDay && (
-              <span className="text-[10px] sm:text-[11px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.5 rounded">
-                Thuê: {formatPrice(product.rentPricePerDay)}/ngày
+              <span className="text-[11px] font-medium text-emerald-700 font-mono tabular-nums">
+                Thuê {formatPrice(product.rentPricePerDay)}/ngày
               </span>
+            )}
+          </div>
+
+          {/* Title */}
+          <h3 className="font-medium text-slate-800 text-[13px] sm:text-sm line-clamp-2 group-hover:text-emerald-700 transition-colors leading-snug">
+            {product.title}
+          </h3>
+
+          {/* Location & Category Meta */}
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 pt-0.5 truncate">
+            <MapPin size={12} className="text-slate-400 shrink-0" />
+            <span className="truncate">{product.locker?.name || 'Smart Locker KTX'}</span>
+            {product.category?.name && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="truncate max-w-[120px] text-slate-400">{product.category.name}</span>
+              </>
             )}
           </div>
         </div>
 
-        {/* Seller Info & Meta */}
-        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] sm:text-xs text-slate-600 gap-1.5">
-          <div className="flex items-center gap-1.5 min-w-0 truncate max-w-[120px] sm:max-w-[150px]">
-            <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-[10px] shrink-0 font-mono">
+        {/* Seller & Posted Time */}
+        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 gap-2">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-[10px] shrink-0 border border-slate-200/80">
               {product.owner?.fullName?.charAt(0) || product.owner?.username?.charAt(0) || 'U'}
             </div>
-            <span className="truncate font-medium text-slate-700">
+            <span className="truncate font-medium text-slate-600">
               {product.owner?.fullName || product.owner?.username || 'Sinh viên'}
             </span>
             {product.owner?.identityVerified && (
-              <span title="Đã duyệt CCCD bảo chứng" className="text-emerald-600 shrink-0">
-                <ShieldCheck size={13} className="text-emerald-600" />
+              <span title="Đã xác thực CCCD" className="text-emerald-600 shrink-0">
+                <ShieldCheck size={13} />
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-1 text-slate-400 shrink-0 text-[10px] sm:text-[11px]">
-            <Clock size={11} />
-            <span className="font-mono">{formatDate(product.createdAt)}</span>
+            <span>{formatDate(product.createdAt)}</span>
           </div>
         </div>
       </div>

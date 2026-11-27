@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePendingSellingOrdersCount } from '../hooks/usePendingSellingOrders';
 import { NotificationBell } from './NotificationBell';
+import { BrandMark } from './common/BrandMark';
 import {
   ShoppingBag,
   Package,
@@ -75,7 +76,6 @@ export const Navbar = () => {
     setUserMenuOpen(false);
   }, [location.pathname]);
 
-  // Real-time pending selling orders count for seller badge
   const { data: pendingData } = usePendingSellingOrdersCount();
   const pendingSellingCount = pendingData?.pendingCount || 0;
 
@@ -96,7 +96,7 @@ export const Navbar = () => {
   };
 
   const navLinks = [
-    { to: '/marketplace', label: 'Chợ đồ cũ', icon: ShoppingBag },
+    { to: '/marketplace', label: 'Khám phá', icon: ShoppingBag },
     { to: '/orders/buying', label: 'Đơn mua', icon: Inbox, authOnly: true },
     {
       to: '/orders/selling',
@@ -106,66 +106,52 @@ export const Navbar = () => {
       badge: pendingSellingCount,
     },
     { to: '/wallet', label: 'Ví tiền', icon: Wallet, authOnly: true },
-    { to: '/marketplace/my-listings', label: 'Tin bán', icon: Package, authOnly: true },
+    { to: '/marketplace/my-listings', label: 'Tin đăng', icon: Package, authOnly: true },
     { to: '/about-guide', label: 'Hướng dẫn', icon: BookOpen },
   ];
 
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 font-sans shadow-xs">
-      {/* Top Value Proposition Banner - UI/UX Pro Max Command Telemetry */}
-      <div className="bg-slate-900 border-b border-slate-800 text-slate-300 text-xs py-1.5 px-4 text-center font-mono flex items-center justify-center gap-2.5">
-        <span className="inline-flex items-center gap-1.5 font-bold text-emerald-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-live-pulse" />
-          SMART LOCKER LIVE:
-        </span>
-        <span className="hidden sm:inline text-slate-300">Giao nhận tủ thông minh KTX 24/7</span>
-        <span className="hidden sm:inline text-slate-600">•</span>
-        <span className="text-emerald-400 font-semibold">Ký quỹ Escrow bảo vệ 100%</span>
-        <span className="hidden md:inline text-slate-600">•</span>
-        <span className="hidden md:inline text-slate-400">Không cần hẹn gặp trực tiếp</span>
-      </div>
-
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/90 sticky top-0 z-40 font-sans">
+      <div className="w-full max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 gap-4">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3 xl:gap-6 shrink-0">
-            <Link to={isAdmin ? '/admin/dashboard' : '/'} className="flex items-center gap-2.5 group shrink-0">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-transform shrink-0">
-                <Package size={19} />
-              </div>
-              <div>
-                <span className="font-black text-slate-900 text-lg tracking-tight flex items-center gap-1.5 leading-none">
+          {/* Left: Brand & Navigation */}
+          <div className="flex items-center gap-4 xl:gap-7 shrink-0">
+            <Link
+              to={isAdmin ? '/admin/dashboard' : '/'}
+              className="flex items-center gap-2.5 group shrink-0"
+            >
+              <BrandMark size="md" tone="dark" className="group-hover:bg-emerald-600 transition-colors" />
+              <div className="leading-tight">
+                <span className="font-display font-bold text-slate-900 text-[17px] tracking-tight block">
                   Campus<span className="text-emerald-600">Hub</span>
                 </span>
-                <span className="hidden xl:block text-[10px] text-slate-400 font-medium mt-0.5 tracking-wide">
-                  Chợ Sinh Viên &amp; Smart Locker
+                <span className="hidden xl:block text-[10px] text-slate-500 font-medium tracking-wide">
+                  Chợ sinh viên &amp; Smart Locker
                 </span>
               </div>
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-0.5">
               {navLinks.map((link) => {
                 if (link.authOnly && !isAuthenticated) return null;
-                const Icon = link.icon;
-                const isActive = location.pathname === link.to || (link.to !== '/' && location.pathname.startsWith(`${link.to}/`));
+                const isActive =
+                  (link.to === '/marketplace' && location.pathname === '/') ||
+                  location.pathname === link.to ||
+                  (link.to !== '/' && location.pathname.startsWith(`${link.to}/`));
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs xl:text-sm font-semibold transition-all ${
+                    className={`relative inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                       isActive
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                        ? 'text-slate-950 bg-slate-100 font-semibold'
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
                     }`}
                   >
-                    <Icon size={14} className={isActive ? 'text-white' : 'text-slate-400'} />
                     <span>{link.label}</span>
                     {Boolean(link.badge && link.badge > 0) && (
                       <span
-                        className={`absolute -top-1 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black leading-none shadow-xs ring-2 ring-white ${
-                          isActive ? 'bg-white text-emerald-800' : 'bg-rose-500 text-white'
-                        }`}
+                        className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold leading-none bg-rose-600 text-white tabular-nums"
                         title={`${link.badge} đơn bán chờ bạn xác nhận`}
                       >
                         {link.badge! > 99 ? '99+' : link.badge}
@@ -177,133 +163,148 @@ export const Navbar = () => {
             </nav>
           </div>
 
-          {/* Center Global Search (Pill Style) */}
+          {/* Center Global Search */}
           <form
             onSubmit={handleGlobalSearch}
             className="hidden md:flex flex-1 min-w-40 max-w-md items-center"
           >
-            <div className="flex w-full items-center bg-slate-100/80 hover:bg-white focus-within:bg-white border border-slate-300/80 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 rounded-full overflow-hidden transition shadow-2xs">
-              <div className="pl-3.5 text-slate-400 shrink-0">
+            <div className="flex w-full items-center bg-slate-100/90 hover:bg-slate-100 focus-within:bg-white border border-slate-200/90 focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-900/5 rounded-lg overflow-hidden transition">
+              <div className="pl-3 text-slate-400 shrink-0">
                 <Search size={15} />
               </div>
               <input
                 type="text"
                 value={navSearch}
                 onChange={(e) => setNavSearch(e.target.value)}
-                placeholder="Tìm giáo trình, Casio, laptop, đồ KTX..."
-                className="w-full px-2.5 py-1.5 text-xs sm:text-sm bg-transparent border-none focus:outline-hidden placeholder:text-slate-400 min-w-0"
+                placeholder="Tìm giáo trình, máy tính, đồ ký túc xá..."
+                className="w-full px-2.5 py-2 text-[13px] bg-transparent border-none text-slate-900 focus:outline-hidden placeholder:text-slate-400 min-w-0"
               />
+              {navSearch && (
+                <button
+                  type="button"
+                  onClick={() => setNavSearch('')}
+                  className="p-1.5 text-slate-400 hover:text-slate-700"
+                  aria-label="Xóa từ khóa tìm kiếm"
+                >
+                  <X size={13} />
+                </button>
+              )}
               <button
                 type="submit"
-                className="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold shrink-0 transition"
+                className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-slate-950 hover:bg-slate-200/70 border-l border-slate-200/80 shrink-0 transition"
               >
                 Tìm
               </button>
             </div>
           </form>
 
-          {/* Right Action Icons & Account (Desktop >= 1024px) */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-2.5 shrink-0">
-            {/* Admin Portal Jump Badge */}
+          {/* Right Action Cluster (Desktop >= 1024px) */}
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
             {isAdmin && (
               <Link
                 to="/admin/dashboard"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-900 transition shrink-0 min-h-[40px]"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 transition shrink-0 min-h-[40px]"
               >
                 <LayoutDashboard size={14} />
-                <span className="hidden xl:inline">Quản trị</span> Admin
+                <span>Quản trị</span>
               </Link>
             )}
 
-            {/* Post Listing Action (Pro Gradient Button) */}
             <Link
-              to={isAuthenticated ? "/marketplace/new" : "/login"}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xs hover:shadow-md active:scale-95 shrink-0 transition min-h-[40px]"
+              to={isAuthenticated ? '/marketplace/new' : '/login'}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.98] shrink-0 transition min-h-[40px]"
             >
               <Plus size={15} />
               <span>Đăng bán</span>
             </Link>
 
-            {/* Notification Bell */}
             {isAuthenticated && <NotificationBell />}
 
-            {/* User Profile Popover Dropdown */}
             {isAuthenticated ? (
-              <div className="relative pl-2 border-l border-slate-200 shrink-0" ref={userMenuRef}>
+              <div className="relative pl-2 ml-0.5 border-l border-slate-200 shrink-0" ref={userMenuRef}>
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100 transition focus-visible:ring-2 focus-visible:ring-emerald-500 min-h-[44px]"
                   aria-expanded={userMenuOpen}
                   aria-haspopup="true"
                   aria-label="Menu tài khoản cá nhân"
+                  className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-lg hover:bg-slate-100 transition min-h-[44px]"
                 >
-                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shadow-xs shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-semibold flex items-center justify-center text-xs shrink-0">
                     {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'U'}
                   </div>
-                  <span className="text-xs font-semibold text-slate-800 max-w-[110px] truncate text-left">
+                  <span className="text-[13px] font-medium text-slate-800 max-w-[110px] truncate text-left">
                     {user?.fullName || user?.username}
                   </span>
                   <ChevronDown
                     size={14}
-                    className={`text-slate-400 transition-transform duration-200 ${userMenuOpen ? 'rotate-180 text-emerald-600' : ''}`}
+                    className={`text-slate-400 transition-transform duration-200 ${userMenuOpen ? 'rotate-180 text-slate-800' : ''}`}
                   />
                 </button>
 
                 {userMenuOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95"
+                    className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl shadow-slate-900/10 border border-slate-200/90 py-1.5 z-50"
                     role="menu"
                     aria-orientation="vertical"
                     aria-label="Tùy chọn tài khoản"
                   >
                     <div className="px-3.5 py-2.5 border-b border-slate-100">
-                      <p className="text-xs font-bold text-slate-900 truncate">
+                      <p className="text-[13px] font-semibold text-slate-900 truncate">
                         {user?.fullName || user?.username}
                       </p>
-                      <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                      <p className="text-xs text-slate-500 truncate mt-0.5">
                         {user?.email}
                       </p>
                       {user?.identityVerified ? (
-                        <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                          <CheckCircle2 size={11} className="text-emerald-600 shrink-0" />
-                          <span>Đã duyệt CCCD</span>
+                        <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+                          <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                          <span>Đã xác thực CCCD</span>
                         </div>
                       ) : (
                         <Link
                           to="/verify-identity"
                           onClick={() => setUserMenuOpen(false)}
-                          className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition"
+                          className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition"
                         >
-                          <ShieldAlert size={11} className="text-amber-600 shrink-0" />
-                          <span>Chưa duyệt CCCD • Xác minh</span>
+                          <ShieldAlert size={12} className="text-amber-600 shrink-0" />
+                          <span>Chưa xác thực CCCD</span>
                         </Link>
                       )}
                     </div>
 
                     <div className="py-1">
                       <Link
+                        to="/dashboard"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-medium text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition"
+                        role="menuitem"
+                      >
+                        <LayoutDashboard size={15} className="text-slate-400" />
+                        <span>Tổng quan tài khoản</span>
+                      </Link>
+                      <Link
                         to="/profile"
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 hover:text-emerald-700 hover:bg-slate-50 transition"
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-medium text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition"
                         role="menuitem"
                       >
                         <User size={15} className="text-slate-400" />
-                        <span>Hồ sơ cá nhân & CCCD</span>
+                        <span>Hồ sơ cá nhân &amp; CCCD</span>
                       </Link>
                       <Link
                         to="/wallet"
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 hover:text-emerald-700 hover:bg-slate-50 transition"
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-medium text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition"
                         role="menuitem"
                       >
                         <Wallet size={15} className="text-slate-400" />
-                        <span>Ví tiền & Lịch sử</span>
+                        <span>Ví tiền &amp; Lịch sử</span>
                       </Link>
                       <Link
                         to="/orders/buying"
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-slate-700 hover:text-emerald-700 hover:bg-slate-50 transition"
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-medium text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition"
                         role="menuitem"
                       >
                         <Inbox size={15} className="text-slate-400" />
@@ -312,15 +313,15 @@ export const Navbar = () => {
                       <Link
                         to="/orders/selling"
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center justify-between px-3.5 py-2 text-xs font-medium text-slate-700 hover:text-emerald-700 hover:bg-slate-50 transition"
+                        className="flex items-center justify-between px-3.5 py-2 text-[13px] font-medium text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition"
                         role="menuitem"
                       >
                         <div className="flex items-center gap-2.5">
                           <Send size={15} className="text-slate-400" />
-                          <span>Đơn bán & Giao tủ</span>
+                          <span>Đơn bán &amp; Giao tủ</span>
                         </div>
                         {Boolean(pendingSellingCount > 0) && (
-                          <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold">
+                          <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold tabular-nums">
                             {pendingSellingCount > 99 ? '99+' : pendingSellingCount}
                           </span>
                         )}
@@ -334,27 +335,27 @@ export const Navbar = () => {
                           setUserMenuOpen(false);
                           handleLogout();
                         }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition min-h-[44px] text-left"
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium text-rose-600 hover:bg-rose-50 transition min-h-[44px] text-left"
                         role="menuitem"
                       >
                         <LogOut size={15} className="shrink-0" />
-                        <span>Đăng xuất tài khoản</span>
+                        <span>Đăng xuất</span>
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 pl-1 border-l border-slate-200">
                 <Link
                   to="/login"
-                  className="px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 min-h-[44px] flex items-center transition"
+                  className="px-3 py-2 text-[13px] font-medium text-slate-700 hover:text-slate-950 min-h-[44px] flex items-center transition"
                 >
                   Đăng nhập
                 </Link>
                 <Link
                   to="/register"
-                  className="px-3.5 py-2 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl min-h-[44px] flex items-center transition"
+                  className="px-3.5 py-2 text-[13px] font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg min-h-[40px] flex items-center transition"
                 >
                   Đăng ký
                 </Link>
@@ -366,8 +367,8 @@ export const Navbar = () => {
           <div className="lg:hidden flex items-center gap-1.5 sm:gap-2">
             {isAuthenticated && <NotificationBell />}
             <Link
-              to={isAuthenticated ? "/marketplace/new" : "/login"}
-              className="px-2.5 py-2 sm:px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs shrink-0 min-h-[44px] transition"
+              to={isAuthenticated ? '/marketplace/new' : '/login'}
+              className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shrink-0 min-h-[40px] transition"
             >
               <Plus size={15} />
               <span className="hidden sm:inline">Đăng bán</span>
@@ -375,63 +376,56 @@ export const Navbar = () => {
             <button
               type="button"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center transition focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className="p-2 text-slate-700 hover:text-slate-950 hover:bg-slate-100 rounded-lg shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center transition"
               aria-label={mobileMenuOpen ? "Đóng menu điều hướng" : "Mở menu điều hướng"}
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileMenuOpen ? <X size={21} /> : <Menu size={21} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile & Tablet Drawer (Fixed Modal Overlay) */}
+      {/* Mobile & Tablet Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex justify-end animate-in fade-in duration-200">
-          {/* Backdrop with blur & click to dismiss */}
+        <div className="fixed inset-0 z-50 lg:hidden flex justify-end">
           <div
             className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
 
-          {/* Slide-out Drawer Panel */}
           <aside
-            className="relative w-full max-w-xs sm:max-w-sm bg-white h-full shadow-2xl flex flex-col z-10 overflow-y-auto animate-in slide-in-from-right duration-200"
+            className="relative w-full max-w-xs sm:max-w-sm bg-white h-full shadow-2xl flex flex-col z-10 overflow-y-auto"
             role="dialog"
             aria-modal="true"
             aria-label="Menu điều hướng di động"
           >
-            {/* Drawer Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50/80 shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-2xs">
-                  <Package size={16} />
-                </div>
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-200 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <BrandMark size="sm" tone="dark" />
                 <div>
-                  <span className="font-extrabold text-slate-900 text-sm tracking-tight leading-none block">
+                  <span className="font-display font-bold text-slate-900 text-sm tracking-tight leading-none block">
                     CampusHub
                   </span>
-                  <span className="text-[10px] text-slate-500 font-medium">
-                    Menu điều hướng
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Điều hướng hệ thống
                   </span>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center transition"
+                className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center transition"
                 aria-label="Đóng menu"
               >
                 <X size={20} />
               </button>
             </div>
 
-            {/* Drawer Body */}
             <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-              {/* Mobile Search Input */}
               <form onSubmit={handleGlobalSearch} className="flex items-center">
-                <div className="flex w-full items-center bg-slate-50 border border-slate-300 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 rounded-lg overflow-hidden transition">
+                <div className="flex w-full items-center bg-slate-100 border border-slate-200 focus-within:bg-white focus-within:border-slate-400 rounded-lg overflow-hidden transition">
                   <div className="pl-3 text-slate-400 shrink-0">
                     <Search size={15} />
                   </div>
@@ -439,42 +433,44 @@ export const Navbar = () => {
                     type="text"
                     value={navSearch}
                     onChange={(e) => setNavSearch(e.target.value)}
-                    placeholder="Tìm sản phẩm, sách giáo trình..."
+                    placeholder="Tìm sản phẩm, giáo trình..."
                     className="w-full px-2.5 py-2 text-xs bg-transparent border-none focus:outline-hidden placeholder:text-slate-400 min-w-0"
                   />
                   <button
                     type="submit"
-                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0 transition min-h-[44px]"
+                    className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shrink-0 transition min-h-[44px]"
                   >
                     Tìm
                   </button>
                 </div>
               </form>
 
-              {/* Navigation Links */}
               <nav className="space-y-1">
                 {navLinks.map((link) => {
                   if (link.authOnly && !isAuthenticated) return null;
                   const Icon = link.icon;
-                  const isActive = location.pathname === link.to || (link.to !== '/' && location.pathname.startsWith(`${link.to}/`));
+                  const isActive =
+                    (link.to === '/marketplace' && location.pathname === '/') ||
+                    location.pathname === link.to ||
+                    (link.to !== '/' && location.pathname.startsWith(`${link.to}/`));
                   return (
                     <Link
                       key={link.to}
                       to={link.to}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition min-h-[44px] ${
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition min-h-[44px] ${
                         isActive
-                          ? 'bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200/70'
+                          ? 'bg-slate-100 text-slate-950 font-semibold'
                           : 'text-slate-700 hover:bg-slate-50'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon size={17} className={isActive ? 'text-emerald-700' : 'text-slate-500'} />
+                        <Icon size={17} className={isActive ? 'text-emerald-600' : 'text-slate-400'} />
                         <span>{link.label}</span>
                       </div>
                       {Boolean(link.badge && link.badge > 0) && (
                         <span
-                          className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-rose-500 text-white text-xs font-bold leading-none shadow-xs"
+                          className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-rose-600 text-white text-xs font-bold leading-none tabular-nums"
                           title={`${link.badge} đơn bán chờ xác nhận`}
                         >
                           {link.badge! > 99 ? '99+' : link.badge}
@@ -485,9 +481,9 @@ export const Navbar = () => {
                 })}
 
                 <Link
-                  to={isAuthenticated ? "/marketplace/new" : "/login"}
+                  to={isAuthenticated ? '/marketplace/new' : '/login'}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition min-h-[44px] mt-2 shadow-2xs"
+                  className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition min-h-[44px] mt-2"
                 >
                   <Plus size={17} />
                   <span>Đăng tin bán sản phẩm</span>
@@ -497,7 +493,7 @@ export const Navbar = () => {
                   <Link
                     to="/admin/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 transition min-h-[44px] mt-2"
+                    className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 transition min-h-[44px] mt-2"
                   >
                     <LayoutDashboard size={17} />
                     <span>Cổng Quản trị Admin</span>
@@ -507,15 +503,15 @@ export const Navbar = () => {
                 {isAuthenticated && !isAdmin && (
                   <div className="pt-2">
                     {user?.identityVerified ? (
-                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/80">
                         <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
-                        <span>Tài khoản đã duyệt CCCD</span>
+                        <span>Tài khoản đã xác thực CCCD</span>
                       </div>
                     ) : (
                       <Link
                         to="/verify-identity"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition min-h-[44px]"
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition min-h-[44px]"
                       >
                         <ShieldAlert size={15} className="text-amber-600 shrink-0" />
                         <span>Xác minh CCCD để mở toàn quyền</span>
@@ -526,7 +522,6 @@ export const Navbar = () => {
               </nav>
             </div>
 
-            {/* Drawer Footer */}
             <div className="p-4 border-t border-slate-200 bg-slate-50/70 shrink-0">
               {isAuthenticated ? (
                 <div className="space-y-3">
@@ -535,7 +530,7 @@ export const Navbar = () => {
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-2.5 hover:opacity-85 transition min-h-[44px]"
                   >
-                    <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-semibold flex items-center justify-center text-xs shrink-0">
                       {user?.fullName?.charAt(0) || user?.username?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div className="text-xs min-w-0 flex-1">
@@ -549,7 +544,7 @@ export const Navbar = () => {
                       setMobileMenuOpen(false);
                       handleLogout();
                     }}
-                    className="w-full py-2.5 px-3 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 min-h-[44px] transition"
+                    className="w-full py-2.5 px-3 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 min-h-[44px] transition"
                   >
                     <LogOut size={16} />
                     <span>Đăng xuất tài khoản</span>
@@ -560,14 +555,14 @@ export const Navbar = () => {
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="py-2.5 text-center text-xs font-semibold text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-100 min-h-[44px] flex items-center justify-center transition"
+                    className="py-2.5 text-center text-xs font-semibold text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-100 min-h-[44px] flex items-center justify-center transition"
                   >
                     Đăng nhập
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="py-2.5 text-center text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl min-h-[44px] flex items-center justify-center transition"
+                    className="py-2.5 text-center text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg min-h-[44px] flex items-center justify-center transition"
                   >
                     Đăng ký
                   </Link>

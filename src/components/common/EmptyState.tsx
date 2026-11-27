@@ -21,14 +21,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={`flex flex-col items-center justify-center p-8 sm:p-12 text-center bg-white rounded-lg border border-slate-200/80 shadow-2xs font-sans ${className}`}
+      className={`flex flex-col items-center justify-center px-6 py-12 sm:py-16 text-center bg-white rounded-xl border border-slate-200/80 font-sans ${className}`}
     >
-      <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center mb-3 shadow-2xs">
-        {icon || <PackageOpen size={24} />}
+      <div className="w-11 h-11 rounded-xl bg-slate-100 text-slate-600 border border-slate-200/80 flex items-center justify-center mb-3.5">
+        {icon || <PackageOpen size={20} />}
       </div>
-      <h3 className="text-base font-bold text-slate-800 tracking-tight">{title}</h3>
+      <h3 className="text-sm sm:text-base font-semibold text-slate-900 tracking-tight">
+        {title}
+      </h3>
       {description && (
-        <p className="text-xs sm:text-sm text-slate-500 max-w-sm mt-1 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-500 max-w-sm mt-1.5 leading-relaxed">
           {description}
         </p>
       )}
@@ -36,7 +38,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <button
           type="button"
           onClick={action.onClick}
-          className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-md shadow-2xs transition"
+          className="mt-5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition"
         >
           {action.label}
         </button>
