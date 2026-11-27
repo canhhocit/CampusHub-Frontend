@@ -1,97 +1,166 @@
-# CampusHub — Frontend Web Application
+# CampusHub Frontend (Web & PWA)
 
-Nền tảng thương mại điện tử sinh viên P2P (Peer-to-Peer Marketplace) kết hợp bàn giao qua hệ thống tủ đồ thông minh (Smart Locker) và gặp mặt trực tiếp.
+> Giao diện Web và Progressive Web App (PWA) cho nền tảng mua bán, cho thuê đồ dùng sinh viên P2P tích hợp thanh toán PayOS QR, định danh eKYC và bàn giao qua Smart Locker 24/7.
 
----
+[![CampusHub Frontend CI](https://github.com/canhhocit/CampusHub-Frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/canhhocit/CampusHub-Frontend/actions/workflows/ci.yml)
+[![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue.svg)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8.3-646cff.svg)](https://vite.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-v4-38bdf8.svg)](https://tailwindcss.com/)
 
-## 1. Công nghệ sử dụng
-
-- **Core**: React 19, TypeScript 5+, Vite 8
-- **Styling**: Tailwind CSS v4 (Design tokens: Terracotta `#eb6e34`, Slate neutrals)
-- **State & Data Fetching**: TanStack React Query v5
-- **Routing**: React Router v7
-- **Forms & Validation**: React Hook Form, Zod
-- **Icons**: Lucide React
-- **Linter & Test**: Oxlint, Node.js Native Test Runner
+**Hệ sinh thái CampusHub:** **CampusHub-Frontend** | [CampusHub-Backend](https://github.com/canhhocit/CampusHub-Backend) | [CampusHub-OCR](https://github.com/canhhocit/CampusHub-OCR)
 
 ---
 
-## 2. Yêu cầu môi trường
+## Mục lục
 
-- **Node.js**: >= 20.x
-- **Backend API**: CampusHub Spring Boot Monolith (`http://localhost:8080`)
+- [Tổng quan](#tổng-quan)
+- [Tính năng chính](#tính-năng-chính)
+- [Tech Stack](#tech-stack)
+- [Cấu trúc thư mục & Tuyến trang](#cấu-trúc-thư-mục--tuyến-trang)
+- [Cài đặt và chạy cục bộ](#cài-đặt-và-chạy-cục-bộ)
+- [Progressive Web App (PWA)](#progressive-web-app-pwa)
+- [Kiểm thử, Linter và CI](#kiểm-thử-linter-và-ci)
+- [Lưu ý mô phỏng Smart Locker](#lưu-ý-mô-phỏng-smart-locker)
 
 ---
 
-## 3. Cài đặt và khởi chạy
+## Tổng quan
 
-### Cài đặt dependencies:
-```bash
-npm install
+**CampusHub Frontend** là ứng dụng đơn trang (SPA) hỗ trợ cài đặt như ứng dụng gốc trên di động/desktop (**PWA**). Ứng dụng kết nối trực tiếp tới `CampusHub-Backend` qua REST API với cơ chế tự động làm mới JWT Access Token khi hết hạn và lazy-loading theo từng nhóm trang để tối ưu tốc độ tải trên mạng di động.
+
+---
+
+## Tính năng chính
+
+### Sinh viên (Buyer / Seller)
+- **Marketplace mua bán & cho thuê:** Tìm kiếm, lọc theo danh mục, khoảng giá, hình thức giao dịch (Mua / Thuê theo ngày), phương thức bàn giao (Smart Locker / Gặp trực tiếp) và bản đồ vị trí tủ đồ (Leaflet).
+- **Quản lý tin đăng & Lưu sản phẩm:** Đăng tin mới (`/marketplace/new`), chỉnh sửa (`/marketplace/edit/:id`), tải đa ảnh/video qua API upload an toàn của Backend, và đánh dấu lưu sản phẩm với hiệu ứng phản hồi mượt trên cả Web & PWA.
+- **Định danh sinh viên eKYC (`/verify-identity`):**
+  - Quét nhanh mã QR trên CCCD (client-side `jsqr`) hoặc chụp ảnh mặt trước/sau.
+  - Hướng dẫn quay đầu kiểm tra thực thể sống (Active Liveness + Passive Anti-Spoofing) qua webcam trước khi gửi về Backend đối soát với `CampusHub-OCR`.
+- **Đơn hàng, Thanh toán PayOS & Đánh giá:**
+  - Theo dõi đơn mua (`/orders/buying`), đơn bán (`/orders/selling`) và chi tiết từng bước (`/orders/:id`).
+  - Quét mã QR PayOS để thanh toán trực tiếp, theo dõi trạng thái giải ngân và gửi khiếu nại/đánh giá khi phát sinh sự cố.
+- **Ví cá nhân (`/wallet`) & Hồ sơ (`/profile`):**
+  - Xem số dư khả dụng, lịch sử biến động, liên kết tài khoản ngân hàng và gửi yêu cầu rút tiền.
+
+### Kiosk Tủ đồ (`/kiosk`)
+- Giao diện độc lập mô phỏng màn hình cảm ứng tại trạm Smart Locker để người bán gửi hàng và người mua nhập mã PIN 6 chữ số nhận đồ.
+
+### Quản trị viên (`/admin/*`)
+- **Dashboard (`/admin/dashboard`):** Theo dõi doanh thu phí sàn, tăng trưởng người dùng và đơn hàng.
+- **Quản lý người dùng & Duyệt eKYC (`/admin/users`):** Xem hồ sơ CCCD, khóa/mở tài khoản.
+- **Quản lý Smart Locker (`/admin/lockers`):** Tạo trạm tủ mới, cấu hình tọa độ bản đồ, giám sát trạng thái từng ngăn tủ (`AVAILABLE`, `OCCUPIED`, `MAINTENANCE`).
+- **Xử lý rút tiền & Khiếu nại (`/admin/payouts`, `/admin/disputes`):** Phê duyệt lệnh chi và giải quyết tranh chấp.
+- **Nhật ký hệ thống (`/admin/audit`):** Truy vết sự kiện bảo mật và giao dịch.
+
+---
+
+## Tech Stack
+
+| Thành phần | Công nghệ / Thư viện | Phiên bản |
+|---|---|---|
+| Core UI | React + TypeScript | React `19.2`, TypeScript `~6.0` |
+| Build & PWA | Vite + `vite-plugin-pwa` (Workbox) | Vite `8.3`, `vite-plugin-pwa` `2.0` |
+| Styling | Tailwind CSS + PostCSS + Lucide React | Tailwind `v4.3` |
+| Data Fetching | TanStack React Query + Axios | React Query `5.104`, Axios `1.20` |
+| Routing | React Router DOM | `7.18` |
+| Form & Validation | React Hook Form + Zod | RHF `7.89`, Zod `4.6` |
+| Tiện ích chuyên biệt | `leaflet` (bản đồ tủ), `jsqr` (quét QR CCCD) | `leaflet` `1.9.4`, `jsqr` `1.4.0` |
+| Chất lượng mã & Test | Oxlint + Node.js Native Test Runner | `oxlint` `1.81` |
+
+---
+
+## Cấu trúc thư mục & Tuyến trang
+
+```text
+CampusHub-Frontend/
+├── .github/workflows/ci.yml        # CI: oxlint + node tests + vite build
+├── .env.example                    # VITE_API_BASE_URL
+├── vite.config.ts                  # Cấu hình Vite + Manifest & Workbox PWA
+├── package.json
+├── public/                         # Icons & tài nguyên tĩnh PWA
+├── tests/                          # Empirical & Auth refresh tests (*.test.mjs)
+└── src/
+    ├── api/                        # Axios interceptors, identityApi, userApi, upload
+    ├── components/                 # Layout, Navbar, MobileBottomNav, Admin, Dispute, Review
+    ├── contexts/                   # AuthContext (trạng thái đăng nhập & session refresh)
+    ├── hooks/                      # Custom hooks (usePendingSellingOrders, ...)
+    ├── pages/                      # admin/, auth/, kiosk/, marketplace/, orders/, profile/, wallet/
+    ├── types/                      # TypeScript interfaces theo từng module nghiệp vụ
+    └── utils/                      # cccdQrParser & helpers
 ```
 
-### Khởi chạy môi trường phát triển (Dev server):
+---
+
+## Cài đặt và chạy cục bộ
+
+### Yêu cầu môi trường
+
+- **Node.js `22.x`** (khớp với cờ `--experimental-strip-types` của `npm test` và môi trường CI)
+- **Backend API:** `CampusHub-Backend` đang chạy (mặc định tại `http://localhost:8080`)
+
+### Cấu hình và khởi chạy
+
 ```bash
+git clone https://github.com/canhhocit/CampusHub-Frontend.git
+cd CampusHub-Frontend
+cp .env.example .env
+npm ci
 npm run dev
 ```
-Ứng dụng sẽ khả dụng tại: `http://localhost:5173`
 
-### Chạy kiểm thử tự động (Unit / Auth Refresh Tests):
-```bash
-npm run test
+- Ứng dụng khả dụng tại: `http://localhost:5173`
+- Biến môi trường duy nhất cần khai báo trong `.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
 ```
 
-### Kiểm tra cú pháp và chất lượng mã nguồn (Linter):
+> Lưu ý: Frontend không giữ API key bí mật của Cloudinary hay OCR; mọi tác vụ tải ảnh và eKYC đều đi qua API có xác thực tại `CampusHub-Backend`.
+
+---
+
+## Progressive Web App (PWA)
+
+Cấu hình trong [`vite.config.ts`](vite.config.ts) tích hợp `vite-plugin-pwa` với chế độ `registerType: 'autoUpdate'`:
+
+- Tự động sinh Web App Manifest (`CampusHub`, `display: standalone`, icon `192x192` & `512x512` `any maskable`) và Service Worker (`Workbox`) cho phép cài đặt lên màn hình chính điện thoại/desktop.
+- Precache tài nguyên tĩnh (`js, css, html, ico, png, svg, woff, woff2`) và cache font qua `CacheFirst`.
+- Kiểm thử bản build PWA cục bộ:
+
 ```bash
+npm run build
+npm run preview
+```
+
+---
+
+## Kiểm thử, Linter và CI
+
+```bash
+# Kiểm tra lint với Oxlint
 npm run lint
-```
 
-### Biên dịch và đóng gói kiểm tra sản phẩm (Production Build):
-```bash
+# Chạy bộ test tự động (Node native test runner)
+npm test
+
+# Kiểm tra TypeScript (tsc -b) và build production + PWA bundle
 npm run build
 ```
 
----
-
-## 4. Hướng dẫn trải nghiệm & Demo luồng nghiệp vụ
-
-### A. Người dùng thông thường (Sinh viên)
-1. **Khám phá Marketplace**:
-   - Truy cập trang chủ `/` để xem danh sách sản phẩm.
-   - Sử dụng bộ lọc theo danh mục, khoảng giá, tình trạng hàng, phương thức bàn giao (Gặp trực tiếp hoặc Smart Locker).
-2. **Đăng tin bán / Cho thuê sản phẩm**:
-   - Vào `/marketplace/create` (yêu cầu đăng nhập).
-   - Điền thông tin tiêu đề, mô tả, danh mục, giá bán hoặc giá thuê theo ngày, tiền cọc.
-   - Tải lên hình ảnh mô tả thực tế.
-3. **Mua / Thuê sản phẩm & Bàn giao qua Smart Locker**:
-   - Vào chi tiết sản phẩm `/marketplace/:id`, nhấn nút Đặt mua hoặc Thuê.
-   - Chọn phương thức bàn giao qua Smart Locker và địa điểm tủ mong muốn.
-   - Chờ người bán xác nhận đơn và gửi hàng vào tủ đồ.
-4. **Theo dõi đơn hàng & Nhận hàng**:
-   - Quản lý đơn mua tại `/orders/buying` và đơn bán tại `/orders/selling`.
-   - Xem chi tiết tại `/orders/:id`. Khi hàng đã được đưa vào tủ, người mua nhận mã PIN bảo mật để mở ngăn tủ.
-
-### B. Quản trị viên (Admin)
-- Truy cập khu vực quản trị tại `/admin` (tài khoản vai trò `ADMIN`).
-- **Tổng quan hệ thống (Overview)**: Giám sát doanh thu phí, số lượng tin đăng, người dùng và đơn hàng.
-- **Quản lý người dùng (Users)**: Xem danh sách thành viên, khóa/mở khóa tài khoản, duyệt hồ sơ CCCD/CMND sinh viên.
-- **Quản lý Tủ đồ thông minh (Lockers & Compartments)**:
-  - Xem danh sách tủ đồ và ngăn tủ tại `/admin/lockers`.
-  - Giám sát trạng thái từng ngăn: TRỐNG (AVAILABLE), ĐANG GIỮ HÀNG (OCCUPIED), BẢO TRÌ (MAINTENANCE).
-  - Thử nghiệm lệnh gửi hàng, mở tủ [MÔ PHỎNG / SIMULATED].
-- **Cấu hình phí & Media**: Tùy chỉnh tỷ lệ phí sàn, phí thuê theo ngày, số lượng ảnh/video tối đa.
-- **Audit Logs**: Truy vết toàn bộ nhật ký sự kiện bảo mật, giao dịch và phân quyền.
+Workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) chạy lần lượt `npm ci` -> `npm run lint` -> `npm test` -> `npm run build` trên `ubuntu-latest` (Node.js 22) mỗi khi `push` hoặc mở `pull_request` vào nhánh `main`.
 
 ---
 
-## 5. Lưu ý về Smart Locker [Mô phỏng IoT]
+## Lưu ý mô phỏng Smart Locker
 
-- Giai đoạn hiện tại hệ thống sử dụng **Mock Device Simulation** để mô phỏng tương tác phần cứng tủ đồ thông minh.
-- Tất cả các nút bấm mở ngăn tủ, gửi hàng hoặc giải phóng ngăn đều được dán nhãn `[MÔ PHỎNG / SIMULATED]` nhằm đảm bảo tính minh bạch giữa dữ liệu mô phỏng và phần cứng vật lý trong tương lai.
+- Ở giai đoạn hiện tại, giao diện Kiosk (`/kiosk`) và các thao tác mở ngăn tủ/gửi hàng trong khu vực Admin tương tác với **Mock Device Simulation** từ Backend. Các nút thao tác phần cứng đều được gắn nhãn `[MÔ PHỎNG / SIMULATED]` để tách biệt rõ ràng với kết nối phần cứng IoT thực tế.
 
 ---
 
-## 6. Bản quyền & Tác giả
+## Tác giả
 
-- **Dự án**: CampusHub (Đồ án tốt nghiệp / Khóa luận tốt nghiệp)
-- **Tác giả / Phát triển**: Phạm Hữu Cảnh
+- **Dự án:** CampusHub
+- **Phát triển:** Phạm Hữu Cảnh
