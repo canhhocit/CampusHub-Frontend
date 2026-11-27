@@ -453,12 +453,21 @@ export const SellingOrders = () => {
                       )}
 
                       {order.status === 'AWAITING_DEPOSIT' && (
-                        <button
-                          onClick={() => setDepositModalOrder(order)}
-                          className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-xl shadow-2xs transition flex items-center gap-1.5"
-                        >
-                          <Package size={13} /> Gửi hàng vào tủ
-                        </button>
+                        order.paymentStatus && order.paymentStatus !== 'PAID' ? (
+                          <span
+                            className="px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold rounded-xl"
+                            title="Người mua chưa hoàn tất thanh toán ký quỹ Escrow"
+                          >
+                            Chờ người mua ký quỹ
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => setDepositModalOrder(order)}
+                            className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-xl shadow-2xs transition flex items-center gap-1.5"
+                          >
+                            <Package size={13} /> Gửi hàng vào tủ
+                          </button>
+                        )
                       )}
 
                       <Link

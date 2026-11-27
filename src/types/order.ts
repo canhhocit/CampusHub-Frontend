@@ -118,5 +118,6 @@ export interface PaymentResponse {
   qrCode?: string | null;
   message?: string;
   paidAt?: string | null;
+  simulationAllowed?: boolean;
 }
 

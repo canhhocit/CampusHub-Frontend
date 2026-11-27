@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
 import type { Product } from '../../types/marketplace';
@@ -26,6 +26,7 @@ import { getMediaUrl } from '../../api/cloudinary';
 
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { SmartLockerActionButton } from '../../components/common/SmartLockerActionButton';
 import type { UserRatingSummaryResponse, ReviewResponse } from '../../types/review';
 import type { Locker } from '../../types/locker';
 
@@ -56,6 +57,15 @@ export const ProductDetail = () => {
 
   // Smart Locker Lock-In Interaction State (Squareboat-inspired)
   const [isLockerLocking, setIsLockerLocking] = useState(false);
+  const lockTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (lockTimeoutRef.current !== null) {
+        window.clearTimeout(lockTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const triggerHaptic = () => {
     if (typeof window !== 'undefined' && 'vibrate' in navigator) {
@@ -102,8 +112,8 @@ export const ProductDetail = () => {
   const productReviews: ReviewResponse[] = Array.isArray(rawReviews)
     ? rawReviews
     : (rawReviews && Array.isArray((rawReviews as any)?.content))
-    ? (rawReviews as any).content
-    : [];
+      ? (rawReviews as any).content
+      : [];
 
   const isOwner = Boolean(
     user?.username && product?.owner?.username && user.username === product.owner.username
@@ -162,7 +172,8 @@ export const ProductDetail = () => {
     }
     triggerHaptic();
     setIsLockerLocking(true);
-    setTimeout(() => {
+    if (lockTimeoutRef.current !== null) window.clearTimeout(lockTimeoutRef.current);
+    lockTimeoutRef.current = window.setTimeout(() => {
       setIsLockerLocking(false);
       setIsConfirmPurchaseOpen(true);
     }, 400);
@@ -184,7 +195,8 @@ export const ProductDetail = () => {
     }
     triggerHaptic();
     setIsLockerLocking(true);
-    setTimeout(() => {
+    if (lockTimeoutRef.current !== null) window.clearTimeout(lockTimeoutRef.current);
+    lockTimeoutRef.current = window.setTimeout(() => {
       setIsLockerLocking(false);
       setIsRentalModalOpen(true);
     }, 400);
@@ -209,8 +221,8 @@ export const ProductDetail = () => {
     product?.listingType === 'RENT'
       ? 'RENTAL'
       : product?.listingType === 'BOTH'
-      ? actionMode
-      : 'PURCHASE';
+        ? actionMode
+        : 'PURCHASE';
 
   const handlePrimaryAction = () => {
     if (effectiveMode === 'PURCHASE') {
@@ -285,7 +297,7 @@ export const ProductDetail = () => {
           </Link>
           <span>/</span>
           <Link to="/marketplace" className="hover:text-emerald-700">
-            Chợ 
+            Chợ
           </Link>
           <span>/</span>
           <Link
@@ -381,11 +393,10 @@ export const ProductDetail = () => {
                           key={`img-${idx}`}
                           type="button"
                           onClick={() => setSelectedMedia({ type: 'IMAGE', url: imgUrl })}
-                          className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition ${
-                            isActive
-                              ? 'border-slate-900 ring-2 ring-slate-900/10 scale-102'
-                              : 'border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100'
-                          }`}
+                          className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition ${isActive
+                            ? 'border-slate-900 ring-2 ring-slate-900/10 scale-102'
+                            : 'border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100'
+                            }`}
                         >
                           <img
                             src={getMediaUrl(imgUrl)}
@@ -406,11 +417,10 @@ export const ProductDetail = () => {
                       <button
                         type="button"
                         onClick={() => setSelectedMedia({ type: 'VIDEO', url: product.videoUrl! })}
-                        className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 bg-slate-900 flex flex-col items-center justify-center text-white transition ${
-                          currentMedia?.type === 'VIDEO'
-                            ? 'border-slate-900 ring-2 ring-slate-900/10 scale-102'
-                            : 'border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100'
-                        }`}
+                        className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 bg-slate-900 flex flex-col items-center justify-center text-white transition ${currentMedia?.type === 'VIDEO'
+                          ? 'border-slate-900 ring-2 ring-slate-900/10 scale-102'
+                          : 'border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100'
+                          }`}
                       >
                         <Play size={20} className="text-white fill-white" />
                         <span className="text-[9px] font-bold text-slate-300 mt-1">Video</span>
@@ -630,11 +640,10 @@ export const ProductDetail = () => {
                         <button
                           type="button"
                           onClick={() => setActionMode('PURCHASE')}
-                          className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[44px] ${
-                            actionMode === 'PURCHASE'
-                              ? 'bg-white text-emerald-800 shadow-xs border border-slate-200/50'
-                              : 'text-slate-600 hover:text-slate-900'
-                          }`}
+                          className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[44px] ${actionMode === 'PURCHASE'
+                            ? 'bg-white text-emerald-800 shadow-xs border border-slate-200/50'
+                            : 'text-slate-600 hover:text-slate-900'
+                            }`}
                         >
                           <ShoppingBag size={15} />
                           <span>Mua đứt ({formatPrice(product.price)})</span>
@@ -642,11 +651,10 @@ export const ProductDetail = () => {
                         <button
                           type="button"
                           onClick={() => setActionMode('RENTAL')}
-                          className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[44px] ${
-                            actionMode === 'RENTAL'
-                              ? 'bg-white text-blue-800 shadow-xs border border-slate-200/50'
-                              : 'text-slate-600 hover:text-slate-900'
-                          }`}
+                          className={`py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 min-h-[44px] ${actionMode === 'RENTAL'
+                            ? 'bg-white text-blue-800 shadow-xs border border-slate-200/50'
+                            : 'text-slate-600 hover:text-slate-900'
+                            }`}
                         >
                           <Calendar size={15} />
                           <span>Thuê ({formatPrice(product.rentPricePerDay || 0)}/ngày)</span>
@@ -714,8 +722,8 @@ export const ProductDetail = () => {
                       {product.status === 'SOLD'
                         ? 'Sản phẩm này đã được bán thành công cho thành viên khác.'
                         : product.status === 'RENTED'
-                        ? 'Sản phẩm hiện đang được người khác thuê và sẽ có sẵn trở lại sau khi hoàn trả vào tủ.'
-                        : 'Sản phẩm hiện đang tạm ẩn bởi người bán.'}
+                          ? 'Sản phẩm hiện đang được người khác thuê và sẽ có sẵn trở lại sau khi hoàn trả vào tủ.'
+                          : 'Sản phẩm hiện đang tạm ẩn bởi người bán.'}
                     </p>
                     <Link
                       to="/marketplace"
@@ -754,11 +762,10 @@ export const ProductDetail = () => {
                     setSelectedRentalDays(days);
                     setCustomDays('');
                   }}
-                  className={`py-2 px-1 text-xs font-bold rounded-xl border transition min-h-[44px] ${
-                    !customDays && selectedRentalDays === days
-                      ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                      : 'border-slate-200 text-slate-700 hover:border-blue-300'
-                  }`}
+                  className={`py-2 px-1 text-xs font-bold rounded-xl border transition min-h-[44px] ${!customDays && selectedRentalDays === days
+                    ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
+                    : 'border-slate-200 text-slate-700 hover:border-blue-300'
+                    }`}
                 >
                   {days} ngày
                 </button>
@@ -795,11 +802,10 @@ export const ProductDetail = () => {
             <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
               <div
                 onClick={() => setPreferredLockerId(null)}
-                className={`p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between ${
-                  preferredLockerId === null
-                    ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-600'
-                    : 'border-slate-200 hover:bg-slate-50'
-                }`}
+                className={`p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between ${preferredLockerId === null
+                  ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-600'
+                  : 'border-slate-200 hover:bg-slate-50'
+                  }`}
               >
                 <div>
                   <div className="font-bold text-slate-900">Tự động phân bổ ngăn trống</div>
@@ -822,13 +828,12 @@ export const ProductDetail = () => {
                     onClick={() => {
                       if (!isFull) setPreferredLockerId(l.id);
                     }}
-                    className={`p-2.5 rounded-xl border text-xs transition flex items-center justify-between gap-2 ${
-                      isFull
-                        ? 'opacity-50 cursor-not-allowed bg-slate-50 border-slate-200'
-                        : isSelected
+                    className={`p-2.5 rounded-xl border text-xs transition flex items-center justify-between gap-2 ${isFull
+                      ? 'opacity-50 cursor-not-allowed bg-slate-50 border-slate-200'
+                      : isSelected
                         ? 'border-blue-600 bg-blue-50/60 ring-1 ring-blue-600 cursor-pointer'
                         : 'border-slate-200 hover:bg-slate-50 cursor-pointer'
-                    }`}
+                      }`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
@@ -851,11 +856,10 @@ export const ProductDetail = () => {
                           Hết ngăn
                         </span>
                       ) : (
-                        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                          available <= 2
-                            ? 'bg-amber-50 text-amber-700 border-amber-200'
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        }`}>
+                        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${available <= 2
+                          ? 'bg-amber-50 text-amber-700 border-amber-200'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>
                           {available}/{total} trống
                         </span>
                       )}
@@ -917,21 +921,16 @@ export const ProductDetail = () => {
             >
               Hủy bỏ
             </button>
-            <button
+            <SmartLockerActionButton
               type="button"
-              disabled={createOrderMutation.isPending}
+              mode="RENTAL"
+              variant="dark"
+              isLoading={createOrderMutation.isPending}
+              showAnimationBeforeAction={false}
               onClick={handleConfirmRental}
-              className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-slate-900/20 min-h-[44px]"
-            >
-              {createOrderMutation.isPending ? (
-                <>
-                  <Loader2 size={15} className="animate-spin" />
-                  <span>Đang tạo đơn...</span>
-                </>
-              ) : (
-                <span>Xác nhận thuê qua Locker</span>
-              )}
-            </button>
+              label="Xác nhận thuê qua Locker"
+              className="flex-1 py-2.5 px-4 text-xs shadow-md shadow-slate-900/20"
+            />
           </div>
         </div>
       </Modal>
@@ -991,11 +990,10 @@ export const ProductDetail = () => {
               {/* Default Auto Option */}
               <div
                 onClick={() => setPreferredLockerId(null)}
-                className={`p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between ${
-                  preferredLockerId === null
-                    ? 'border-emerald-600 bg-emerald-50/60 ring-1 ring-emerald-600'
-                    : 'border-slate-200 hover:bg-slate-50'
-                }`}
+                className={`p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between ${preferredLockerId === null
+                  ? 'border-emerald-600 bg-emerald-50/60 ring-1 ring-emerald-600'
+                  : 'border-slate-200 hover:bg-slate-50'
+                  }`}
               >
                 <div>
                   <div className="font-bold text-slate-900">Tự động phân bổ ngăn trống</div>
@@ -1021,13 +1019,12 @@ export const ProductDetail = () => {
                     onClick={() => {
                       if (!isFull) setPreferredLockerId(l.id);
                     }}
-                    className={`p-2.5 rounded-xl border text-xs transition flex items-center justify-between gap-2 ${
-                      isFull
-                        ? 'opacity-50 cursor-not-allowed bg-slate-50 border-slate-200'
-                        : isSelected
+                    className={`p-2.5 rounded-xl border text-xs transition flex items-center justify-between gap-2 ${isFull
+                      ? 'opacity-50 cursor-not-allowed bg-slate-50 border-slate-200'
+                      : isSelected
                         ? 'border-emerald-600 bg-emerald-50/60 ring-1 ring-emerald-600 cursor-pointer'
                         : 'border-slate-200 hover:bg-slate-50 cursor-pointer'
-                    }`}
+                      }`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
@@ -1052,11 +1049,10 @@ export const ProductDetail = () => {
                         </span>
                       ) : (
                         <span
-                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                            available <= 2
-                              ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          }`}
+                          className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border ${available <= 2
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            }`}
                         >
                           {available}/{total} trống
                         </span>
@@ -1110,24 +1106,16 @@ export const ProductDetail = () => {
             >
               Hủy bỏ
             </button>
-            <button
+            <SmartLockerActionButton
               type="button"
-              disabled={createOrderMutation.isPending}
+              mode="PURCHASE"
+              variant="emerald"
+              isLoading={createOrderMutation.isPending}
+              showAnimationBeforeAction={false}
               onClick={handleConfirmPurchase}
-              className="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 min-h-[44px]"
-            >
-              {createOrderMutation.isPending ? (
-                <>
-                  <Loader2 size={15} className="animate-spin" />
-                  <span>Đang tạo đơn...</span>
-                </>
-              ) : (
-                <>
-                  <ShoppingBag size={15} />
-                  <span>Xác nhận tạo đơn mua</span>
-                </>
-              )}
-            </button>
+              label="Xác nhận tạo đơn mua"
+              className="flex-1 py-2.5 px-4 text-xs shadow-md shadow-emerald-600/20"
+            />
           </div>
         </div>
       </Modal>
@@ -1169,9 +1157,8 @@ export const ProductDetail = () => {
               {effectiveMode === 'PURCHASE' ? 'Giá mua đứt' : 'Giá thuê theo ngày'}
             </span>
             <span
-              className={`text-base font-extrabold truncate block ${
-                effectiveMode === 'PURCHASE' ? 'text-emerald-700' : 'text-blue-700'
-              }`}
+              className={`text-base font-extrabold truncate block ${effectiveMode === 'PURCHASE' ? 'text-emerald-700' : 'text-blue-700'
+                }`}
             >
               {effectiveMode === 'PURCHASE'
                 ? formatPrice(product.price)
@@ -1194,13 +1181,11 @@ export const ProductDetail = () => {
               type="button"
               onClick={handlePrimaryAction}
               disabled={createOrderMutation.isPending || isLockerLocking}
-              className={`px-4 py-2.5 active:scale-[0.98] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 min-h-[44px] ${
-                isLockerLocking ? 'animate-locker-morph ring-2 ring-emerald-300' : ''
-              } ${
-                effectiveMode === 'PURCHASE'
+              className={`px-4 py-2.5 active:scale-[0.98] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 min-h-[44px] ${isLockerLocking ? 'animate-locker-morph ring-2 ring-emerald-300' : ''
+                } ${effectiveMode === 'PURCHASE'
                   ? 'bg-emerald-600 hover:bg-emerald-700'
                   : 'bg-slate-900 hover:bg-slate-800'
-              }`}
+                }`}
             >
               {isLockerLocking ? (
                 <div className="flex items-center gap-1.5">

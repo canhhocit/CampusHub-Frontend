@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
-import type { OrderDetail as OrderDetailType, OrderStatus } from '../../types/order';
+import type { OrderDetail as OrderDetailType, OrderStatus, PaymentResponse } from '../../types/order';
 import {
   Lock,
   KeyRound,
@@ -115,6 +115,13 @@ export const OrderDetail = () => {
       return false;
     },
   });
+
+  const { data: paymentStatusInfo } = useQuery<PaymentResponse>({
+    queryKey: ['order-payment-status', id],
+    queryFn: () => axiosInstance.get(`/api/v1/orders/${id}/payment-status`).then((res) => res.data),
+    enabled: Boolean(id && order && order.paymentStatus !== 'PAID'),
+  });
+  const isSimulationAllowed = paymentStatusInfo?.simulationAllowed ?? Boolean(import.meta.env.DEV);
 
   // Pickup Mutation
   const pickupMutation = useMutation({
@@ -956,30 +963,36 @@ export const OrderDetail = () => {
                 )}
 
                 {/* 2-Stream Selector Tabs */}
-                <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPaymentMethod('PAYOS')}
-                    className={`py-2 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
-                      selectedPaymentMethod === 'PAYOS'
-                        ? 'bg-white text-slate-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <QrCode size={14} /> Quét VietQR (PayOS)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPaymentMethod('MOCK')}
-                    className={`py-2 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
-                      selectedPaymentMethod === 'MOCK'
-                        ? 'bg-white text-slate-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <Zap size={14} /> Giả lập tức thì
-                  </button>
-                </div>
+                {isSimulationAllowed ? (
+                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPaymentMethod('PAYOS')}
+                      className={`py-2 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+                        selectedPaymentMethod === 'PAYOS'
+                          ? 'bg-white text-slate-900 shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <QrCode size={14} /> Quét VietQR (PayOS)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPaymentMethod('MOCK')}
+                      className={`py-2 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+                        selectedPaymentMethod === 'MOCK'
+                          ? 'bg-white text-slate-900 shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Zap size={14} /> Giả lập tức thì
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-2.5 bg-slate-100 rounded-xl text-xs font-semibold text-slate-800 flex items-center justify-center gap-1.5">
+                    <QrCode size={14} /> Thanh toán VietQR qua cổng PayOS
+                  </div>
+                )}
 
                 {/* Stream 1: VietQR PayOS */}
                 {selectedPaymentMethod === 'PAYOS' && (
@@ -1039,20 +1052,22 @@ export const OrderDetail = () => {
                         </div>
 
                         {/* Demo helper button when running locally */}
-                        <div className="pt-2 border-t border-slate-200/80">
-                          <button
-                            type="button"
-                            disabled={simulatePayOSSuccessMutation.isPending}
-                            onClick={() => simulatePayOSSuccessMutation.mutate()}
-                            className="w-full py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-medium rounded-xl text-xs transition flex items-center justify-center gap-1.5"
-                          >
-                            <CheckCircle2 size={13} className="text-slate-500" />
-                            {simulatePayOSSuccessMutation.isPending ? 'Đang kích hoạt...' : 'Mô phỏng thanh toán thành công (Test Webhook)'}
-                          </button>
-                          <span className="text-[10px] text-slate-400 block mt-1">
-                            Dành cho kiểm thử cục bộ khi chưa cấu hình Webhook public domain
-                          </span>
-                        </div>
+                        {isSimulationAllowed && (
+                          <div className="pt-2 border-t border-slate-200/80">
+                            <button
+                              type="button"
+                              disabled={simulatePayOSSuccessMutation.isPending}
+                              onClick={() => simulatePayOSSuccessMutation.mutate()}
+                              className="w-full py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-medium rounded-xl text-xs transition flex items-center justify-center gap-1.5"
+                            >
+                              <CheckCircle2 size={13} className="text-slate-500" />
+                              {simulatePayOSSuccessMutation.isPending ? 'Đang kích hoạt...' : 'Mô phỏng thanh toán thành công (Test Webhook)'}
+                            </button>
+                            <span className="text-[10px] text-slate-400 block mt-1">
+                              Dành cho kiểm thử cục bộ khi chưa cấu hình Webhook public domain
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -1079,7 +1094,7 @@ export const OrderDetail = () => {
                 )}
 
                 {/* Stream 2: Mock Simulated Payment */}
-                {selectedPaymentMethod === 'MOCK' && (
+                {isSimulationAllowed && selectedPaymentMethod === 'MOCK' && (
                   <div className="space-y-4 pt-1">
                     <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 space-y-1">
                       <strong className="block font-semibold text-slate-900">Chế độ giả lập (Demo Testing):</strong>

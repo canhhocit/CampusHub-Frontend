@@ -268,7 +268,9 @@ export const MarketplaceList = () => {
                 </div>
                 <div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Trạm Tủ</div>
-                  <div className="text-xs font-black text-slate-800 font-mono">12 Điểm Online</div>
+                  <div className="text-xs font-black text-slate-800 font-mono">
+                    {lockers.length > 0 ? `${lockers.length} Điểm Online` : 'Đang đồng bộ'}
+                  </div>
                 </div>
               </div>
 
@@ -288,7 +290,7 @@ export const MarketplaceList = () => {
                 </div>
                 <div>
                   <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Giao Nhận</div>
-                  <div className="text-xs font-black text-slate-800 font-mono">&lt; 3 Phút Mở Tủ</div>
+                  <div className="text-xs font-black text-slate-800 font-mono">Tự Động 24/7</div>
                 </div>
               </div>
 
