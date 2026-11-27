@@ -19,129 +19,66 @@ export const MobileBottomNav = () => {
   return (
     <nav
       aria-label="Thanh điều hướng di động"
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-2 py-1 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] select-none"
-      style={{ paddingBottom: 'max(0.375rem, env(safe-area-inset-bottom))' }}
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 pt-1.5 select-none"
+      style={{ paddingBottom: 'max(0.45rem, env(safe-area-inset-bottom))' }}
     >
-      <div className="flex items-center justify-around max-w-md mx-auto">
-        {/* Tab 1: Chợ đồ cũ */}
+      <div className="flex items-end justify-around max-w-md mx-auto">
         <Link
           to="/marketplace"
-          className={`relative flex flex-col items-center justify-center flex-1 py-1 transition-all duration-300 ease-spring active:scale-90 ${
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
             isMarketplace ? 'text-emerald-700 font-semibold' : 'text-slate-500 hover:text-slate-900'
           }`}
         >
-          <div className="relative px-3 py-0.5 rounded-full flex items-center justify-center">
-            {isMarketplace && (
-              <span className="absolute inset-0 bg-emerald-100/70 rounded-full animate-liquid-pill" />
-            )}
-            <ShoppingBag
-              size={20}
-              className={`relative z-10 transition-transform duration-300 ease-spring ${
-                isMarketplace ? 'stroke-[2.5] scale-110 -translate-y-0.5 animate-liquid-squash text-emerald-700' : 'stroke-[1.8]'
-              }`}
-            />
-          </div>
-          <span className="text-[10px] mt-0.5 tracking-tight">Chợ Đồ</span>
-          {isMarketplace ? (
-            <span className="w-1 h-1 rounded-full bg-emerald-600 animate-liquid-dot mt-0.5" />
-          ) : (
-            <span className="w-1 h-1 mt-0.5" />
-          )}
+          <ShoppingBag size={20} strokeWidth={isMarketplace ? 2.25 : 1.75} />
+          <span className="text-[10px] mt-1">Khám phá</span>
         </Link>
 
-        {/* Tab 2: Đơn mua */}
         <Link
           to={isAuthenticated ? '/orders/buying' : '/login'}
-          className={`relative flex flex-col items-center justify-center flex-1 py-1 transition-all duration-300 ease-spring active:scale-90 ${
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
             isBuying ? 'text-emerald-700 font-semibold' : 'text-slate-500 hover:text-slate-900'
           }`}
         >
-          <div className="relative px-3 py-0.5 rounded-full flex items-center justify-center">
-            {isBuying && (
-              <span className="absolute inset-0 bg-emerald-100/70 rounded-full animate-liquid-pill" />
-            )}
-            <Inbox
-              size={20}
-              className={`relative z-10 transition-transform duration-300 ease-spring ${
-                isBuying ? 'stroke-[2.5] scale-110 -translate-y-0.5 animate-liquid-squash text-emerald-700' : 'stroke-[1.8]'
-              }`}
-            />
-          </div>
-          <span className="text-[10px] mt-0.5 tracking-tight">Đơn Mua</span>
-          {isBuying ? (
-            <span className="w-1 h-1 rounded-full bg-emerald-600 animate-liquid-dot mt-0.5" />
-          ) : (
-            <span className="w-1 h-1 mt-0.5" />
-          )}
+          <Inbox size={20} strokeWidth={isBuying ? 2.25 : 1.75} />
+          <span className="text-[10px] mt-1">Đơn mua</span>
         </Link>
 
-        {/* Tab 3: Center Elevated CTA - Đăng bán (Liquid Jelly Spring) */}
         <Link
           to={isAuthenticated ? '/marketplace/new' : '/login'}
-          className="flex flex-col items-center justify-center flex-1 -mt-5 group active:scale-80 transition-transform duration-300 ease-spring"
+          className="flex flex-col items-center justify-center flex-1 -mt-4 group"
           aria-label="Đăng bán đồ cũ"
         >
-          <div className="w-12 h-12 rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 flex items-center justify-center ring-4 ring-white animate-liquid-pulse group-hover:bg-emerald-700 transition">
-            <Plus size={22} className="stroke-[2.5] transition-transform duration-300 group-hover:rotate-90 ease-spring" />
+          <div className="w-11 h-11 rounded-full bg-slate-900 group-hover:bg-emerald-600 text-white shadow-md shadow-slate-900/20 flex items-center justify-center ring-4 ring-white transition-colors active:scale-95">
+            <Plus size={20} strokeWidth={2.5} />
           </div>
-          <span className="text-[10px] font-bold text-slate-800 mt-0.5 tracking-tight">Đăng Bán</span>
+          <span className="text-[10px] font-semibold text-slate-800 mt-1">Đăng bán</span>
         </Link>
 
-        {/* Tab 4: Ví tiền */}
         <Link
           to={isAuthenticated ? '/wallet' : '/login'}
-          className={`relative flex flex-col items-center justify-center flex-1 py-1 transition-all duration-300 ease-spring active:scale-90 ${
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
             isWallet ? 'text-emerald-700 font-semibold' : 'text-slate-500 hover:text-slate-900'
           }`}
         >
-          <div className="relative px-3 py-0.5 rounded-full flex items-center justify-center">
-            {isWallet && (
-              <span className="absolute inset-0 bg-emerald-100/70 rounded-full animate-liquid-pill" />
-            )}
-            <Wallet
-              size={20}
-              className={`relative z-10 transition-transform duration-300 ease-spring ${
-                isWallet ? 'stroke-[2.5] scale-110 -translate-y-0.5 animate-liquid-squash text-emerald-700' : 'stroke-[1.8]'
-              }`}
-            />
-          </div>
-          <span className="text-[10px] mt-0.5 tracking-tight">Ví Tiền</span>
-          {isWallet ? (
-            <span className="w-1 h-1 rounded-full bg-emerald-600 animate-liquid-dot mt-0.5" />
-          ) : (
-            <span className="w-1 h-1 mt-0.5" />
-          )}
+          <Wallet size={20} strokeWidth={isWallet ? 2.25 : 1.75} />
+          <span className="text-[10px] mt-1">Ví tiền</span>
         </Link>
 
-        {/* Tab 5: Tài khoản / Dashboard */}
         <Link
           to={isAuthenticated ? '/dashboard' : '/login'}
-          className={`relative flex flex-col items-center justify-center flex-1 py-1 transition-all duration-300 ease-spring active:scale-90 ${
+          className={`relative flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
             isAccount ? 'text-emerald-700 font-semibold' : 'text-slate-500 hover:text-slate-900'
           }`}
         >
-          <div className="relative px-3 py-0.5 rounded-full flex items-center justify-center">
-            {isAccount && (
-              <span className="absolute inset-0 bg-emerald-100/70 rounded-full animate-liquid-pill" />
-            )}
-            <User
-              size={20}
-              className={`relative z-10 transition-transform duration-300 ease-spring ${
-                isAccount ? 'stroke-[2.5] scale-110 -translate-y-0.5 animate-liquid-squash text-emerald-700' : 'stroke-[1.8]'
-              }`}
-            />
+          <div className="relative">
+            <User size={20} strokeWidth={isAccount ? 2.25 : 1.75} />
             {pendingSellingCount > 0 && (
-              <span className="absolute -top-1 -right-0.5 w-3.5 h-3.5 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+              <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-rose-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white tabular-nums">
                 {pendingSellingCount > 9 ? '9+' : pendingSellingCount}
               </span>
             )}
           </div>
-          <span className="text-[10px] mt-0.5 tracking-tight">Cá Nhân</span>
-          {isAccount ? (
-            <span className="w-1 h-1 rounded-full bg-emerald-600 animate-liquid-dot mt-0.5" />
-          ) : (
-            <span className="w-1 h-1 mt-0.5" />
-          )}
+          <span className="text-[10px] mt-1">Tài khoản</span>
         </Link>
       </div>
     </nav>

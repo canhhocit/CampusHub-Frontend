@@ -289,37 +289,37 @@ export const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 pt-6 pb-24 sm:py-8 font-sans">
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
-          <Link to="/" className="hover:text-emerald-700">
+          <Link to="/" className="hover:text-slate-900 transition-colors">
             Trang chủ
           </Link>
-          <span>/</span>
-          <Link to="/marketplace" className="hover:text-emerald-700">
-            Chợ
+          <span className="text-slate-300">/</span>
+          <Link to="/marketplace" className="hover:text-slate-900 transition-colors">
+            Chợ sinh viên
           </Link>
-          <span>/</span>
+          <span className="text-slate-300">/</span>
           <Link
             to={`/marketplace?categoryId=${product.category?.id}`}
-            className="hover:text-emerald-700"
+            className="hover:text-slate-900 transition-colors"
           >
             {product.category?.name || 'Khác'}
           </Link>
-          <span>/</span>
-          <span className="text-slate-900 font-medium truncate max-w-50 sm:max-w-md">
+          <span className="text-slate-300">/</span>
+          <span className="text-slate-800 font-medium truncate max-w-50 sm:max-w-md">
             {product.title}
           </span>
         </nav>
 
         {/* Main Product Details Card */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+        <div className="bg-white rounded-2xl border border-slate-200/85 shadow-[var(--shadow-card)] overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-200/80">
             {/* Left Column: Product Imagery (lg:col-span-6) */}
-            <div className="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between bg-slate-50/50 space-y-4">
+            <div className="lg:col-span-6 p-5 sm:p-8 flex flex-col justify-between bg-slate-50/40 space-y-4">
               <div className="space-y-4">
                 {/* Main Media Viewer */}
-                <div className="aspect-square bg-slate-100 rounded-lg border border-slate-200 overflow-hidden relative flex items-center justify-center shadow-xs">
+                <div className="aspect-square bg-slate-100 rounded-xl border border-slate-200/80 overflow-hidden relative flex items-center justify-center">
                   {currentMedia?.type === 'VIDEO' ? (
                     <video
                       src={getMediaUrl(currentMedia.url)}
@@ -465,48 +465,48 @@ export const ProductDetail = () => {
                 </div>
 
                 {/* Price Display */}
-                <div className="p-4 rounded-xl bg-emerald-50/40 border border-emerald-100/70 space-y-3">
+                <div className="p-5 rounded-xl bg-slate-50 border border-slate-200/85 space-y-3.5">
                   {/* Purchase Price if applicable */}
                   {isForSale && (
-                    <div className="flex items-baseline justify-between">
+                    <div className="flex items-baseline justify-between gap-3">
                       <div>
-                        <span className="text-xs text-slate-500 block">
-                          {product.listingType === 'BOTH' ? 'Giá mua đứt:' : 'Giá chuyển nhượng:'}
+                        <span className="text-xs font-medium text-slate-500 block mb-0.5">
+                          {product.listingType === 'BOTH' ? 'Giá mua đứt' : 'Giá chuyển nhượng'}
                         </span>
-                        <span className="text-3xl font-extrabold text-emerald-700 tracking-tight">
+                        <span className="text-2xl sm:text-3xl font-bold text-slate-950 font-mono tabular-nums tracking-tight">
                           {formatPrice(product.price || 0)}
                         </span>
                       </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 bg-white text-emerald-800 rounded-md border border-emerald-200/80">
-                        Thanh lý sinh viên
+                      <span className="text-[11px] font-medium px-2.5 py-1 bg-white text-emerald-700 rounded-md border border-emerald-200/80">
+                        Bảo vệ ký quỹ
                       </span>
                     </div>
                   )}
 
                   {/* Rental Price if applicable */}
                   {isForRent && (
-                    <div className={`flex items-baseline justify-between ${isForSale ? 'pt-3 border-t border-slate-200' : ''}`}>
+                    <div className={`flex items-baseline justify-between gap-3 ${isForSale ? 'pt-3.5 border-t border-slate-200/80' : ''}`}>
                       <div>
-                        <span className="text-xs text-slate-500 block">Đơn giá cho thuê:</span>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-black text-blue-700 tracking-tight">
+                        <span className="text-xs font-medium text-slate-500 block mb-0.5">Đơn giá cho thuê</span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-xl sm:text-2xl font-bold text-emerald-700 font-mono tabular-nums tracking-tight">
                             {formatPrice(product.rentPricePerDay || 0)}
                           </span>
                           <span className="text-xs text-slate-500 font-medium">/ ngày</span>
                         </div>
-                        <span className="text-[11px] text-slate-400 block mt-0.5">
-                          Tiền cọc bảo đảm: {formatPrice(product.depositAmount || 0)} (hoàn lại 100% khi trả)
+                        <span className="text-[11px] text-slate-500 block mt-1">
+                          Tiền cọc bảo đảm: <strong className="font-mono tabular-nums text-slate-700">{formatPrice(product.depositAmount || 0)}</strong> (hoàn 100% khi trả đồ)
                         </span>
                       </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg">
-                        Dịch vụ cho thuê
+                      <span className="text-[11px] font-medium px-2.5 py-1 bg-slate-900 text-white rounded-md shrink-0">
+                        Cho thuê
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* Seller Profile Card (Oreka Seller Card Pattern) */}
-                <div className="p-4 rounded-lg border border-slate-200 bg-white shadow-xs space-y-3">
+                {/* Seller Profile Card */}
+                <div className="p-4 rounded-xl border border-slate-200/85 bg-white space-y-3">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                     Thông tin người bán
                   </span>
